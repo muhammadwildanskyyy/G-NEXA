@@ -8,12 +8,14 @@ import {
 } from "../validation/user.validation";
 import type { IReqUser } from "../model/user.model";
 import userService from "../services/user.service";
+import { logger } from "../lib/logger";
 
 export default {
   async register(req: Request, res: Response, next: NextFunction) {
     try {
       const userValidate = userRegisterSchema.parse(req.body);
       const user = await authService.register(userValidate);
+      logger.info("User Created", { userId: user.id });
       return response.success(res, "User Created", user, HTTP_STATUS.CREATED);
     } catch (error) {
       next(error);
@@ -23,6 +25,9 @@ export default {
     try {
       const userLoginvalidated = userLoginSchema.parse(req.body);
       const token = await authService.login(userLoginvalidated);
+      logger.info("User Success Login", {
+        userEmail: userLoginvalidated.email,
+      });
       return response.success(res, "Login Success", { token }, HTTP_STATUS.OK);
     } catch (error) {
       next(error);
@@ -36,9 +41,15 @@ export default {
         return response.unauthorized(res, "Unauthorized");
       }
 
-      const result = await userService.getUserByEmail(user.email)
+      const result = await userService.getUserByEmail(user.email);
 
-      response.success(res, "success get user profile", result, HTTP_STATUS.OK);
+      logger.info("Succes get data User", { userId: result?.id });
+      return response.success(
+        res,
+        "success get user profile",
+        result,
+        HTTP_STATUS.OK,
+      );
     } catch (error) {
       next(error);
     }

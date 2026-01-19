@@ -1,7 +1,5 @@
-import type { Prisma, User } from "../generated/prisma/client";
+import type { Prisma } from "../generated/prisma/client";
 import { prisma } from "../lib/database";
-import { AppError } from "../utils/appError";
-
 export default {
   async createUser(user: Prisma.UserCreateInput) {
     try {
@@ -22,6 +20,13 @@ export default {
       },
     });
   },
-
-  async updateUser() {},
+  async findUserById(userId: string) {
+    return await prisma.user.findUnique({ where: { id: userId } });
+  },
+  async updateUser(userId: string, userData: Prisma.UserUpdateInput) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: userData,
+    });
+  },
 };
