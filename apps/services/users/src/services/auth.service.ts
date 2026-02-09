@@ -57,8 +57,9 @@ export default {
       }
 
       const token = generateToken({
-        id: userExist.id,
-        email: userExist.email,
+        user_id: userExist.id,
+        user_email: userExist.email,
+        user_role: userExist.role,
       });
 
       return token;

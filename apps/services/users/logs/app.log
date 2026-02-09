@@ -82,3 +82,15 @@
 {"level":"info","message":"GET /login 200 308 - 5928.303 ms","timestamp":"2026-01-19 21:06:18"}
 {"level":"info","message":"User Success Login","timestamp":"2026-01-19 21:07:37","userEmail":"budi.pembflfdiff@example.com"}
 {"level":"info","message":"GET /login 200 308 - 1394.917 ms","timestamp":"2026-01-19 21:07:37"}
+{"level":"info","message":"User Success Login","timestamp":"2026-01-29 15:59:28","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 308 - 750.126 ms","timestamp":"2026-01-29 15:59:28"}
+{"level":"info","message":"User Success Login","timestamp":"2026-01-29 16:12:31","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 308 - 789.824 ms","timestamp":"2026-01-29 16:12:31"}
+{"level":"info","message":"User Success Login","timestamp":"2026-01-29 16:25:16","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 321 - 786.288 ms","timestamp":"2026-01-29 16:25:16"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-04 14:51:26","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 827.329 ms","timestamp":"2026-02-04 14:51:26"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-04 14:56:25","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 2627.271 ms","timestamp":"2026-02-04 14:56:25"}
+{"level":"info","message":"GET / 200 43 - 15.065 ms","timestamp":"2026-02-04 15:21:51"}
+{"level":"info","message":"GET /favicon.ico 404 150 - 15.455 ms","timestamp":"2026-02-04 15:21:52"}
