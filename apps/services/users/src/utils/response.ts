@@ -1,7 +1,7 @@
 import type { Response } from "express";
 import { ZodError } from "zod";
 import { Prisma } from "../generated/prisma/client";
-import { logger } from "../lib/logger";
+
 import { HTTP_STATUS } from "../model/web.model";
 
 export default {

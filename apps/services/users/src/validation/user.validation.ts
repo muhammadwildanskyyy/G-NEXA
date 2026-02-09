@@ -42,4 +42,28 @@ export const userLoginSchema = z.object({
     .regex(/[0-9]/, "Password harus mengandung setidaknya satu angka"),
 });
 
-export type UserLogin = z.infer<typeof userLoginSchema>;
+export type TUserLogin = z.infer<typeof userLoginSchema>;
+
+export const userUpdateSchema = z.object({
+  fullName: z
+    .string()
+    .min(3, "Nama lengkap minimal 3 karakter")
+    .max(100, "Nama lengkap maksimal 100 karakter")
+    .optional(),
+  phoneNumber: z
+    .string()
+    .regex(
+      /^(\+62|0)8[1-9][0-9]{6,10}$/,
+      "Format nomor telepon Indonesia tidak valid",
+    )
+    .optional()
+    .nullable(),
+  profilePicture: z
+    .string()
+    .url("Format URL foto profil tidak valid")
+    .optional()
+    .nullable(),
+  bio: z.string().max(255, "Bio maksimal 255 karakter").optional().nullable(),
+});
+
+export type TUserUpdate = z.infer<typeof userUpdateSchema>;

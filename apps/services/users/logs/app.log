@@ -37,3 +37,60 @@
 {"level":"info","message":"GET /login 404 144 - 0.950 ms","timestamp":"2026-01-19 01:15:34"}
 {"level":"error","message":{"method":"GET","stack":"Error: Email and Password Not Match\n    at login (/Volumes/MyDrive/Programming/CodeDev/xl/G-NEXA/apps/services/users/src/services/auth.service.ts:56:19)\n    at processTicksAndRejections (native:7:39)","statusCode":401,"url":"/login"},"timestamp":"2026-01-19 01:20:41"}
 {"level":"error","message":{"method":"GET","stack":"Error: Email Not Registered\n    at login (/Volumes/MyDrive/Programming/CodeDev/xl/G-NEXA/apps/services/users/src/services/auth.service.ts:47:19)\n    at processTicksAndRejections (native:7:39)","statusCode":401,"url":"/login"},"timestamp":"2026-01-19 01:20:52"}
+{"level":"error","message":{"method":"PUT","statusCode":400,"url":"/api/update-user"},"timestamp":"2026-01-19 15:57:01"}
+{"level":"error","message":{"method":"POST","statusCode":400,"url":"/register"},"timestamp":"2026-01-19 16:01:19"}
+{"level":"info","message":"User Created","timestamp":"2026-01-19 16:01:34","userId":"e12299ca-9dd7-4a3c-8632-ec8be72521c4"}
+{"level":"error","message":{"method":"POST","stack":"Error: This Email or Phone Number Already Registered\n    at register (/Volumes/MyDrive/Programming/CodeDev/xl/G-NEXA/apps/services/users/src/services/auth.service.ts:18:19)\n    at processTicksAndRejections (native:7:39)","statusCode":400,"url":"/register"},"timestamp":"2026-01-19 20:42:48"}
+{"level":"error","message":{"method":"POST","statusCode":400,"url":"/register"},"timestamp":"2026-01-19 20:42:55"}
+{"level":"info","message":"User Created","timestamp":"2026-01-19 20:43:09","userId":"85d54fe6-fb67-43e5-9f49-d24baf9c6bce"}
+{"level":"error","message":{"method":"POST","stack":"Error: This Email or Phone Number Already Registered\n    at register (/Volumes/MyDrive/Programming/CodeDev/xl/G-NEXA/apps/services/users/src/services/auth.service.ts:18:19)\n    at processTicksAndRejections (native:7:39)","statusCode":400,"url":"/register"},"timestamp":"2026-01-19 20:46:04"}
+{"level":"info","message":"User Created","timestamp":"2026-01-19 20:48:16","userId":"1bd6729d-fdc1-46f6-b6bf-e32a8149ac88"}
+{"level":"error","message":{"method":"POST","stack":"Error: This Email or Phone Number Already Registered\n    at register (/Volumes/MyDrive/Programming/CodeDev/xl/G-NEXA/apps/services/users/src/services/auth.service.ts:18:19)\n    at processTicksAndRejections (native:7:39)","statusCode":400,"url":"/register"},"timestamp":"2026-01-19 20:48:51"}
+{"level":"error","message":{"method":"GET","statusCode":400,"url":"/login"},"timestamp":"2026-01-19 20:51:10"}
+{"level":"info","message":"GET /login 400 151 - 13.129 ms","timestamp":"2026-01-19 20:51:10"}
+{"level":"error","message":{"method":"GET","statusCode":400,"url":"/login"},"timestamp":"2026-01-19 20:51:50"}
+{"level":"info","message":"GET /login 400 151 - 2.257 ms","timestamp":"2026-01-19 20:51:50"}
+{"level":"error","message":{"method":"GET","statusCode":400,"url":"/login"},"timestamp":"2026-01-19 20:54:22"}
+{"level":"info","message":"GET /login 400 151 - 2.238 ms","timestamp":"2026-01-19 20:54:22"}
+{"level":"error","message":{"method":"GET","statusCode":400,"url":"/login"},"timestamp":"2026-01-19 20:54:30"}
+{"level":"info","message":"GET /login 400 151 - 11.443 ms","timestamp":"2026-01-19 20:54:30"}
+{"level":"error","message":{"method":"GET","statusCode":400,"url":"/login"},"timestamp":"2026-01-19 20:54:33"}
+{"level":"info","message":"GET /login 400 151 - 0.935 ms","timestamp":"2026-01-19 20:54:33"}
+{"level":"error","message":{"method":"GET","statusCode":400,"url":"/login"},"timestamp":"2026-01-19 20:55:15"}
+{"level":"info","message":"GET /login 400 151 - 5.424 ms","timestamp":"2026-01-19 20:55:15"}
+{"level":"error","message":{"method":"GET","statusCode":400,"url":"/login"},"timestamp":"2026-01-19 20:55:16"}
+{"level":"info","message":"GET /login 400 151 - 0.859 ms","timestamp":"2026-01-19 20:55:16"}
+{"level":"error","message":{"method":"GET","statusCode":400,"url":"/login"},"timestamp":"2026-01-19 20:55:43"}
+{"level":"info","message":"GET /login 400 151 - 15.121 ms","timestamp":"2026-01-19 20:55:43"}
+{"level":"error","message":{"method":"GET","statusCode":400,"url":"/login"},"timestamp":"2026-01-19 20:56:13"}
+{"level":"info","message":"GET /login 400 151 - 2.455 ms","timestamp":"2026-01-19 20:56:13"}
+{"level":"error","message":{"method":"POST","statusCode":400,"url":"/register"},"timestamp":"2026-01-19 20:56:27"}
+{"level":"info","message":"POST /register 400 151 - 3.229 ms","timestamp":"2026-01-19 20:56:27"}
+{"level":"error","message":{"method":"POST","statusCode":400,"url":"/register"},"timestamp":"2026-01-19 20:56:30"}
+{"level":"info","message":"POST /register 400 151 - 0.863 ms","timestamp":"2026-01-19 20:56:30"}
+{"level":"error","message":{"method":"POST","statusCode":400,"url":"/register"},"timestamp":"2026-01-19 20:56:49"}
+{"level":"info","message":"POST /register 400 151 - 18.587 ms","timestamp":"2026-01-19 20:56:49"}
+{"level":"error","message":{"method":"POST","statusCode":400,"url":"/register"},"timestamp":"2026-01-19 20:56:57"}
+{"level":"info","message":"POST /register 400 151 - 1.238 ms","timestamp":"2026-01-19 20:56:57"}
+{"level":"error","message":{"method":"GET","statusCode":400,"url":"/login"},"timestamp":"2026-01-19 20:57:32"}
+{"level":"info","message":"GET /login 400 151 - 6.415 ms","timestamp":"2026-01-19 20:57:32"}
+{"level":"info","message":"GET /login 200 308 - 827.006 ms","timestamp":"2026-01-19 20:58:43"}
+{"level":"error","message":{"method":"POST","stack":"Error: This Email or Phone Number Already Registered\n    at register (/Volumes/MyDrive/Programming/CodeDev/xl/G-NEXA/apps/services/users/src/services/auth.service.ts:18:19)\n    at processTicksAndRejections (native:7:39)","statusCode":400,"url":"/register"},"timestamp":"2026-01-19 20:58:50"}
+{"level":"info","message":"POST /register 400 93 - 560.373 ms","timestamp":"2026-01-19 20:58:50"}
+{"level":"info","message":"GET /login 200 308 - 738.934 ms","timestamp":"2026-01-19 20:59:16"}
+{"level":"info","message":"User Login","timestamp":"2026-01-19 21:06:18","userId":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 308 - 5928.303 ms","timestamp":"2026-01-19 21:06:18"}
+{"level":"info","message":"User Success Login","timestamp":"2026-01-19 21:07:37","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 308 - 1394.917 ms","timestamp":"2026-01-19 21:07:37"}
+{"level":"info","message":"User Success Login","timestamp":"2026-01-29 15:59:28","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 308 - 750.126 ms","timestamp":"2026-01-29 15:59:28"}
+{"level":"info","message":"User Success Login","timestamp":"2026-01-29 16:12:31","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 308 - 789.824 ms","timestamp":"2026-01-29 16:12:31"}
+{"level":"info","message":"User Success Login","timestamp":"2026-01-29 16:25:16","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 321 - 786.288 ms","timestamp":"2026-01-29 16:25:16"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-04 14:51:26","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 827.329 ms","timestamp":"2026-02-04 14:51:26"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-04 14:56:25","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 2627.271 ms","timestamp":"2026-02-04 14:56:25"}
+{"level":"info","message":"GET / 200 43 - 15.065 ms","timestamp":"2026-02-04 15:21:51"}
+{"level":"info","message":"GET /favicon.ico 404 150 - 15.455 ms","timestamp":"2026-02-04 15:21:52"}

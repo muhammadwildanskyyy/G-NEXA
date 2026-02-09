@@ -14,8 +14,12 @@ async function init() {
     const app = express();
     const PORT = 3000;
     connectDB();
-    app.use(cors());
     app.use(bodyParser.json());
+    app.use(cors());
+    app.use(httpLogger);
+    app.use("/api", routerPrivate);
+    app.use(routerPublic);
+    app.use(globalErrorHandler);
 
     app.get("/", (req: Request, res: Response) => {
       res.status(200).json({
@@ -24,11 +28,6 @@ async function init() {
       });
       return;
     });
-
-    app.use("/api", routerPrivate);
-    app.use(routerPublic);
-    app.use(globalErrorHandler);
-    app.use(httpLogger);
 
     app.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
