@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
 import response from "../utils/response";
 import { verifyToken } from "../utils/jwt";
-import type { IReqUser, UserPayload } from "../model/user.model";
+import type { IReqUser, UserJWT, UserPayload } from "../model/user.model";
 
 export default (req: Request, res: Response, next: NextFunction) => {
   const authorization = req.headers?.authorization;
@@ -20,7 +20,7 @@ export default (req: Request, res: Response, next: NextFunction) => {
     return response.unauthorized(res);
   }
 
-  (req as IReqUser).user = decoded as UserPayload;
+  (req as IReqUser).user = decoded as UserJWT;
 
   next();
 };

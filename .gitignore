@@ -1,0 +1,99 @@
+# ----------------------------------------------------------------------
+# 1. SECURITY & CREDENTIALS (SANGAT KRUSIAL)
+# ----------------------------------------------------------------------
+# Abaikan semua file environment yang mungkin berisi API Keys atau Password
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.env
+
+# Private keys dan sertifikat keamanan
+*.pem
+*.key
+*.cert
+*.crt
+*.ca-bundle
+*.p12
+*.pfx
+*.asc
+
+# File kredensial AWS, Google Cloud, Azure, dll.
+aws_credentials
+gcloud_credentials
+*.json
+!package.json
+!tsconfig.json
+!manifest.json
+# (Penting: Baris !*.json di atas melakukan un-ignore untuk file json konfigurasi yang sah.
+# Hati-hati jika Anda memiliki file json berisi secret, pastikan ditambahkan secara manual di bawah)
+
+# File log debug npm yang mungkin berisi info sensitif saat crash
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ----------------------------------------------------------------------
+# 2. SYSTEM & OS JUNK (AGAR REPO BERSIH)
+# ----------------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# ----------------------------------------------------------------------
+# 3. IDE & EDITOR SETTINGS (PERSONAL PREFERENCE)
+# ----------------------------------------------------------------------
+# Jangan paksa tim lain menggunakan setting editor Anda
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+.project
+.classpath
+.settings/
+
+# ----------------------------------------------------------------------
+# 4. DEPENDENCIES & BUILD OUTPUTS (HEAVY FILES)
+# ----------------------------------------------------------------------
+# Node.js
+node_modules/
+jspm_packages/
+
+
+# Build outputs (General)
+dist/
+build/
+out/
+coverage/
+.nyc_output/
+
+# ----------------------------------------------------------------------
+# 5. LOGS & TEMPORARY FILES
+# ----------------------------------------------------------------------
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+pid
+*.pid
+*.seed
+*.pid.lock

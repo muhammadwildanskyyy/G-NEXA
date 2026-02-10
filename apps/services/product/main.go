@@ -21,16 +21,17 @@ func main() {
 	db := resources.ConnectMongoDB(config.Databasee)
 	logger.SetupLogger()
 
-	// product
-	productRepository := repositories.NewProductRepository(db)
-	productService := services.NewProductService(productRepository)
-	productUseCase := usecases.NewProductUsecase(productService)
-	productHandler := handlers.NewProductHandler(productUseCase)
-
+	// category
 	categoryRepository := repositories.NewCategoryRepository(db)
 	categoryService := services.NewCategoryService(categoryRepository)
 	categoryUsecase := usecases.NewCategoryUsecase(categoryService)
 	categoryHandler := handlers.NewCategoryHandler(categoryUsecase)
+
+	// product
+	productRepository := repositories.NewProductRepository(db)
+	productService := services.NewProductService(productRepository, categoryRepository)
+	productUseCase := usecases.NewProductUsecase(productService)
+	productHandler := handlers.NewProductHandler(productUseCase)
 
 	// routing
 	router := gin.Default()

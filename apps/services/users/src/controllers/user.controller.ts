@@ -12,7 +12,7 @@ import { logger } from "../lib/logger";
 export default {
   async updateUser(req: IReqUser, res: Response, next: NextFunction) {
     try {
-      const userId = req.user?.id;
+      const userId = req.user?.user_id;
       if (!userId) {
         return response.unauthorized(res, "Unauthorized");
       }

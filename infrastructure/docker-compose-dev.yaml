@@ -1,0 +1,99 @@
+name: g-nexa
+services:
+  # ------------------------------------
+  # 1. DATABASE: POSTGRESQL (User DB)
+  # ------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: g-nexa-postgres
+    restart: always
+    env_file: ../.env
+    environment:
+      POSTGRES_DB: postgres
+    ports:
+      - "5532:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./pg-init/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - g-nexa-network
+
+  # ------------------------------------
+  # 2. DATABASE: MONGODB (Product DB)
+  # ------------------------------------
+  mongo:
+    image: mongo:8.0.0
+    container_name: g-nexa-mongo
+    restart: always
+    env_file: ../.env
+    ports:
+      - "28017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - g-nexa-network
+
+  # ------------------------------------
+  # 3. USER SERVICE (Bun + Hot Reload)
+  # ------------------------------------
+  user-service:
+    build:
+      context: ../apps/services/users
+      target: development
+    container_name: g-nexa-user-service
+    restart: always
+    ports:
+      - "8081:8081"
+
+    env_file:
+      - ../apps/services/users/.env
+    environment:
+      - PORT=8081
+
+    volumes:
+      - ../apps/services/users:/app # Sync Code
+      - /app/node_modules # Protect node_modules
+
+    command: /bin/sh -c "bunx prisma migrate dev --name auto_dev && bun run dev"
+
+    depends_on:
+      - postgres
+    networks:
+      - g-nexa-network
+
+  # ------------------------------------
+  # 4. PRODUCT SERVICE (Go + Hot Reload)
+  # ------------------------------------
+  product-service:
+    build:
+      context: ../apps/services/product
+      target: development # Pastikan ini development
+    container_name: g-nexa-product-service
+    restart: always
+    ports:
+      - "8082:8082"
+
+    env_file:
+      - ../apps/services/product/files/config/.env
+    environment:
+      - PORT=8082
+
+    volumes:
+      - ../apps/services/product:/app # Sync Code
+      - /app/tmp # Folder temp Air
+
+    depends_on:
+      - mongo
+    networks:
+      - g-nexa-network
+
+# ---------------------------------------
+# NETWORK & VOLUMES
+# ---------------------------------------
+networks:
+  g-nexa-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongo_data:
