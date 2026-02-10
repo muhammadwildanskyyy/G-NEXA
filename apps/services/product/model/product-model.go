@@ -20,9 +20,9 @@ type Variant struct {
 }
 
 type Product struct {
-	ID         primitive.ObjectID `bson:"_id,omitempty" json:"id" binding:"required"`
-	StoreID    string             `bson:"store_id" json:"store_id" binding:"required"`
-	CategoryID primitive.ObjectID `bson:"category_id" json:"category_id" binding:"required"`
+	ID         primitive.ObjectID  `bson:"_id,omitempty" json:"id" binding:"required"`
+	StoreID    string              `bson:"store_id" json:"store_id" binding:"required"`
+	CategoryID *primitive.ObjectID `bson:"category_id" json:"category_id" binding:"required"`
 
 	// --- Basic Info ---
 	Name        string `bson:"name" json:"name" binding:"required"`

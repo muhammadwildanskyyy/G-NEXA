@@ -1,0 +1,93 @@
+name: g-nexa
+services:
+  # ------------------------------------
+  # 1. DATABASE: POSTGRESQL (User DB)
+  # ------------------------------------
+  postgres:
+    image: postgres:15-alpine
+    container_name: g-nexa-postgres
+    restart: always
+    env_file: ../.env
+    environment:
+      POSTGRES_DB: postgres
+    ports:
+      - "5532:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./pg-init/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - g-nexa-network
+
+  # ------------------------------------
+  # 2. DATABASE: MONGODB (Product DB)
+  # ------------------------------------
+  mongo:
+    image: mongo:8.0.0
+    container_name: g-nexa-mongo
+    restart: always
+    env_file: ../.env
+    ports:
+      - "28017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - g-nexa-network
+
+  # ------------------------------------
+  # 3. USER SERVICE (Bun Production)
+  # ------------------------------------
+  user-service:
+    build:
+      context: ../apps/services/users
+      target: production # <--- [PENTING] Pakai Stage Production
+    container_name: g-nexa-user-service
+    restart: always # <--- Auto restart jika crash
+    ports:
+      - "8081:8081" # Port aplikasi tetap dibuka untuk Nginx/Frontend
+
+    env_file:
+      - ../apps/services/users/.env
+    environment:
+      - NODE_ENV=production # <--- Mode Production
+      - PORT=8081
+
+    command: /bin/sh -c "bunx prisma migrate deploy && bun src/server.ts"
+
+    depends_on:
+      - postgres
+    networks:
+      - g-nexa-network
+
+  # ------------------------------------
+  # 4. PRODUCT SERVICE (Go Production)
+  # ------------------------------------
+  product-service:
+    build:
+      context: ../apps/services/product
+      target: production # <--- [PENTING] Pakai Stage Production (Alpine + Binary)
+    container_name: g-nexa-product-service
+    restart: always
+    ports:
+      - "8082:8082"
+
+    env_file:
+      - ../apps/services/product/files/config/.env
+    environment:
+      - APP_ENV=production
+      - PORT=8082
+
+    depends_on:
+      - mongo
+    networks:
+      - g-nexa-network
+
+# ---------------------------------------
+# NETWORK & VOLUMES
+# ---------------------------------------
+networks:
+  g-nexa-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongo_data:

@@ -19,12 +19,14 @@ type ProductService interface {
 	GetProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error)
 }
 type productService struct {
-	ProductRepository repositories.ProductRepository
+	ProductRepository  repositories.ProductRepository
+	CategoryRepository repositories.CategoryRepository
 }
 
-func NewProductService(productRepository repositories.ProductRepository) ProductService {
+func NewProductService(productRepository repositories.ProductRepository, categoryRepository repositories.CategoryRepository) ProductService {
 	return &productService{
-		ProductRepository: productRepository,
+		ProductRepository:  productRepository,
+		CategoryRepository: categoryRepository,
 	}
 }
 
@@ -42,9 +44,15 @@ func (p *productService) CreateProduct(ctx context.Context, product *model.Creat
 		return nil, err
 	}
 
+	_, err = p.CategoryRepository.SelectCategoryById(ctx, product.CategoryID)
+	if err != nil {
+		logger.LogError(logFeild, "Category Not Found", "categoryId", err)
+		return nil, err
+	}
+
 	productInput := &model.Product{
 		StoreID:    product.StoreID,
-		CategoryID: CategoryId,
+		CategoryID: &CategoryId,
 
 		Name:        product.Name,
 		Slug:        product.Slug,
@@ -89,7 +97,7 @@ func (p *productService) UpdateProduct(ctx context.Context, product *model.Updat
 
 	productInput := &model.Product{
 		StoreID:    product.StoreID,
-		CategoryID: CategoryId,
+		CategoryID: &CategoryId,
 
 		Name:        product.Name,
 		Slug:        product.Slug,

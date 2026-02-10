@@ -94,3 +94,96 @@
 {"level":"info","message":"GET /login 200 348 - 2627.271 ms","timestamp":"2026-02-04 14:56:25"}
 {"level":"info","message":"GET / 200 43 - 15.065 ms","timestamp":"2026-02-04 15:21:51"}
 {"level":"info","message":"GET /favicon.ico 404 150 - 15.455 ms","timestamp":"2026-02-04 15:21:52"}
+{"level":"error","message":{"method":"POST","stack":"PrismaClientKnownRequestError: \nInvalid `prisma.user.findFirst()` invocation in\n/app/src/repository/user.repository.ts:12:30\n\n   9   }\n  10 },\n  11 async findUserByEmailOrPhone(email: string, phoneNumber?: string | null) {\n→ 12   return await prisma.user.findFirst(\nThe table `public.users` does not exist in the current database.\n    at handleRequestError (/app/node_modules/@prisma/client/runtime/library.mjs:128:7272)\n    at handleAndLogRequestError (/app/node_modules/@prisma/client/runtime/library.mjs:128:6593)\n    at request (/app/node_modules/@prisma/client/runtime/library.mjs:128:6300)\n    at processTicksAndRejections (native:7:39)","statusCode":500,"url":"/register"},"timestamp":"2026-02-10 08:49:11"}
+{"level":"info","message":"POST /register 400 108 - 118.569 ms","timestamp":"2026-02-10 08:49:11"}
+{"level":"info","message":"User Created","timestamp":"2026-02-10 08:53:03","userId":"e23af582-842c-4c98-b383-a3b905f65673"}
+{"level":"info","message":"POST /register 201 395 - 142.445 ms","timestamp":"2026-02-10 08:53:03"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-10 08:53:13","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 102.437 ms","timestamp":"2026-02-10 08:53:13"}
+{"level":"info","message":"GET /api/me 401 60 - 9.738 ms","timestamp":"2026-02-10 08:53:47"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 08:54:08"}
+{"level":"info","message":"GET /api/me 200 72 - 28.238 ms","timestamp":"2026-02-10 08:54:08"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 08:54:19"}
+{"level":"info","message":"GET /api/me 200 72 - 5.941 ms","timestamp":"2026-02-10 08:54:19"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 08:55:48"}
+{"level":"info","message":"GET /api/me 200 72 - 24.767 ms","timestamp":"2026-02-10 08:55:48"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-10 08:56:02","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 95.197 ms","timestamp":"2026-02-10 08:56:02"}
+{"level":"info","message":"User Created","timestamp":"2026-02-10 17:30:07","userId":"a9598042-dbc9-44eb-bec8-e0898f12ddcf"}
+{"level":"info","message":"POST /register 201 395 - 135.484 ms","timestamp":"2026-02-10 17:30:07"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-10 17:30:12","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 69.320 ms","timestamp":"2026-02-10 17:30:12"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 17:30:40"}
+{"level":"info","message":"GET /api/me 200 72 - 30.547 ms","timestamp":"2026-02-10 17:30:40"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 17:31:14"}
+{"level":"info","message":"GET /api/me 200 72 - 29.156 ms","timestamp":"2026-02-10 17:31:14"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 17:32:17"}
+{"level":"info","message":"GET /api/me 200 72 - 59.118 ms","timestamp":"2026-02-10 17:32:17"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 17:35:24"}
+{"level":"info","message":"GET /api/me 200 72 - 94.769 ms","timestamp":"2026-02-10 17:35:24"}
+{"level":"error","message":{"method":"GET","stack":"PrismaClientValidationError: \nInvalid `prisma.user.findUnique()` invocation in\n/app/src/repository/user.repository.ts:13:30\n\n  10 },\n  11 \n  12 async findByEmail(email: string) {\n→ 13   return await prisma.user.findUnique({\n         where: {\n           email: undefined,\n       ?   id?: String,\n       ?   phoneNumber?: String,\n       ?   AND?: UserWhereInput | UserWhereInput[],\n       ?   OR?: UserWhereInput[],\n       ?   NOT?: UserWhereInput | UserWhereInput[],\n       ?   fullName?: StringFilter | String,\n       ?   password?: StringFilter | String,\n       ?   role?: EnumRoleFilter | Role,\n       ?   profilePicture?: StringNullableFilter | String | Null,\n       ?   bio?: StringNullableFilter | String | Null,\n       ?   createdAt?: DateTimeFilter | DateTime,\n       ?   updatedAt?: DateTimeFilter | DateTime\n         }\n       })\n\nArgument `where` of type UserWhereUniqueInput needs at least one of `id`, `email` or `phoneNumber` arguments. Available options are marked with ?.\n    at In (/app/node_modules/@prisma/client/runtime/library.mjs:36:1367)\n    at handleRequestError (/app/node_modules/@prisma/client/runtime/library.mjs:128:6911)\n    at handleAndLogRequestError (/app/node_modules/@prisma/client/runtime/library.mjs:128:6593)\n    at request (/app/node_modules/@prisma/client/runtime/library.mjs:128:6300)\n    at processTicksAndRejections (native:7:39)","statusCode":500,"url":"/api/me"},"timestamp":"2026-02-10 17:42:58"}
+{"level":"info","message":"GET /api/me 400 97 - 65.267 ms","timestamp":"2026-02-10 17:42:58"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 17:44:52","userId":"a9598042-dbc9-44eb-bec8-e0898f12ddcf"}
+{"level":"info","message":"GET /api/me 200 407 - 64.705 ms","timestamp":"2026-02-10 17:44:52"}
+{"level":"info","message":"PUT /api/update-user 401 60 - 3.100 ms","timestamp":"2026-02-10 17:45:18"}
+{"level":"info","message":"PUT /api/update-user 401 60 - 1.435 ms","timestamp":"2026-02-10 17:45:34"}
+{"level":"info","message":"PUT /api/update-user 401 60 - 0.772 ms","timestamp":"2026-02-10 17:45:38"}
+{"level":"info","message":"PUT /api/update-user 401 60 - 0.809 ms","timestamp":"2026-02-10 17:45:46"}
+{"level":"error","message":{"method":"GET","stack":"TypeError: userRepository.findUserByEmailOrPhone is not a function. (In 'userRepository.findUserByEmailOrPhone(userData.email)', 'userRepository.findUserByEmailOrPhone' is undefined)\n    at login (/app/src/services/auth.service.ts:39:46)\n    at login (/app/src/controllers/auth.controller.ts:27:39)\n    at handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n    at next (/app/node_modules/router/lib/route.js:157:13)\n    at dispatch (/app/node_modules/router/lib/route.js:117:3)\n    at handle (/app/node_modules/router/index.js:435:11)\n    at handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n    at <anonymous> (/app/node_modules/router/index.js:295:15)\n    at next (/app/node_modules/router/index.js:291:5)\n    at handle (/app/node_modules/router/index.js:186:3)\n    at router (/app/node_modules/router/index.js:60:12)\n    at handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n    at trimPrefix (/app/node_modules/router/index.js:342:13)\n    at <anonymous> (/app/node_modules/router/index.js:297:9)\n    at next (/app/node_modules/router/index.js:291:5)\n    at logger (/app/node_modules/morgan/index.js:144:5)\n    at handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n    at trimPrefix (/app/node_modules/router/index.js:342:13)\n    at <anonymous> (/app/node_modules/router/index.js:297:9)\n    at next (/app/node_modules/router/index.js:291:5)\n    at cors (/app/node_modules/cors/lib/index.js:188:7)\n    at <anonymous> (/app/node_modules/cors/lib/index.js:224:17)\n    at originCallback (/app/node_modules/cors/lib/index.js:214:15)\n    at <anonymous> (/app/node_modules/cors/lib/index.js:219:13)\n    at optionsCallback (/app/node_modules/cors/lib/index.js:199:9)\n    at corsMiddleware (/app/node_modules/cors/lib/index.js:204:7)\n    at handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n    at trimPrefix (/app/node_modules/router/index.js:342:13)\n    at <anonymous> (/app/node_modules/router/index.js:297:9)\n    at next (/app/node_modules/router/index.js:291:5)\n    at <anonymous> (/app/node_modules/body-parser/lib/read.js:171:5)\n    at runInAsyncScope (node:async_hooks:137:23)\n    at invokeCallback (/app/node_modules/raw-body/index.js:238:16)\n    at done (/app/node_modules/raw-body/index.js:227:7)\n    at onEnd (/app/node_modules/raw-body/index.js:287:7)\n    at emit (node:events:92:22)\n    at endReadableNT (internal:streams/readable:861:50)\n    at processTicksAndRejections (native:7:39)","statusCode":500,"url":"/login"},"timestamp":"2026-02-10 17:46:17"}
+{"level":"info","message":"GET /login 500 219 - 10.395 ms","timestamp":"2026-02-10 17:46:17"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-10 17:47:10","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 147.025 ms","timestamp":"2026-02-10 17:47:10"}
+{"level":"info","message":"PUT /api/update-user 401 60 - 11.821 ms","timestamp":"2026-02-10 17:47:28"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 17:47:56","userId":"a9598042-dbc9-44eb-bec8-e0898f12ddcf"}
+{"level":"info","message":"GET /api/me 200 407 - 24.111 ms","timestamp":"2026-02-10 17:47:56"}
+{"level":"info","message":"PUT /api/update-user 401 60 - 7.226 ms","timestamp":"2026-02-10 17:48:36"}
+{"level":"info","message":"PUT /api/update-user 401 60 - 4.272 ms","timestamp":"2026-02-10 17:51:30"}
+{"level":"info","message":"PUT /api/update-user 401 60 - 6.954 ms","timestamp":"2026-02-10 17:52:22"}
+{"level":"info","message":"PUT /api/update-user 401 66 - 18.437 ms","timestamp":"2026-02-10 17:54:55"}
+{"level":"info","message":"PUT /api/update-user 401 60 - 10.103 ms","timestamp":"2026-02-10 18:02:34"}
+{"level":"info","message":"User Updated","timestamp":"2026-02-10 18:10:22","userId":"a9598042-dbc9-44eb-bec8-e0898f12ddcf"}
+{"level":"info","message":"PUT /api/update-user 200 465 - 86.439 ms","timestamp":"2026-02-10 18:10:22"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 18:20:26"}
+{"level":"info","message":"GET /api/me 200 72 - 69.355 ms","timestamp":"2026-02-10 18:20:26"}
+{"level":"error","message":{"method":"GET","stack":"Error: Email Not Registered\n    at login (/app/src/services/auth.service.ts:38:19)\n    at processTicksAndRejections (native:7:39)","statusCode":401,"url":"/login"},"timestamp":"2026-02-10 18:20:51"}
+{"level":"info","message":"GET /login 401 68 - 19.247 ms","timestamp":"2026-02-10 18:20:51"}
+{"level":"info","message":"User Created","timestamp":"2026-02-10 18:20:57","userId":"f04a5f9c-99b1-444f-9dc2-85228e761905"}
+{"level":"info","message":"POST /register 201 395 - 110.524 ms","timestamp":"2026-02-10 18:20:57"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-10 18:21:01","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 96.908 ms","timestamp":"2026-02-10 18:21:01"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 18:21:23","userId":"f04a5f9c-99b1-444f-9dc2-85228e761905"}
+{"level":"info","message":"GET /api/me 200 407 - 52.116 ms","timestamp":"2026-02-10 18:21:23"}
+{"level":"info","message":"User Updated","timestamp":"2026-02-10 18:21:31","userId":"f04a5f9c-99b1-444f-9dc2-85228e761905"}
+{"level":"info","message":"PUT /api/update-user 200 465 - 28.970 ms","timestamp":"2026-02-10 18:21:31"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 18:40:40"}
+{"level":"info","message":"GET /api/me 200 72 - 60.093 ms","timestamp":"2026-02-10 18:40:40"}
+{"level":"error","message":{"method":"GET","stack":"Error: Email Not Registered\n    at login (/app/src/services/auth.service.ts:38:19)\n    at processTicksAndRejections (native:7:39)","statusCode":401,"url":"/login"},"timestamp":"2026-02-10 18:40:51"}
+{"level":"info","message":"GET /login 401 68 - 19.915 ms","timestamp":"2026-02-10 18:40:51"}
+{"level":"info","message":"User Created","timestamp":"2026-02-10 18:40:55","userId":"859c9e1b-0c9d-43bb-a671-bfb89d19b02e"}
+{"level":"info","message":"POST /register 201 395 - 90.851 ms","timestamp":"2026-02-10 18:40:55"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-10 18:41:02","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 89.249 ms","timestamp":"2026-02-10 18:41:02"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 18:41:25","userId":"859c9e1b-0c9d-43bb-a671-bfb89d19b02e"}
+{"level":"info","message":"GET /api/me 200 407 - 27.153 ms","timestamp":"2026-02-10 18:41:25"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-10 18:41:57","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 95.597 ms","timestamp":"2026-02-10 18:41:57"}
+{"level":"info","message":"Succes get data User","timestamp":"2026-02-10 18:42:15","userId":"859c9e1b-0c9d-43bb-a671-bfb89d19b02e"}
+{"level":"info","message":"GET /api/me 200 407 - 25.795 ms","timestamp":"2026-02-10 18:42:15"}
+{"level":"info","message":"User Created","timestamp":"2026-02-10 19:04:19","userId":"ea9d462b-eeb2-4f53-9baf-8b55fcb3c6bf"}
+{"level":"info","message":"POST /register 201 395 - 132.169 ms","timestamp":"2026-02-10 19:04:19"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-10 19:04:23","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 105.952 ms","timestamp":"2026-02-10 19:04:23"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-10 19:05:23","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 85.533 ms","timestamp":"2026-02-10 19:05:23"}
+{"level":"error","message":{"method":"POST","stack":"Error: This Email or Phone Number Already Registered\n    at register (/app/src/services/auth.service.ts:14:19)\n    at processTicksAndRejections (native:7:39)","statusCode":400,"url":"/register"},"timestamp":"2026-02-10 20:08:41"}
+{"level":"info","message":"POST /register 400 93 - 136.405 ms","timestamp":"2026-02-10 20:08:41"}
+{"level":"info","message":"User Created","timestamp":"2026-02-10 20:49:21","userId":"3a604beb-d1d1-4cf9-9f16-1d22b24d4554"}
+{"level":"info","message":"POST /register 201 395 - 241.919 ms","timestamp":"2026-02-10 20:49:21"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-10 20:49:27","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 140.790 ms","timestamp":"2026-02-10 20:49:27"}
+{"level":"info","message":"User Created","timestamp":"2026-02-10 22:29:32","userId":"0d7666c9-fe68-464a-8e92-17fba4b66bc1"}
+{"level":"info","message":"POST /register 201 395 - 225.930 ms","timestamp":"2026-02-10 22:29:32"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-10 22:31:52","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 483.591 ms","timestamp":"2026-02-10 22:31:52"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-10 22:32:31","userEmail":"budi.pembflfdiff@example.com"}
+{"level":"info","message":"GET /login 200 348 - 149.338 ms","timestamp":"2026-02-10 22:32:31"}

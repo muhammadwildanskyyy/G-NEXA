@@ -8,18 +8,23 @@ export default {
       throw error;
     }
   },
-  async findUserByEmailOrPhone(email: string, phoneNumber?: string | null) {
+
+  async findByEmail(email: string) {
     return await prisma.user.findFirst({
       where: {
-        OR: [
-          { email: email },
-          {
-            phoneNumber: phoneNumber ? phoneNumber : undefined,
-          },
-        ],
+        email: email,
       },
     });
   },
+
+  async findByPhone(phoneNumber: string) {
+    return await prisma.user.findFirst({
+      where: {
+        phoneNumber: phoneNumber,
+      },
+    });
+  },
+
   async findUserById(userId: string) {
     return await prisma.user.findUnique({ where: { id: userId } });
   },

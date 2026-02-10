@@ -122,6 +122,7 @@ func (c *categoryRepository) SelectCategories(ctx context.Context) ([]*model.Cat
 	cursor, err := c.DB.Collection(CategoryCollection).Find(ctx, bson.M{})
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
+
 			logger.Log.WithFields(logFields).Warn("Category not found")
 			return nil, err
 		}
@@ -135,6 +136,7 @@ func (c *categoryRepository) SelectCategories(ctx context.Context) ([]*model.Cat
 		logger.LogError(logFields, "Failed to find all category into MongoDB", "cursor.All()", err)
 		return nil, err
 	}
+
 	return categories, nil
 }
 

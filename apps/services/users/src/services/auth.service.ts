@@ -3,17 +3,13 @@ import { HTTP_STATUS } from "../model/web.model";
 import userRepository from "../repository/user.repository";
 import { AppError } from "../utils/appError";
 import { PasswordHelper } from "../utils/eccryption";
-import { email } from "zod";
 import { generateToken } from "../utils/jwt";
 import type { TUserLogin } from "../validation/user.validation";
 
 export default {
   async register(user: Prisma.UserCreateInput) {
     try {
-      const userExist = await userRepository.findUserByEmailOrPhone(
-        user.email,
-        user.phoneNumber,
-      );
+      const userExist = await userRepository.findByEmail(user.email);
       if (userExist) {
         throw new AppError(
           "This Email or Phone Number Already Registered",
@@ -36,9 +32,7 @@ export default {
   },
   async login(userData: TUserLogin) {
     try {
-      const userExist = await userRepository.findUserByEmailOrPhone(
-        userData.email,
-      );
+      const userExist = await userRepository.findByEmail(userData.email);
 
       if (!userExist) {
         throw new AppError("Email Not Registered", HTTP_STATUS.UNAUTHORIZED);

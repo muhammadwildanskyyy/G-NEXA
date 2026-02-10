@@ -41,7 +41,7 @@ export default {
         return response.unauthorized(res, "Unauthorized");
       }
 
-      const result = await userService.getUserByEmail(user.email);
+      const result = await userService.getUserByEmail(user.user_email);
 
       logger.info("Succes get data User", { userId: result?.id });
       return response.success(
