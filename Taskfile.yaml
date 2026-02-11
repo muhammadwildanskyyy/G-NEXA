@@ -1,0 +1,97 @@
+version: "3"
+
+vars:
+  # Konfigurasi Path File Docker Compose
+  DEV_COMPOSE: infrastructure/docker-compose-dev.yaml
+  PROD_COMPOSE: infrastructure/docker-compose-prod.yaml
+
+tasks:
+  default:
+    desc: Menampilkan status container yang aktif
+    cmds:
+      - docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+  # ============================================================================
+  # 1. DEVELOPMENT TASKS (Mode Dev + Hot Reload)
+  # ============================================================================
+
+  dev:up:
+    desc: "1. Menyalakan SEMUA service & DB di mode Development"
+    cmds:
+      - docker compose -f {{.DEV_COMPOSE}} up -d
+    silent: false
+
+  dev:down:
+    desc: "Mematikan semua service Development"
+    cmds:
+      - docker compose -f {{.DEV_COMPOSE}} down
+
+  dev:restart:
+    desc: "Restart service tertentu di Dev (Contoh: task dev:restart s=user-service)"
+    cmds:
+      - docker compose -f {{.DEV_COMPOSE}} up -d --build {{.s}}
+
+  dev:user-service:
+    desc: "Menyalakan/Restart hanya User Service (Dev)"
+    cmds:
+      - task: dev:restart
+        vars: { s: "user-service" }
+
+  dev:product-service:
+    desc: "Menyalakan/Restart hanya Product Service (Dev)"
+    cmds:
+      - task: dev:restart
+        vars: { s: "product-service" }
+
+  dev:media-service":
+    desc: "Menyalakan/Restart hanya Media Service (Dev)"
+    cmds:
+      - task: dev:restart
+        vars: { s: "media-service" }
+
+  # ============================================================================
+  # 2. PRODUCTION TASKS (Mode Prod + Binary/Build)
+  # ============================================================================
+
+  prod:up:
+    desc: "2. Menyalakan SEMUA service & DB di mode Production"
+    cmds:
+      - docker compose -f {{.PROD_COMPOSE}} up -d --build
+
+  prod:down:
+    desc: "Mematikan semua service Production"
+    cmds:
+      - docker compose -f {{.PROD_COMPOSE}} down
+
+  # ============================================================================
+  # 3. DATABASE TASKS (Hanya Database)
+  # ============================================================================
+
+  db:up:
+    desc: "3. Hanya menyalakan Database (Postgres & Mongo)"
+    cmds:
+      # Kita gunakan file dev karena biasanya DB config sama, dan kita butuh volume-nya
+      - docker compose -f {{.DEV_COMPOSE}} up -d postgres mongo
+
+  db:reset:
+    desc: "BAHAYA: Menghapus dan menyalakan ulang database (Data Hilang!)"
+    prompt: "Apakah anda yakin ingin menghapus semua data database?"
+    cmds:
+      - docker compose -f {{.DEV_COMPOSE}} stop postgres mongo
+      - docker compose -f {{.DEV_COMPOSE}} rm -f -v postgres mongo
+      - task: db:up
+
+  # ============================================================================
+  # UTILITIES (Saran Tambahan)
+  # ============================================================================
+
+  logs:
+    desc: "Melihat logs real-time (Contoh: task logs s=product-service)"
+    cmds:
+      # Jika variabel 's' kosong, tampilkan semua log. Jika ada isinya, tampilkan service itu saja
+      - docker compose -f {{.DEV_COMPOSE}} logs -f {{.s}}
+
+  shell:
+    desc: "Masuk ke dalam container (Contoh: task shell s=g-nexa-user-service)"
+    cmds:
+      - docker exec -it {{.s}} /bin/sh
