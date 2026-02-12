@@ -21,3 +21,7 @@ func (m *Media) BeforeCreate(tx *gorm.DB) (err error) {
 	m.ID = uuid.New()
 	return
 }
+
+type DeleteBulkRequest struct {
+	IDs []string `json:"ids"`
+}

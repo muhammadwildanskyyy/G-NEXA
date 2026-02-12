@@ -13,9 +13,7 @@ import (
 func RequestLogger() fiber.Handler {
 	return func(c fiber.Ctx) error {
 		requestId := uuid.New().String()
-		timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		ctx := context.WithValue(timeoutCtx, "request_id", requestId)
+		ctx := context.WithValue(c.Context(), "request_id", requestId)
 		c.SetContext(ctx)
 		c.Set("X-Request-ID", requestId)
 
