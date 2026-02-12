@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"product-service/cmd/product/usecases"
 	"product-service/infrastructure/logger"
@@ -20,6 +21,7 @@ type ProductHandler interface {
 	GetProductByID(c *gin.Context)
 	GetProductInfo(c *gin.Context)
 	GetAllProductsByCategoryId(c *gin.Context)
+	CreateProductBulk(c *gin.Context)
 }
 
 type producthandler struct {
@@ -147,25 +149,35 @@ func (p *producthandler) GetProductByID(c *gin.Context) {
 }
 
 func (p *producthandler) GetProductInfo(c *gin.Context) {
-
 	logFields := logrus.Fields{
 		"layer":  "product-handler",
 		"func":   "GetProductInfo()",
 		"method": c.Request.Method,
 	}
 
-	result, err := p.ProductUseCase.GetProducts(c.Request.Context())
+	// 1. Bind Query Parameter otomatis (Page, Limit, Search, Filter)
+	var params model.ProductQueryParam
+	if err := c.ShouldBindQuery(&params); err != nil {
+		utils.ResponseError(c, http.StatusBadRequest, "Invalid query parameters")
+		return
+	}
+
+	// 2. Panggil Usecase
+	result, err := p.ProductUseCase.GetProducts(c.Request.Context(), &params)
+
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			logger.Log.WithFields(logFields).Warn("Product not found")
+			// Bisa return empty list [] daripada 404, tapi 404 juga oke
 			utils.ResponseError(c, http.StatusNotFound, "Product not found")
 			return
 		}
 		logger.LogError(logFields, "Failed GetProductInfo", "p.ProductUseCase.GetProducts()", err)
 		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
+		return
 	}
-	utils.ResponseSuccess(c, result, "Success Get Products", http.StatusOK)
 
+	utils.ResponseSuccess(c, result, "Success Get Products", http.StatusOK)
 }
 
 func (p *producthandler) GetAllProductsByCategoryId(c *gin.Context) {
@@ -194,4 +206,33 @@ func (p *producthandler) GetAllProductsByCategoryId(c *gin.Context) {
 		return
 	}
 	utils.ResponseSuccess(c, result, "Success Get Products", http.StatusOK)
+}
+
+func (h *producthandler) CreateProductBulk(c *gin.Context) {
+	// Perhatikan: Variable ini adalah SLICE (Array)
+	var input []*model.CreateProductRequest
+
+	// 1. Bind JSON Array
+	if err := c.ShouldBindJSON(&input); err != nil {
+		// Error jika format JSON bukan Array atau tipe data salah
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Format JSON salah. Pastikan mengirim Array []. Detail: " + err.Error(),
+		})
+		return
+	}
+
+	// 2. Panggil Service
+	result, err := h.ProductUseCase.CreateProductBulk(c.Request.Context(), input)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	// 3. Response Sukses
+	msg := fmt.Sprintf("Berhasil memproses bulk insert. Data tersimpan: %d", len(result))
+	utils.ResponseSuccess(c, result, msg, http.StatusCreated)
 }
