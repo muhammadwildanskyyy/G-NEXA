@@ -1,0 +1,19 @@
+package routes
+
+import (
+	"media-service/cmd/media/handlers"
+	"media-service/middleware"
+
+	"github.com/gofiber/fiber/v3"
+)
+
+func SetupRouter(app fiber.Router, mediahandler handlers.MediaHandler, authSecret string) {
+	// Grouping Routes
+	api := app.Group("/api/v1/media")
+
+	api.Use(middleware.AuthMiddleware(authSecret))
+	api.Post("/upload", mediahandler.Upload)
+	api.Post("/uploads", mediahandler.Uploads)
+	api.Delete("/batch-delete", mediahandler.BatchDeletes)
+	api.Delete("/:id", mediahandler.Delete)
+}

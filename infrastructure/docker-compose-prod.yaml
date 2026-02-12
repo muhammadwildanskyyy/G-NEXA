@@ -81,6 +81,28 @@ services:
     networks:
       - g-nexa-network
 
+ # ------------------------------------
+  # 4. PRODUCT media (Go + Hot Reload)
+  # ------------------------------------
+  media-service:
+    build:
+      context: ../apps/services/media
+      target: production
+    container_name: g-nexa-media-service
+    restart: always
+    ports:
+      - "8083:8083"
+
+    env_file:
+      - ../apps/services/media/files/config/.env
+    environment:
+      - PORT=8083
+
+    depends_on:
+      - postgres
+    networks:
+      - g-nexa-network
+
 # ---------------------------------------
 # NETWORK & VOLUMES
 # ---------------------------------------
