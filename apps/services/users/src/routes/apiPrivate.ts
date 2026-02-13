@@ -5,7 +5,7 @@ import userController from "../controllers/user.controller";
 const routerPrivate = express.Router();
 routerPrivate.use(authMiddleware);
 
-routerPrivate.get("/me", authController.me);
-routerPrivate.put("/update-user", userController.updateUser);
+routerPrivate.get("/users/me", authController.me);
+routerPrivate.put("/users/update-user", userController.updateUser);
 
 export default routerPrivate;

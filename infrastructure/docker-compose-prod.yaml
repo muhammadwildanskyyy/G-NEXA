@@ -81,7 +81,7 @@ services:
     networks:
       - g-nexa-network
 
- # ------------------------------------
+  # ------------------------------------
   # 4. PRODUCT media (Go + Hot Reload)
   # ------------------------------------
   media-service:
@@ -100,6 +100,24 @@ services:
 
     depends_on:
       - postgres
+    networks:
+      - g-nexa-network
+
+  web-market-place:
+    build:
+      context: ../apps/web/public/market-place
+      target: production
+
+    container_name: g-nexa-web-market-place
+    restart: always
+    ports:
+      - "3000:3000"
+
+    # Environment Runtime (Hanya untuk Server-Side)
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+
     networks:
       - g-nexa-network
 

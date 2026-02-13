@@ -1,0 +1,50 @@
+# --- STAGE 1: BASE (Pondasi) ---
+FROM oven/bun:1-alpine AS base
+WORKDIR /app
+
+# --- STAGE 2: DEPS (Install Dependencies) ---
+# Kita pisahkan stage ini agar layer caching Docker bekerja optimal
+FROM base AS deps
+COPY package.json bun.lockb* ./
+RUN bun install --frozen-lockfile
+
+# --- STAGE 3: DEVELOPMENT (Untuk Laptop/Hot Reload) ---
+FROM base AS development
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+# Next.js default port is 3000
+ENV PORT=3000
+CMD ["bun", "run", "dev"]
+
+# --- STAGE 4: BUILDER (Compile Next.js untuk Prod) ---
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+# [PENTING] Disable telemetry saat build
+ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN bun run build
+
+# --- STAGE 5: PRODUCTION (Mode Gendut / Standard) ---
+FROM base AS production
+WORKDIR /app
+
+ENV NODE_ENV=production
+# Jangan lupa copy package.json agar script 'start' terbaca
+COPY package.json ./
+
+# [BEDANYA DISINI]
+# Kita harus copy folder .next UTUH dan node_modules UTUH
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/node_modules ./node_modules
+
+USER bun
+
+EXPOSE 3000
+
+# Baru disini bisa pakai bun run start
+CMD ["bun", "run", "start"]
