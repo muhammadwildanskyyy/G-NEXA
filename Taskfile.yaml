@@ -21,6 +21,11 @@ tasks:
       - docker compose -f {{.DEV_COMPOSE}} up -d
     silent: false
 
+  dev:stop:
+    desc: "menutup semua service Development"
+    cmds:
+      - docker compose -f {{.DEV_COMPOSE}} stop
+
   dev:down:
     desc: "Mematikan semua service Development"
     cmds:

@@ -13,12 +13,14 @@ async function init() {
   try {
     const app = express();
     const PORT = process.env.PORT;
+    const routerV1 = express.Router();
     connectDB();
     app.use(bodyParser.json());
     app.use(cors());
     app.use(httpLogger);
-    app.use("/api", routerPrivate);
-    app.use(routerPublic);
+    routerV1.use("/api", routerPrivate);
+    routerV1.use(routerPublic);
+    app.use("/v1", routerV1);
     app.use(globalErrorHandler);
 
     app.get("/", (req: Request, res: Response) => {
