@@ -187,3 +187,12 @@
 {"level":"info","message":"GET /login 200 348 - 483.591 ms","timestamp":"2026-02-10 22:31:52"}
 {"level":"info","message":"User Success Login","timestamp":"2026-02-10 22:32:31","userEmail":"budi.pembflfdiff@example.com"}
 {"level":"info","message":"GET /login 200 348 - 149.338 ms","timestamp":"2026-02-10 22:32:31"}
+{"level":"error","message":{"method":"POST","statusCode":400,"url":"/register"},"timestamp":"2026-02-12 14:04:44"}
+{"level":"info","message":"POST /register 400 169 - 121.049 ms","timestamp":"2026-02-12 14:04:44"}
+{"level":"info","message":"User Created","timestamp":"2026-02-12 14:04:55","userId":"f2c9c4f7-0892-40dc-8f76-70cd09d43587"}
+{"level":"info","message":"POST /register 201 377 - 260.763 ms","timestamp":"2026-02-12 14:04:55"}
+{"level":"error","message":{"method":"GET","stack":"SyntaxError: JSON Parse error: Property name must be a string literal\n    at <parse> (:0)\n    at parse (unknown)\n    at parse (/app/node_modules/body-parser/lib/types/json.js:72:19)\n    at <anonymous> (/app/node_modules/body-parser/lib/read.js:162:18)\n    at runInAsyncScope (node:async_hooks:137:23)\n    at invokeCallback (/app/node_modules/raw-body/index.js:238:16)\n    at done (/app/node_modules/raw-body/index.js:227:7)\n    at onEnd (/app/node_modules/raw-body/index.js:287:7)\n    at emit (node:events:92:22)\n    at endReadableNT (internal:streams/readable:861:50)\n    at processTicksAndRejections (native:7:39)","statusCode":400,"url":"/login"},"timestamp":"2026-02-12 14:05:17"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-12 14:05:25","userEmail":"skyyy@example.com"}
+{"level":"info","message":"GET /login 200 333 - 115.475 ms","timestamp":"2026-02-12 14:05:25"}
+{"level":"info","message":"User Success Login","timestamp":"2026-02-12 14:05:54","userEmail":"skyyy@example.com"}
+{"level":"info","message":"GET /login 200 333 - 85.051 ms","timestamp":"2026-02-12 14:05:54"}

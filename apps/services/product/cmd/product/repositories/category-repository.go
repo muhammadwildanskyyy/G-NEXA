@@ -137,6 +137,10 @@ func (c *categoryRepository) SelectCategories(ctx context.Context) ([]*model.Cat
 		return nil, err
 	}
 
+	if len(categories) == 0 {
+		return nil, mongo.ErrNoDocuments
+	}
+
 	return categories, nil
 }
 

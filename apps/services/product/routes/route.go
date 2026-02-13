@@ -14,13 +14,13 @@ func SetupRoutes(router *gin.Engine, productHandler handlers.ProductHandler, cat
 
 	// product
 	router.POST("/v1/product", productHandler.CreateProduct)
+	router.POST("/v1/batch-product", productHandler.CreateProductBulk)
 	router.GET("/v1/products", productHandler.GetProductInfo)
 	router.GET("/v1/product/:product_id", productHandler.GetProductByID)
 	router.DELETE("/v1/product/:product_id", productHandler.DeleteProduct)
 	router.PUT("/v1/product/:product_id", productHandler.UpdateProduct)
 	router.GET("/v1/products-by-category/:category_id", productHandler.GetAllProductsByCategoryId)
 
-	// todo : implementasi guard for admin
 	// category
 
 	router.POST("/v1/category", middleware.AclMiddleware([]string{"ADMIN"}), categoryHandler.CreateCategory)

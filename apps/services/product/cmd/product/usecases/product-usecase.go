@@ -12,20 +12,21 @@ import (
 type ProductUsecase interface {
 	CreateProduct(ctx context.Context, product *model.CreateProductRequest) (*model.Product, error)
 	GetProductByID(ctx context.Context, id string) (*model.Product, error)
-	GetProducts(ctx context.Context) ([]*model.Product, error)
+	GetProducts(ctx context.Context, paramPagination *model.ProductQueryParam) (*model.PaginationProductResult, error)
 	UpodateProduct(ctx context.Context, product *model.UpdateProductRequest, productId string) (*model.Product, error)
 	DeleteProduct(ctx context.Context, id string) error
 	SelectProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error)
+	CreateProductBulk(ctx context.Context, products []*model.CreateProductRequest) ([]*model.Product, error)
 }
-type productRepository struct {
+type productUsecase struct {
 	ProductService services.ProductService
 }
 
 func NewProductUsecase(productService services.ProductService) ProductUsecase {
-	return &productRepository{ProductService: productService}
+	return &productUsecase{ProductService: productService}
 }
 
-func (p *productRepository) CreateProduct(ctx context.Context, product *model.CreateProductRequest) (*model.Product, error) {
+func (p *productUsecase) CreateProduct(ctx context.Context, product *model.CreateProductRequest) (*model.Product, error) {
 	logFields := logrus.Fields{
 		"layer":       "Usecase",
 		"func":        "CreateProduct()",
@@ -41,7 +42,7 @@ func (p *productRepository) CreateProduct(ctx context.Context, product *model.Cr
 
 }
 
-func (p *productRepository) GetProductByID(ctx context.Context, id string) (*model.Product, error) {
+func (p *productUsecase) GetProductByID(ctx context.Context, id string) (*model.Product, error) {
 	logFields := logrus.Fields{
 		"layer":     "Usecase",
 		"func":      "GetProductByID()",
@@ -55,20 +56,21 @@ func (p *productRepository) GetProductByID(ctx context.Context, id string) (*mod
 	return result, nil
 }
 
-func (p *productRepository) GetProducts(ctx context.Context) ([]*model.Product, error) {
+func (p *productUsecase) GetProducts(ctx context.Context, params *model.ProductQueryParam) (*model.PaginationProductResult, error) {
 	logFields := logrus.Fields{
 		"layer": "Usecase",
 		"func":  "GetProducts()",
 	}
-	result, err := p.ProductService.GetProducts(ctx)
+
+	result, err := p.ProductService.GetProducts(ctx, params)
 	if err != nil {
-		logger.LogError(logFields, "Failed to get products", " p.ProductService.GetProducts()", err)
+		logger.LogError(logFields, "Failed to get products", "p.ProductService.GetProducts()", err)
 		return nil, err
 	}
 	return result, nil
 }
 
-func (p *productRepository) UpodateProduct(ctx context.Context, product *model.UpdateProductRequest, productId string) (*model.Product, error) {
+func (p *productUsecase) UpodateProduct(ctx context.Context, product *model.UpdateProductRequest, productId string) (*model.Product, error) {
 	logFields := logrus.Fields{
 		"layer":        "Usecase",
 		"func":         "UpodateProduct()",
@@ -84,7 +86,7 @@ func (p *productRepository) UpodateProduct(ctx context.Context, product *model.U
 
 }
 
-func (p *productRepository) DeleteProduct(ctx context.Context, id string) error {
+func (p *productUsecase) DeleteProduct(ctx context.Context, id string) error {
 	logFields := logrus.Fields{
 		"layer": "Usecase",
 		"func":  "DeleteProduct()",
@@ -97,7 +99,7 @@ func (p *productRepository) DeleteProduct(ctx context.Context, id string) error 
 	return nil
 }
 
-func (p *productRepository) SelectProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error) {
+func (p *productUsecase) SelectProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error) {
 	logFields := logrus.Fields{
 		"layer":      "Usecase",
 		"func":       "SelectProductsByCategoryId()",
@@ -111,4 +113,13 @@ func (p *productRepository) SelectProductsByCategoryId(ctx context.Context, cate
 	}
 	return result, nil
 
+}
+
+func (p *productUsecase) CreateProductBulk(ctx context.Context, products []*model.CreateProductRequest) ([]*model.Product, error) {
+
+	result, err := p.ProductService.CreateProductBulk(ctx, products)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
 }

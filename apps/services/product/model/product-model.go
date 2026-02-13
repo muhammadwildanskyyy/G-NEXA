@@ -60,7 +60,7 @@ type CreateProductRequest struct {
 
 	// --- Basic Info ---
 	Name        string `bson:"name" json:"name" binding:"required,max=50" `
-	Slug        string `bson:"slug" json:"slug" binding:"required,max=15"`
+	Slug        string `bson:"slug" json:"slug" binding:"required,max=50"`
 	Description string `bson:"description" json:"description" binding:"required"`
 	Condition   string `bson:"condition" json:"condition" binding:"required"`
 
@@ -112,4 +112,27 @@ type UpdateProductRequest struct {
 
 	// --- Metadata ---
 	Tags []string `bson:"tags" json:"tags" binding:"required"`
+}
+
+type ProductQueryParam struct {
+	// Pagination
+	Page  int64 `json:"page" form:"page"`
+	Limit int64 `json:"limit" form:"limit"`
+
+	//search and filter
+	Search     string  `json:"search" form:"search"`
+	CategoryID string  `json:"category_id" form:"category_id"`
+	StoreID    string  `json:"store_id" form:"store_id"`
+	Condition  string  `json:"condition" form:"condition"`
+	MinPrice   float64 `json:"min_price" form:"min_price"`
+	MaxPrice   float64 `json:"max_price" form:"max_price"`
+	SortBy     string  `json:"sort_by" form:"sort_by"`
+}
+
+type PaginationProductResult struct {
+	Products  []*Product `json:"products"`
+	TotalData int64      `json:"total_data"`
+	TotalPage int64      `json:"total_page"`
+	Page      int64      `json:"page"`
+	Limit     int64      `json:"limit"`
 }
