@@ -65,5 +65,3 @@ export const userUpdateSchema = z.object({
     .nullable(),
   bio: z.string().max(255, "Bio maksimal 255 karakter").optional().nullable(),
 });
-
-export type TUserUpdate = z.infer<typeof userUpdateSchema>;

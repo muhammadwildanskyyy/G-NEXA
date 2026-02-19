@@ -1,42 +1,23 @@
-import express from "express";
-
-import bodyParser from "body-parser";
-import cors from "cors";
-import type { Request, Response } from "express";
+import app from "./app";
 import { connectDB } from "./lib/database";
-import { globalErrorHandler } from "./middlewares/error.middleware";
-import { httpLogger } from "./middlewares/logger.middleware";
-import routerPrivate from "./routes/apiPrivate";
-import routerPublic from "./routes/apiPublic";
+import { logger } from "./lib/logger"; // Opsional: gunakan logger kamu daripada console.log
 
-async function init() {
+async function bootstrap() {
   try {
-    const app = express();
-    const PORT = process.env.PORT;
-    const routerV1 = express.Router();
-    connectDB();
-    app.use(bodyParser.json());
-    app.use(cors());
-    app.use(httpLogger);
-    routerV1.use("/api", routerPrivate);
-    routerV1.use(routerPublic);
-    app.use("/v1", routerV1);
-    app.use(globalErrorHandler);
+    const PORT = process.env.PORT || 3000;
 
-    app.get("/", (req: Request, res: Response) => {
-      res.status(200).json({
-        message: "Server is running",
-        data: null,
-      });
-      return;
-    });
+    // 1. Hubungkan Database
+    await connectDB();
+    console.log("Database connected successfully");
 
+    // 2. Jalankan Server
     app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+      console.log(`🚀 Server is running on http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.log(error);
+    console.error("Critical error during server startup:", error);
+    process.exit(1);
   }
 }
 
-init();
+bootstrap();

@@ -1,70 +1,75 @@
 import type { Request, Response, NextFunction } from "express";
-import response from "../utils/response";
 import { logger } from "../lib/logger";
-import { HTTP_STATUS } from "../model/web.model";
+
 import { ZodError } from "zod";
 import { Prisma } from "../generated/prisma/client";
+import { HttpStatus } from "../constants/httpStatus";
 
 export const globalErrorHandler = (
   err: any,
   req: Request,
   res: Response,
-  next: NextFunction,
+  _next: NextFunction,
 ) => {
-  // Set default status code
-  let statusCode = err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR;
+  let statusCode = err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
   let message = err.message || "Internal Server Error";
   let isOperational = err.isOperational || false;
-
+  let details = null;
+  // 1. Handling Zod Validation Error
   if (err instanceof ZodError) {
-    statusCode = HTTP_STATUS.BAD_REQUEST;
+    statusCode = HttpStatus.BAD_REQUEST;
+    message = "Validasi data gagal";
     isOperational = true;
+    details = err.issues.map((issue) => ({
+      field: issue.path.join("."),
+      message: issue.message,
+    }));
   }
 
-  // 2. Handling Prisma Known Request Errors
+  // 2. Handling Prisma Errors
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    isOperational = true;
     switch (err.code) {
-      case "P2002": // Unique constraint failed (Duplicate)
-        statusCode = HTTP_STATUS.CONFLICT;
+      case "P2002":
+        statusCode = HttpStatus.CONFLICT;
         message = "Data sudah terdaftar di sistem";
-        isOperational = true;
         break;
-      case "P2025": // Record not found
-        statusCode = HTTP_STATUS.NOT_FOUND;
+      case "P2025":
+        statusCode = HttpStatus.NOT_FOUND;
         message = "Data tidak ditemukan";
-        isOperational = true;
         break;
-      case "P2003": // Foreign key constraint failed
-        statusCode = HTTP_STATUS.BAD_REQUEST;
+      case "P2003":
+        statusCode = HttpStatus.BAD_REQUEST;
         message = "Data relasi tidak valid";
-        isOperational = true;
         break;
       default:
-        statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
+        statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+        message = "Terjadi kesalahan pada database";
+        isOperational = false;
         break;
     }
   }
 
+  // 3. Logging
   logger.error({
     url: req.originalUrl,
     method: req.method,
-    statusCode: statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR,
+    statusCode,
+    message: err.message,
     stack: err.stack,
   });
 
-  //prtoduction and operational error
-if (process.env.NODE_ENV === "production") {
+  // 4. Response Logic
+  const isProduction = process.env.NODE_ENV === "production";
+
   return res.status(statusCode).json({
     meta: {
       status: statusCode,
-      message: isOperational
-        ? message
-        : "Terjadi kesalahan internal pada server",
+      message:
+        isProduction && !isOperational
+          ? "Terjadi kesalahan internal pada server"
+          : message,
     },
-    data: null,
+    data: details || (!isProduction ? { stack: err.stack } : null),
   });
-}
-
-  // development error
-  return response.error(res, err, err.message);
 };

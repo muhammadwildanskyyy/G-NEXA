@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import response from "../utils/response";
-import { verifyToken } from "../utils/jwt";
+import { verifyToken } from "../lib/jwt";
 import type { IReqUser, UserJWT, UserPayload } from "../model/user.model";
 
 export default (req: Request, res: Response, next: NextFunction) => {
