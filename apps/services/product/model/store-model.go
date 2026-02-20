@@ -2,7 +2,14 @@ package model
 
 import "time"
 
-type StoreResponse struct {
+type APIResponseStore struct {
+	Meta struct {
+		Message string `json:"message"`
+		Status  int    `json:"status"`
+	} `json:"meta"`
+	Data Store `json:"data"`
+}
+type Store struct {
 	ID          string    `json:"id"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`

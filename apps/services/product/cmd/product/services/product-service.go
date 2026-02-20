@@ -81,11 +81,12 @@ func (p *productService) CreateProduct(ctx context.Context, product *model.Creat
 		return nil, errStatus
 	}
 
-	var store model.StoreResponse
-	if err := json.NewDecoder(resp.Body).Decode(&store); err != nil {
+	var response model.APIResponseStore
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		logger.LogError(logField, "Error parsing Response", "json.Decode", err)
 		return nil, fmt.Errorf("failed to parse JSON: %w", err)
 	}
+	store := response.Data
 
 	CategoryId, err := primitive.ObjectIDFromHex(product.CategoryID)
 	if err != nil {
