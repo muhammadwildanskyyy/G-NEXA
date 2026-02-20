@@ -31,7 +31,7 @@ func main() {
 
 	// product
 	productRepository := repositories.NewProductRepository(db)
-	productService := services.NewProductService(productRepository, categoryRepository)
+	productService := services.NewProductService(productRepository, categoryRepository, config.HostService)
 	productUseCase := usecases.NewProductUsecase(productService)
 	productHandler := handlers.NewProductHandler(productUseCase)
 

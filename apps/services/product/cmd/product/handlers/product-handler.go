@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -45,8 +46,9 @@ func (p *producthandler) CreateProduct(c *gin.Context) {
 		utils.ResponseError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-
-	result, err := p.ProductUseCase.CreateProduct(c.Request.Context(), param)
+	token, _ := c.Get("access_token")
+	ctx := context.WithValue(c.Request.Context(), "access_token", token)
+	result, err := p.ProductUseCase.CreateProduct(ctx, param)
 	if err != nil {
 		logger.LogError(logFields, "Failed CreateProduct", "p.ProductUseCase.CreateProduct()", err)
 		utils.ResponseError(c, http.StatusInternalServerError, err.Error())

@@ -5,6 +5,7 @@ type AppConfig struct {
 	Elasticsearch ElasticsearchConfig `mapstructure:"ELASTICSEARCH"`
 	Databasee     DatabaseConfig      `mapstructure:"DATABASE"`
 	Kafka         KafkaConfig         `mapstructure:"KAFKA"`
+	HostService   HostServices        `mapstructure:"HOST_SERVICES"`
 }
 
 type APP struct {
@@ -25,4 +26,8 @@ type KafkaConfig struct {
 type DatabaseConfig struct {
 	ConnectionURI string `mapstructure:"URI"` // Menjadi String tunggal
 	Name          string `mapstructure:"NAME"`
+}
+
+type HostServices struct {
+	UserService string `mapstructure:"USER_SERVICE"`
 }

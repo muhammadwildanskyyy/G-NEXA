@@ -24,8 +24,8 @@ func SetupRoutes(router *gin.Engine, productHandler handlers.ProductHandler, cat
 	// category
 
 	router.POST("/v1/category", middleware.AclMiddleware([]string{"ADMIN"}), categoryHandler.CreateCategory)
-	router.GET("/v1/categories", middleware.AclMiddleware([]string{"ADMIN"}), categoryHandler.GetAllCategory)
-	router.GET("/v1/category/:category_id", middleware.AclMiddleware([]string{"ADMIN"}), categoryHandler.GetCategoryById)
+	router.GET("/v1/categories", middleware.AclMiddleware([]string{"ADMIN", "BUYER", "SELLER"}), categoryHandler.GetAllCategory)
+	router.GET("/v1/category/:category_id", middleware.AclMiddleware([]string{"ADMIN", "BUYER", "SELLER"}), categoryHandler.GetCategoryById)
 	router.DELETE("/v1/category/:category_id", middleware.AclMiddleware([]string{"ADMIN"}), categoryHandler.Deletecategory)
 	router.PUT("/v1/category/:category_id", middleware.AclMiddleware([]string{"ADMIN"}), categoryHandler.Updatecategory)
 
