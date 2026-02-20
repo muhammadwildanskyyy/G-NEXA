@@ -3,7 +3,7 @@ import * as z from "zod";
 const RoleEnum = z.enum(["BUYER", "SELLER", "ADMIN"]);
 
 export const userRegisterSchema = z.object({
-  fullName: z
+  full_name: z
     .string()
     .min(3, "Nama lengkap minimal 3 karakter")
     .max(100, "Nama lengkap maksimal 100 karakter"),
@@ -17,7 +17,7 @@ export const userRegisterSchema = z.object({
     .regex(/[A-Z]/, "Password harus mengandung setidaknya satu huruf kapital")
     .regex(/[0-9]/, "Password harus mengandung setidaknya satu angka"),
   role: RoleEnum.default("BUYER"),
-  phoneNumber: z
+  phone_number: z
     .string()
     .regex(
       /^(\+62|0)8[1-9][0-9]{6,10}$/,
@@ -25,7 +25,7 @@ export const userRegisterSchema = z.object({
     )
     .optional()
     .nullable(),
-  profilePicture: z
+  profile_picture: z
     .string()
     .url("Format URL foto profil tidak valid")
     .optional()
@@ -45,12 +45,12 @@ export const userLoginSchema = z.object({
 export type TUserLogin = z.infer<typeof userLoginSchema>;
 
 export const userUpdateSchema = z.object({
-  fullName: z
+  full_name: z
     .string()
     .min(3, "Nama lengkap minimal 3 karakter")
     .max(100, "Nama lengkap maksimal 100 karakter")
     .optional(),
-  phoneNumber: z
+  phonenNumber: z
     .string()
     .regex(
       /^(\+62|0)8[1-9][0-9]{6,10}$/,
@@ -58,7 +58,7 @@ export const userUpdateSchema = z.object({
     )
     .optional()
     .nullable(),
-  profilePicture: z
+  profile_picture: z
     .string()
     .url("Format URL foto profil tidak valid")
     .optional()

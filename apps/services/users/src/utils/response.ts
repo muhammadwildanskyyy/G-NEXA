@@ -20,4 +20,13 @@ export default {
       data: null,
     });
   },
+  notFound(res: Response, message: string) {
+    res.status(HttpStatus.NOT_FOUND).json({
+      meta: {
+        status: HttpStatus.NOT_FOUND,
+        message,
+      },
+      data: null,
+    });
+  },
 };

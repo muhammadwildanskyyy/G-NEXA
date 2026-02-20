@@ -1,10 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import response from "../../utils/response";
-import {
-  userLoginSchema,
-  userRegisterSchema,
-  type TUserLogin,
-} from "../../validation/user.validation";
+import { type TUserLogin } from "../../validation/user.validation";
 import type { IReqUser } from "../../model/user.model";
 import { logger } from "../../lib/logger";
 import { HttpStatus } from "../../constants/httpStatus";
@@ -53,6 +49,7 @@ export class AuthController {
       if (!user) {
         return response.unauthorized(res, "Unauthorized");
       }
+      console.log(user);
 
       const result = await this.userService.getUserByEmail(user.user_email);
       if (!result) {
