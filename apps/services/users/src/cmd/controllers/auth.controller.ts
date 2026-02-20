@@ -7,6 +7,7 @@ import { HttpStatus } from "../../constants/httpStatus";
 import { authService, AuthService } from "../services/auth.service";
 import { userService, type UserService } from "../services/user.service";
 import type { Prisma } from "../../generated/prisma/client";
+import { AppError } from "../../utils/appError";
 
 export class AuthController {
   constructor(
@@ -63,6 +64,20 @@ export class AuthController {
         userWithoutPassword,
         HttpStatus.OK,
       );
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  activationUser = async (req: IReqUser, res: Response, next: NextFunction) => {
+    try {
+      const code = req.query.code as string;
+      if (!code) {
+        throw new AppError("code is required", HttpStatus.BAD_REQUEST);
+      }
+
+      const result = await this.authService.ActivationUser(code);
+      response.success(res, "Success Activation User", result, HttpStatus.OK);
     } catch (error) {
       next(error);
     }

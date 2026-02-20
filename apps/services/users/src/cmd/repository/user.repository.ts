@@ -19,13 +19,19 @@ export class UserRepository {
   findByPhone = async (phoneNumber: string): Promise<User | null> => {
     return await this.database.user.findFirst({
       where: {
-        phoneNumber: phoneNumber,
+        phone_number: phoneNumber,
       },
     });
   };
 
   findUserById = async (userId: string): Promise<User | null> => {
     return await this.database.user.findUnique({ where: { id: userId } });
+  };
+
+  findUserByActivationCode = async (code: string): Promise<User | null> => {
+    return await this.database.user.findFirst({
+      where: { activation_code: code },
+    });
   };
 
   updateUser = async (

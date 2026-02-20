@@ -18,5 +18,6 @@ routerPublic.post(
   validateRequest(userLoginSchema),
   authController.login,
 );
+routerPublic.get("/auth/activation", authController.activationUser);
 
 export default routerPublic;

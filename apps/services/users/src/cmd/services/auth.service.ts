@@ -8,6 +8,8 @@ import {
   userRepository,
   type UserRepository,
 } from "../repository/user.repository";
+import { CLIENT_HOST, EMAIL_SMTP_USER } from "../../utils/env";
+import { renderMailHtml, sendMail } from "../../utils/mail/mail";
 
 export class AuthService {
   constructor(private readonly userRepository: UserRepository) {}
@@ -21,13 +23,16 @@ export class AuthService {
     }
 
     const hasedPassword = await PasswordHelper.hash(user.password);
-
-    const finalUser = {
+    const ActicationCode = await PasswordHelper.hash(user.email);
+    const finalUser: Prisma.UserCreateInput = {
       ...user,
       password: hasedPassword,
       role: Role.BUYER,
+      activation_code: ActicationCode,
     };
+
     const UserCreate = await this.userRepository.createUser(finalUser);
+    this.sendActivationCode(UserCreate);
 
     return UserCreate;
   };
@@ -56,6 +61,40 @@ export class AuthService {
     });
 
     return token;
+  };
+
+  sendActivationCode = async (user: User) => {
+    console.log("Send Email to: ", user);
+    const contentMail = await renderMailHtml("registration-success.ejs", {
+      fullName: user.full_name,
+      email: user.email,
+      createdAt: user.created_at,
+      activationLink: `${CLIENT_HOST}/v1/auth/activation?code=${user.activation_code}`,
+    });
+
+    console.log(`Send Email form ${EMAIL_SMTP_USER} to ${user.email}`);
+    await sendMail({
+      from: EMAIL_SMTP_USER,
+      to: user.email,
+      subject: "Aktivasi Akun Anda",
+      html: contentMail,
+    });
+  };
+
+  ActivationUser = async (code: string): Promise<User> => {
+    const user = await this.userRepository.findUserByActivationCode(code);
+    if (!user) {
+      throw new AppError("User Not Found", HttpStatus.NOT_FOUND);
+    }
+    const userdata: Prisma.UserUpdateInput = {
+      ...user,
+      is_Active: true,
+    };
+    const updateStatusUser = await this.userRepository.updateUser(
+      user.id,
+      userdata,
+    );
+    return updateStatusUser;
   };
 }
 
