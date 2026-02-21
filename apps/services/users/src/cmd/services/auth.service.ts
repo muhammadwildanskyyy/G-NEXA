@@ -10,6 +10,7 @@ import {
 } from "../repository/user.repository";
 import { CLIENT_HOST, EMAIL_SMTP_USER } from "../../utils/env";
 import { renderMailHtml, sendMail } from "../../utils/mail/mail";
+import { http } from "winston";
 
 export class AuthService {
   constructor(private readonly userRepository: UserRepository) {}
@@ -52,6 +53,12 @@ export class AuthService {
         "Email and Password Not Match",
         HttpStatus.UNAUTHORIZED,
       );
+    }
+
+    const user = await this.userRepository.findByEmail(userData.email);
+
+    if (!user?.is_Active) {
+      throw new AppError("User Not Active", HttpStatus.CONFLICT);
     }
 
     const token = generateToken({
