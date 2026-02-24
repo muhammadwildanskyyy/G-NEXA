@@ -56,6 +56,15 @@ export class OrdersUsecase {
     return this.orderService.getOrders();
   }
 
+  async findOrdersByOwnerStore(): Promise<Order[]> {
+    const store = await this.orderService.getStoreByOwner();
+    if (!store) {
+      throw new AppException('Store Not Found', HttpStatus.NOT_FOUND);
+    }
+
+    return await this.orderService.getOrderByStoreId(store.id);
+  }
+
   async updateOrder(orderId: string, params: UpdateOrderDto): Promise<Order> {
     const order = await this.orderService.getOrderById(orderId);
     if (!order) {
@@ -70,6 +79,14 @@ export class OrdersUsecase {
       throw new AppException('Order Not Found', HttpStatus.NOT_FOUND);
     }
     return this.orderService.deleteOrder(orderId);
+  }
+
+  async cancelOrder(orderId: string): Promise<Order> {
+    const order = await this.orderService.getOrderById(orderId);
+    if (!order) {
+      throw new AppException('Order Not Found', HttpStatus.NOT_FOUND);
+    }
+    return this.orderService.cancelOrder(orderId);
   }
 
   private constructOrderItems(

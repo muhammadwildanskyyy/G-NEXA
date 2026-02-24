@@ -46607,3 +46607,4 @@
 {"level":"warn","message":"Stores Not Found","timestamp":"2026-02-24 22:10:48"}
 {"level":"info","message":"GET /v1/api/store/123e4567-e89b-12d3-a456-426614174000 404 64 - 7.411 ms","timestamp":"2026-02-24 22:10:48"}
 {"level":"info","message":"GET /v1/api/store/9d402e2c-823a-433a-af7a-592245553f8a 200 660 - 33.325 ms","timestamp":"2026-02-24 22:11:17"}
+{"level":"info","message":"GET /v1/api/store/owner 200 660 - 420.502 ms","timestamp":"2026-02-24 23:37:05"}

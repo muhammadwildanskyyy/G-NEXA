@@ -61,6 +61,14 @@ export class OrdersRepository {
     return await this.database.order.findMany();
   }
 
+  async selectOrderByStoreId(storeId: string): Promise<Order[] | null> {
+    return this.database.order.findMany({
+      where: {
+        store_id: storeId,
+      },
+    });
+  }
+
   async updateOrder(
     orderId: string,
     orderInput: Prisma.OrderUpdateInput,
