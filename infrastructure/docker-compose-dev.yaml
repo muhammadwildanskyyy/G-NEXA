@@ -88,7 +88,7 @@ services:
       - g-nexa-network
 
   # ------------------------------------
-  # 4. PRODUCT media (Go + Hot Reload)
+  # 5. MEDIA SERVICE (Go + Hot Reload)
   # ------------------------------------
   media-service:
     build:
@@ -114,7 +114,29 @@ services:
       - g-nexa-network
 
   # ------------------------------------
-  # 4. PRODUCT media (Go + Hot Reload)
+  # 6. ORDER SERVICE
+  # ------------------------------------
+  order-service:
+    build:
+      context: ../apps/services/order
+      target: development
+    container_name: gnexa-order-service
+    restart: always
+    ports:
+      - "8084:8084"
+    env_file:
+      - ../apps/services/order/.env
+    volumes:
+      - ../apps/services/order:/app
+      - /app/node_modules
+    command: /bin/sh -c "npx prisma migrate dev --name auto_dev && npm run start:dev"
+    depends_on:
+      - postgres
+    networks:
+      - g-nexa-network
+
+  # ------------------------------------
+  # 7. WEB MARKET PLACE
   # ------------------------------------
   web-market-place:
     build:
@@ -142,7 +164,7 @@ services:
       - g-nexa-network
 
 # ---------------------------------------
-# NETWORK & VOLUMES
+# 8. NETWORK & VOLUMES
 # ---------------------------------------
 networks:
   g-nexa-network:

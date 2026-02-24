@@ -1,0 +1,85 @@
+import { Injectable } from '@nestjs/common';
+import { Order, Prisma } from '@prisma/client';
+import { PrismaService } from 'src/database/prisma/prisma.service';
+import { WinstonLoggerService } from '../../../infrastructure/logger/logger.service';
+
+@Injectable()
+export class OrdersRepository {
+  s;
+  constructor(
+    private readonly database: PrismaService,
+    private readonly logger: WinstonLoggerService,
+  ) {}
+
+  async createOrderWithItems(
+    userId: string,
+    idempotencyKey: string,
+    storeId: string,
+    shippingAddress: Prisma.InputJsonValue,
+    totalAmount: number,
+    items: Prisma.OrderItemCreateWithoutOrderInput[],
+  ): Promise<Order> {
+    return this.database.order.create({
+      data: {
+        user_id: userId,
+        store_id: storeId,
+        idempotency_key: idempotencyKey,
+        shipping_address: shippingAddress,
+        total_price: totalAmount,
+        status: 'PENDING',
+        items: {
+          create: items.map((item) => ({
+            product_id: item.product_id,
+            quantity: item.quantity,
+            price_at_purchase: item.price_at_purchase,
+          })),
+        },
+      },
+      include: {
+        items: true,
+      },
+    });
+  }
+
+  async selecOrdersByUserId(userId: string): Promise<Order[] | null> {
+    return await this.database.order.findMany({
+      where: {
+        user_id: userId,
+      },
+    });
+  }
+
+  async selecOrderById(orderId: string): Promise<Order | null> {
+    return await this.database.order.findFirst({
+      where: {
+        id: orderId,
+      },
+    });
+  }
+
+  async selecOrders(): Promise<Order[] | null> {
+    return await this.database.order.findMany();
+  }
+
+  async updateOrder(
+    orderId: string,
+    orderInput: Prisma.OrderUpdateInput,
+  ): Promise<Order> {
+    return this.database.order.update({
+      where: { id: orderId },
+      data: orderInput,
+    });
+  }
+
+  async deleteOrder(orderId: string): Promise<Order> {
+    return this.database.order.delete({ where: { id: orderId } });
+  }
+
+  async selectOrderByIdempotensi(
+    idempotencyKey: string,
+  ): Promise<Order | null> {
+    return this.database.order.findUnique({
+      where: { idempotency_key: idempotencyKey },
+    });
+  }
+}

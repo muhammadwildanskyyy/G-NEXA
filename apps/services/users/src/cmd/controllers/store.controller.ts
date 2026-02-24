@@ -63,6 +63,30 @@ export class StoreController {
       next(error);
     }
   };
+
+  getStoreByOwner = async (
+    req: IReqUser,
+    res: Response,
+    next: NextFunction,
+  ) => {
+    try {
+      const userId = req.user?.user_id as string;
+      if (!userId) {
+        throw new AppError("Store ID is required", HttpStatus.BAD_REQUEST);
+      }
+
+      const store = await this.storeService.findStoresByOwnerId(userId);
+      if (!store) {
+        logger.warn("Stores Not Found");
+        return response.notFound(res, "Stores Not Found");
+      }
+
+      return response.success(res, "Success Find Store", store, HttpStatus.OK);
+    } catch (error) {
+      next(error);
+    }
+  };
+
   deleteStore = async (req: IReqUser, res: Response, next: NextFunction) => {
     try {
       const storeId = req.params.id as string;

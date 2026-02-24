@@ -143,7 +143,6 @@ func (r *productRepository) FindAllProducts(ctx context.Context, param *model.Pr
 	}
 
 	return products, totalCount, nil
-	return nil, 0, nil
 }
 
 func (r *productRepository) FindProductByID(ctx context.Context, productId string) (*model.Product, error) {

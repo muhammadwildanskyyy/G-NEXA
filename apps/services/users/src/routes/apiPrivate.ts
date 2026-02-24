@@ -21,6 +21,7 @@ routerPrivate.post(
   storeController.createStore,
 );
 routerPrivate.get("/store", storeController.getStores);
+routerPrivate.get("/store/owner", storeController.getStoreByOwner);
 routerPrivate.get("/store/:id", storeController.getStoreById);
 routerPrivate.put(
   "/store/:id",
