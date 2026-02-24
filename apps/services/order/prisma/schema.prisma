@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/common/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  CANCELLED
+}
+
+model Order {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  user_id  String @db.Uuid
+  store_id String @db.Uuid
+
+  status          OrderStatus @default(PENDING)
+  idempotency_key String      @unique @db.VarChar(255)
+
+  total_mount Decimal @db.Decimal(12, 2)
+
+  shipping_address Json
+
+  items OrderItem[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([user_id])
+  @@index([store_id])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  order_id String @db.Uuid
+  order    Order  @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  product_id String
+
+  quantity Int
+
+  price_at_purchase Decimal @db.Decimal(12, 2)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([order_id])
+  @@index([product_id])
+  @@map("order_items")
+}

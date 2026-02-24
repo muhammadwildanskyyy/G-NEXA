@@ -103,6 +103,24 @@ services:
     networks:
       - g-nexa-network
 
+  # ------------------------------------
+  # 6. ORDER SERVICE
+  # ------------------------------------
+  order-service:
+    build:
+      context: ../apps/service/order
+      target: production
+    container_name: gnexa-order-service
+    restart: always
+    ports:
+      - "8084:8084"
+    env_file:
+      - ../apps/services/order/.env
+    depends_on:
+      - postgres
+    networks:
+      - g-nexa-network
+
   web-market-place:
     build:
       context: ../apps/web/public/market-place
