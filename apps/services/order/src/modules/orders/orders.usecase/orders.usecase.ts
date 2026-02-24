@@ -20,6 +20,11 @@ export class OrdersUsecase {
       );
     }
 
+    const IsValidStore = await this.orderService.getStoreById(params.store_id);
+    if (!IsValidStore) {
+      throw new AppException('Store Invalid', HttpStatus.BAD_REQUEST);
+    }
+
     const product = await this.orderService.getValidProduct(params);
     if (!product) {
       throw new AppException(`Product Invalid`, HttpStatus.BAD_REQUEST);

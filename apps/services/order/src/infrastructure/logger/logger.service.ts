@@ -23,7 +23,7 @@ export class WinstonLoggerService implements LoggerService {
     this.logger.warn(message, { context });
   }
 
-  debug?(message: any, context?: string) {
+  debug(message: any, context?: string) {
     this.logger.debug(message, { context });
   }
 }

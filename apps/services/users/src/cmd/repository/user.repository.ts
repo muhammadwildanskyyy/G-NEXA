@@ -19,7 +19,7 @@ export class UserRepository {
   findByPhone = async (phoneNumber: string): Promise<User | null> => {
     return await this.database.user.findFirst({
       where: {
-        phoneNumber: phoneNumber,
+        phone_number: phoneNumber,
       },
     });
   };

@@ -25,7 +25,7 @@ export class OrdersRepository {
         store_id: storeId,
         idempotency_key: idempotencyKey,
         shipping_address: shippingAddress,
-        total_mount: totalAmount,
+        total_price: totalAmount,
         status: 'PENDING',
         items: {
           create: items.map((item) => ({

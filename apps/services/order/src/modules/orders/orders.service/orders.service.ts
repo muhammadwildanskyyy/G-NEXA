@@ -5,12 +5,16 @@ import { Product } from '../../../infrastructure/http-clients/product-client/dto
 import { AppException } from '../../../common/filters/global.exception/app.exception';
 import { ProductClientService } from '../../../infrastructure/http-clients/product-client/product-client.service';
 import { Order, Prisma } from '@prisma/client';
+import { User } from '../../../infrastructure/http-clients/user-client/dto/user.dto';
+import { UserClientService } from '../../../infrastructure/http-clients/user-client/user-client.service';
+import { Store } from '../../../infrastructure/http-clients/user-client/dto/store.dto';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly orderRepository: OrdersRepository,
     private readonly productClient: ProductClientService,
+    private readonly userClient: UserClientService,
   ) {}
   async saveOrder(
     userId: string,
@@ -99,6 +103,17 @@ export class OrdersService {
 
   async deleteOrder(orderId: string): Promise<Order> {
     return this.orderRepository.deleteOrder(orderId);
+  }
+
+  async getUserInfo(): Promise<User> {
+    return this.userClient.getUserInfo();
+  }
+
+  async getStoreByOwner(): Promise<Store> {
+    return this.userClient.getStoreByOwner();
+  }
+  async getStoreById(storeId: string): Promise<Store> {
+    return this.userClient.getStoreById(storeId);
   }
 
   //

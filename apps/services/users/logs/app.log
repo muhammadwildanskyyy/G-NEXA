@@ -46580,3 +46580,30 @@
 {"level":"info","message":"POST /v1/auth/login 401 196 - 52.205 ms","timestamp":"2026-02-23 19:54:18"}
 {"level":"info","message":"User Success Login","timestamp":"2026-02-23 19:54:36","userEmail":"wildan.yulio04@gmail.com"}
 {"level":"info","message":"POST /v1/auth/login 200 342 - 406.587 ms","timestamp":"2026-02-23 19:54:36"}
+{"level":"info","message":"GET /v1/api/store/ 200 68 - 48.060 ms","timestamp":"2026-02-24 20:10:47"}
+{"level":"info","message":"Store Create","storeId":"9d402e2c-823a-433a-af7a-592245553f8a","timestamp":"2026-02-24 20:10:55","userId":"6122b34f-4aa2-4823-b415-45f2d92d7a14"}
+{"level":"info","message":"POST /v1/api/store/register 201 655 - 146.464 ms","timestamp":"2026-02-24 20:10:55"}
+{"level":"info","message":"GET /v1/api/store/ 200 666 - 31.053 ms","timestamp":"2026-02-24 20:11:03"}
+{"level":"info","message":"GET /v1/api/store/owner 200 660 - 143.604 ms","timestamp":"2026-02-24 20:18:14"}
+{"level":"info","message":"GET /v1/api/store/owner 200 660 - 160.900 ms","timestamp":"2026-02-24 21:53:18"}
+{"level":"info","message":"GET /v1/api/store/owner 200 660 - 54.038 ms","timestamp":"2026-02-24 21:54:07"}
+{"level":"info","message":"GET /v1/api/store/owner 200 660 - 56.058 ms","timestamp":"2026-02-24 21:55:11"}
+{"level":"info","message":"GET /v1/api/store/owner 200 660 - 117.530 ms","timestamp":"2026-02-24 21:57:28"}
+{"level":"info","message":"GET /v1/api/store/owner 200 660 - 187.362 ms","timestamp":"2026-02-24 21:58:17"}
+{"level":"info","message":"GET /v1/api/store/owner 200 660 - 307.013 ms","timestamp":"2026-02-24 22:01:24"}
+{"level":"info","message":"GET /v1/api/store/owner 200 660 - 230.632 ms","timestamp":"2026-02-24 22:02:04"}
+{"level":"info","message":"GET /v1/api/store/owner 200 660 - 66.613 ms","timestamp":"2026-02-24 22:02:55"}
+{"level":"info","message":"GET /v1/api/store/owner 200 660 - 130.265 ms","timestamp":"2026-02-24 22:05:07"}
+{"level":"warn","message":"Stores Not Found","timestamp":"2026-02-24 22:09:53"}
+{"level":"info","message":"GET /v1/api/store/123e4567-e89b-12d3-a456-426614174070 404 64 - 407.821 ms","timestamp":"2026-02-24 22:09:53"}
+{"level":"warn","message":"Stores Not Found","timestamp":"2026-02-24 22:09:53"}
+{"level":"info","message":"GET /v1/api/store/123e4567-e89b-12d3-a456-426614174070 404 64 - 7.687 ms","timestamp":"2026-02-24 22:09:53"}
+{"level":"warn","message":"Stores Not Found","timestamp":"2026-02-24 22:09:53"}
+{"level":"info","message":"GET /v1/api/store/123e4567-e89b-12d3-a456-426614174070 404 64 - 13.310 ms","timestamp":"2026-02-24 22:09:53"}
+{"level":"warn","message":"Stores Not Found","timestamp":"2026-02-24 22:10:48"}
+{"level":"info","message":"GET /v1/api/store/123e4567-e89b-12d3-a456-426614174000 404 64 - 25.905 ms","timestamp":"2026-02-24 22:10:48"}
+{"level":"warn","message":"Stores Not Found","timestamp":"2026-02-24 22:10:48"}
+{"level":"info","message":"GET /v1/api/store/123e4567-e89b-12d3-a456-426614174000 404 64 - 4.544 ms","timestamp":"2026-02-24 22:10:48"}
+{"level":"warn","message":"Stores Not Found","timestamp":"2026-02-24 22:10:48"}
+{"level":"info","message":"GET /v1/api/store/123e4567-e89b-12d3-a456-426614174000 404 64 - 7.411 ms","timestamp":"2026-02-24 22:10:48"}
+{"level":"info","message":"GET /v1/api/store/9d402e2c-823a-433a-af7a-592245553f8a 200 660 - 33.325 ms","timestamp":"2026-02-24 22:11:17"}

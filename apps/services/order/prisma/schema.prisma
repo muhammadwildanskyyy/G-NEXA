@@ -30,7 +30,7 @@ model Order {
   status          OrderStatus @default(PENDING)
   idempotency_key String      @unique @db.VarChar(255)
 
-  total_mount Decimal @db.Decimal(12, 2)
+  total_price Decimal @db.Decimal(12, 2)
 
   shipping_address Json
 

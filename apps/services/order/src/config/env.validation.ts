@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod/v3';
 
 export const envSchema = z.object({
   DATABASE_URL: z.string().url(),
@@ -6,6 +6,7 @@ export const envSchema = z.object({
   PORT: z.coerce.number().default(8084),
 
   PRODUCT_SERVICE_URL: z.string().url(),
+  USER_SERVICE_URL: z.string().url(),
 
   SECRET: z.string(),
 });

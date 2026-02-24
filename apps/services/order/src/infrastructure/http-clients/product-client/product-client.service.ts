@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AxiosError } from 'axios'; // 1. Wajib import AxiosError
 import { catchError, firstValueFrom, retry } from 'rxjs';
@@ -11,16 +11,17 @@ import {
 } from './dto/product.dto';
 import { AppException } from '../../../common/filters/global.exception/app.exception';
 import { ClsService } from 'nestjs-cls';
+import { WinstonLoggerService } from '../../logger/logger.service';
 
 @Injectable()
 export class ProductClientService implements OnModuleInit {
-  private readonly logger = new Logger(ProductClientService.name);
   private readonly baseUrl: string;
 
   constructor(
     private readonly httpService: HttpService,
     private readonly config: ConfigService<EnvConfig, true>,
     private readonly cls: ClsService,
+    private readonly logger: WinstonLoggerService,
   ) {
     this.baseUrl = this.config.get('PRODUCT_SERVICE_URL', { infer: true });
   }
@@ -32,7 +33,7 @@ export class ProductClientService implements OnModuleInit {
       config.headers['X-Correlation-ID'] = crypto.randomUUID();
       config.headers['X-Service-Name'] = 'order-service';
 
-      this.logger.debug(
+      this.logger.log(
         `[Outgoing Request] ${config.method?.toUpperCase()} ${config.url}`,
       );
       return config;
@@ -40,7 +41,7 @@ export class ProductClientService implements OnModuleInit {
 
     axios.interceptors.response.use(
       (response) => {
-        this.logger.debug(
+        this.logger.log(
           `[Incoming Response] ${response.config.url} - Status: ${response.status}`,
         );
         return response;
@@ -62,7 +63,6 @@ export class ProductClientService implements OnModuleInit {
 
   async getProductById(productId: string): Promise<Product> {
     const token: string = this.cls.get('access_token');
-    console.log('Token: ', token);
     const request$ = this.httpService
       .get<GetProductInfoResponse>(`${this.baseUrl}/v1/product/${productId}`, {
         headers: {

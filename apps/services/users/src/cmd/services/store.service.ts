@@ -46,6 +46,10 @@ export class StoreService {
     return await this.storeRepository.selectStoreById(storeId);
   };
 
+  findStoresByOwnerId = async (ownerId: string): Promise<Store | null> => {
+    return await this.storeRepository.selectStoreByOwnerId(ownerId);
+  };
+
   deleteStore = async (storeId: string): Promise<Store> => {
     const existStore = await this.storeRepository.selectStoreById(storeId);
     if (!existStore) {

@@ -76,10 +76,9 @@ export class OrdersController {
   }
 
   @Get()
-  @UseGuards(new AclGuard([USER_ROLE.SELLER, USER_ROLE.ADMIN]))
+  @UseGuards(new AclGuard([USER_ROLE.ADMIN]))
   async getOrders(): Promise<GlobalOrderResponse<Order[]>> {
     const result = await this.orderUsecase.findOrders();
-
     return {
       meta: {
         message: 'Success Get Orders By Order Id',
@@ -88,6 +87,20 @@ export class OrdersController {
       data: result,
     };
   }
+
+  // todo: Mengambil pesanan yang hanya memiliki store_id milik seller yang sedang login. Ini wajib ada di multi-seller platform.
+  // @Get()
+  // @UseGuards(new AclGuard([USER_ROLE.ADMIN, USER_ROLE.SELLER]))
+  // async getOrdersBySeller(@User('user_id')): Promise<GlobalOrderResponse<Order[]>> {
+  //   const result = await this.orderUsecase.findOrders();
+  //   return {
+  //     meta: {
+  //       message: 'Success Get Orders By Order Id',
+  //       code: HttpStatusCode.Ok,
+  //     },
+  //     data: result,
+  //   };
+  // }
 
   @Put('/update/:id')
   @UseGuards(new AclGuard([USER_ROLE.SELLER, USER_ROLE.ADMIN]))
