@@ -60,6 +60,52 @@ export class OrdersController {
       data: result,
     };
   }
+
+  @Get('/store')
+  @UseGuards(new AclGuard([USER_ROLE.ADMIN, USER_ROLE.SELLER]))
+  async getOrdersBySeller(): Promise<GlobalOrderResponse<Order[]>> {
+    console.log(53453534543);
+    const result = await this.orderUsecase.findOrdersByOwnerStore();
+    return {
+      meta: {
+        message: 'Success Get Orders By Order Id',
+        code: HttpStatusCode.Ok,
+      },
+      data: result,
+    };
+  }
+  @Put('/update/:id')
+  @UseGuards(new AclGuard([USER_ROLE.SELLER, USER_ROLE.ADMIN]))
+  async updateOrder(
+    @Param('id') orderId: string,
+    @Body(new ZodValidatePipe(UpdateOrderSchema)) params: UpdateOrderDto,
+  ): Promise<GlobalOrderResponse<Order>> {
+    const result = await this.orderUsecase.updateOrder(orderId, params);
+
+    return {
+      meta: {
+        message: 'Success Update Order',
+        code: HttpStatusCode.Ok,
+      },
+      data: result,
+    };
+  }
+
+  @Delete('/delete/:id')
+  @UseGuards(new AclGuard([USER_ROLE.SELLER, USER_ROLE.ADMIN]))
+  async deleteOrder(
+    @Param('id') orderId: string,
+  ): Promise<GlobalOrderResponse<Order>> {
+    const result = await this.orderUsecase.deleteOrder(orderId);
+
+    return {
+      meta: {
+        message: 'Success delete Order',
+        code: HttpStatusCode.Ok,
+      },
+      data: result,
+    };
+  }
   @Get('/:id')
   async getOrderbyId(
     @Param('id') orderId: string,
@@ -88,47 +134,15 @@ export class OrdersController {
     };
   }
 
-  // todo: Mengambil pesanan yang hanya memiliki store_id milik seller yang sedang login. Ini wajib ada di multi-seller platform.
-  // @Get()
-  // @UseGuards(new AclGuard([USER_ROLE.ADMIN, USER_ROLE.SELLER]))
-  // async getOrdersBySeller(@User('user_id')): Promise<GlobalOrderResponse<Order[]>> {
-  //   const result = await this.orderUsecase.findOrders();
-  //   return {
-  //     meta: {
-  //       message: 'Success Get Orders By Order Id',
-  //       code: HttpStatusCode.Ok,
-  //     },
-  //     data: result,
-  //   };
-  // }
-
-  @Put('/update/:id')
-  @UseGuards(new AclGuard([USER_ROLE.SELLER, USER_ROLE.ADMIN]))
-  async updateOrder(
+  @Put('/:id/cancel')
+  async cancelOrder(
     @Param('id') orderId: string,
-    @Body(new ZodValidatePipe(UpdateOrderSchema)) params: UpdateOrderDto,
   ): Promise<GlobalOrderResponse<Order>> {
-    const result = await this.orderUsecase.updateOrder(orderId, params);
+    const result = await this.orderUsecase.cancelOrder(orderId);
 
     return {
       meta: {
-        message: 'Success Update Order',
-        code: HttpStatusCode.Ok,
-      },
-      data: result,
-    };
-  }
-
-  @Delete('/delete/:id')
-  @UseGuards(new AclGuard([USER_ROLE.SELLER, USER_ROLE.ADMIN]))
-  async deleteOrder(
-    @Param('id') orderId: string,
-  ): Promise<GlobalOrderResponse<Order>> {
-    const result = await this.orderUsecase.deleteOrder(orderId);
-
-    return {
-      meta: {
-        message: 'Success delete Order',
+        message: 'Success Cancel Order',
         code: HttpStatusCode.Ok,
       },
       data: result,

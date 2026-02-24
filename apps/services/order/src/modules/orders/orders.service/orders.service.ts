@@ -4,7 +4,7 @@ import { CreateOrderDto, UpdateOrderDto } from '../dto/order.dto';
 import { Product } from '../../../infrastructure/http-clients/product-client/dto/product.dto';
 import { AppException } from '../../../common/filters/global.exception/app.exception';
 import { ProductClientService } from '../../../infrastructure/http-clients/product-client/product-client.service';
-import { Order, Prisma } from '@prisma/client';
+import { Order, OrderStatus, Prisma } from '@prisma/client';
 import { User } from '../../../infrastructure/http-clients/user-client/dto/user.dto';
 import { UserClientService } from '../../../infrastructure/http-clients/user-client/user-client.service';
 import { Store } from '../../../infrastructure/http-clients/user-client/dto/store.dto';
@@ -114,6 +114,22 @@ export class OrdersService {
   }
   async getStoreById(storeId: string): Promise<Store> {
     return this.userClient.getStoreById(storeId);
+  }
+
+  async cancelOrder(orderId: string): Promise<Order> {
+    const inputUpdate: Prisma.OrderUpdateInput = {
+      status: OrderStatus.CANCELLED,
+    };
+    console.log(inputUpdate);
+    return await this.orderRepository.updateOrder(orderId, inputUpdate);
+  }
+
+  async getOrderByStoreId(storeId: string): Promise<Order[]> {
+    const orders = await this.orderRepository.selectOrderByStoreId(storeId);
+    if (!orders || !orders.length) {
+      throw new AppException('Order Not Found', HttpStatus.NOT_FOUND);
+    }
+    return orders;
   }
 
   //
