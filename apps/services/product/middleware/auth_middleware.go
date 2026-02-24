@@ -28,6 +28,7 @@ func AuthMiddleware(secret string) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		c.Set("access_token", tokenString[1])
 		token, err := jwt.Parse(tokenString[1], func(token *jwt.Token) (interface{}, error) {
 			return []byte(secret), nil
 		})

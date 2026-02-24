@@ -23,18 +23,56 @@ enum Role {
 
 model User {
   id              String    @id @default(uuid())
-  fullName       String    @db.VarChar(100)
+  full_name       String    @db.VarChar(100)
   email           String    @unique @db.VarChar(150)
   password        String    @db.VarChar(255)
   role            Role      @default(BUYER)
   
   // --- Atribut Opsional  ---
-  phoneNumber    String?   @unique @db.VarChar(20)
-  profilePicture String?   @db.Text            
+  phone_number    String?   @unique @db.VarChar(20)
+  profile_picture String?   @db.Text            
   bio             String?   @db.VarChar(255)
 
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  store     Store?
+
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
 
   @@map("users")
+}
+
+enum StoreStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+  MAINTENANCE
+}
+
+model Store {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  description String?     @db.Text
+  status      StoreStatus @default(ACTIVE)
+  is_verified  Boolean     @default(false)
+  
+  // --- ASSETS & VISUALS (Untuk mempercantik) ---
+  logo_url     String?
+  cover_url    String?     // Header image toko
+
+  // --- LOCATION & LOGISTICS ---
+  address     String?     @db.Text
+  city        String?
+  province    String?
+  postal_code  String?
+  latitude    Float?      
+  longitude   Float?
+
+
+  // --- RELATIONSHIPS ---
+  user_id    String   @unique // Foreign Key ke User
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  @@index([name])
 }

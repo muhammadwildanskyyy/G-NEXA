@@ -20,11 +20,11 @@ declare const globalThis: {
 } & typeof global;
 
 // Mengambil instance dari global jika sudah ada, atau buat baru jika belum
-export const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
+export const database = globalThis.prismaGlobal ?? prismaClientSingleton();
 
 // Simpan ke global scope jika tidak di environment production
 if (process.env.NODE_ENV !== "production") {
-  globalThis.prismaGlobal = prisma;
+  globalThis.prismaGlobal = database;
 }
 
 /**
@@ -32,7 +32,7 @@ if (process.env.NODE_ENV !== "production") {
  */
 export const connectDB = async () => {
   try {
-    await prisma.$connect();
+    await database.$connect();
     console.info("🐘 Database connected successfully to PostgreSQL");
   } catch (error) {
     console.error("❌ Database connection failed:");
