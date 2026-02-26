@@ -11,6 +11,7 @@ import {
 import { CLIENT_HOST, EMAIL_SMTP_USER } from "../../utils/env";
 import { renderMailHtml, sendMail } from "../../utils/mail/mail";
 import { http } from "winston";
+import {KAFKA_TOPIC_USER, publishEvent, type UserEventPayload} from "../../infrastructure/kafka/producer.ts";
 
 export class AuthService {
   constructor(private readonly userRepository: UserRepository) {}
@@ -93,14 +94,43 @@ export class AuthService {
     if (!user) {
       throw new AppError("User Not Found", HttpStatus.NOT_FOUND);
     }
+
+    if(user.is_Active){
+      return  user
+    }
+
     const userdata: Prisma.UserUpdateInput = {
       ...user,
       is_Active: true,
     };
+
+
+
+
     const updateStatusUser = await this.userRepository.updateUser(
       user.id,
       userdata,
     );
+
+
+
+    const eventPayload: UserEventPayload = {
+      event: "user.created",
+      timestamp: new Date().toISOString(),
+      data: {
+        user_id: updateStatusUser.id,
+        email: updateStatusUser.email,
+        name: updateStatusUser.full_name,
+      },
+    };
+
+
+    await publishEvent(
+        KAFKA_TOPIC_USER,
+        updateStatusUser.id,
+        eventPayload
+    );
+
     return updateStatusUser;
   };
 }
