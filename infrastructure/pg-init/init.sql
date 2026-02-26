@@ -1,6 +1,5 @@
 CREATE DATABASE user_db;
 CREATE DATABASE shop_db;
 CREATE DATABASE order_db;
-CREATE DATABASE payment_db;
-CREATE DATABASE balance_db;
+CREATE DATABASE finance_db;
 CREATE DATABASE media_db
