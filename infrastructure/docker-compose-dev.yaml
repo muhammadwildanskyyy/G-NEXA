@@ -69,7 +69,7 @@ services:
   # ------------------------------------
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
-    container_name: gnexa_kafka_ui
+    container_name: g-nexa-kafka-ui
     ports:
       - "8088:8080"
     environment:
@@ -166,7 +166,7 @@ services:
     build:
       context: ../apps/services/order
       target: development
-    container_name: gnexa-order-service
+    container_name: g-nexa-order-service
     restart: always
     ports:
       - "8084:8084"
@@ -191,8 +191,6 @@ services:
     container_name: g-nexa-finance-service
     ports:
       - "8085:8085"
-    environment:
-      - KAFKA_BROKER=kafka:29092
     env_file:
       - ../apps/services/finance/files/config/.env
     volumes:

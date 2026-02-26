@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"finance/cmd/wallet/repositories"
 	"finance/cmd/wallet/resources"
 	"finance/cmd/wallet/services"
@@ -43,34 +42,7 @@ func main() {
 	consumer := kafka.NewConsumer([]string{config.Kafka.Broker}, config.Kafka.Topic, "finance-group")
 	go func() {
 		consumer.Start(ctx, func(c context.Context, msg []byte) error {
-			var payload model.UserEventMessage
-
-			if err := json.Unmarshal(msg, &payload); err != nil {
-				log.Printf("[Kafka] Gagal parsing pesan, format JSON salah: %v\n", err)
-				return nil
-			}
-			log.Println(payload.Data)
-			log.Println(payload.Event)
-
-			switch payload.Event {
-			case "user.created":
-				wallet, err := walletUseCase.CreateWallet(c, payload.Data.UserID)
-				log.Println(wallet)
-				if err != nil {
-					return err
-				}
-
-				return nil
-
-			case "user.deleted":
-
-				log.Printf("[Kafka] Mengabaikan event user.deleted...\n")
-				return nil
-
-			default:
-
-				return nil
-			}
+			return kafka.HandlerConsumer(c, msg, walletUseCase)
 		})
 	}()
 

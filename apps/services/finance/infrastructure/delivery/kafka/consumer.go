@@ -2,6 +2,9 @@ package kafka
 
 import (
 	"context"
+	"encoding/json"
+	"finance/cmd/wallet/usecases"
+	"finance/model"
 	"log"
 
 	"github.com/segmentio/kafka-go"
@@ -58,6 +61,35 @@ func (c *Consumer) Start(ctx context.Context, processFunc func(ctx context.Conte
 		} else {
 			log.Printf("Sukses memproses & commit pesan. Offset: %d", m.Offset)
 		}
+	}
+}
+
+func HandlerConsumer(c context.Context, msg []byte, walletUseCase usecases.WalletUsecase) error {
+	var payload model.UserEventMessage
+
+	if err := json.Unmarshal(msg, &payload); err != nil {
+		log.Printf("[Kafka] Gagal parsing pesan, format JSON salah: %v\n", err)
+		return nil
+	}
+
+	switch payload.Event {
+	case "user.created":
+		wallet, err := walletUseCase.CreateWallet(c, payload.Data.UserID)
+		log.Println(wallet)
+		if err != nil {
+			return err
+		}
+
+		return nil
+
+	case "user.deleted":
+
+		log.Printf("[Kafka] Mengabaikan event user.deleted...\n")
+		return nil
+
+	default:
+
+		return nil
 	}
 }
 
