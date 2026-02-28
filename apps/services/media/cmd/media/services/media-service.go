@@ -3,18 +3,18 @@ package services
 import (
 	"context"
 	"fmt"
+	"mime/multipart"
+	"time"
+
 	"media-service/cmd/media/repositories"
 	"media-service/infrastructure/logger"
 	"media-service/model"
-	"mime/multipart"
-	"time"
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/sirupsen/logrus"
 )
 
-// MediaStorage interface untuk memudahkan swapping provider (S3/MinIO)
 type MediaStorage interface {
 	UploadFile(ctx context.Context, fileHeader *multipart.FileHeader) (*model.Media, error)
 	UploadFiles(ctx context.Context, filesHeader []*multipart.FileHeader) ([]*model.Media, error)
@@ -31,9 +31,12 @@ type cloudinaryService struct {
 func NewMediaService(repo repositories.MediaRepository, cldURL string, folder string) MediaStorage {
 	cld, err := cloudinary.NewFromURL(cldURL)
 	if err != nil {
-		// Ini akan menghentikan aplikasi daripada panic saat runtime
-		logger.Log.Fatalf("Gagal inisialisasi Cloudinary: %v", err)
+		// Gunakan context Background untuk inisialisasi awal, lalu panic agar fail-fast
+		ctx := context.Background()
+		logger.Error(ctx, "service:media", "Failed to initialize Cloudinary SDK", err, nil)
+		panic(err)
 	}
+
 	return &cloudinaryService{
 		repo:       repo,
 		cld:        cld,
@@ -42,25 +45,28 @@ func NewMediaService(repo repositories.MediaRepository, cldURL string, folder st
 }
 
 func (s *cloudinaryService) UploadFile(ctx context.Context, fileHeader *multipart.FileHeader) (*model.Media, error) {
-	logFields := logrus.Fields{
-		"layer":    "Service",
-		"func":     "UploadFile",
-		"filename": fileHeader.Filename,
-	}
-
 	file, err := fileHeader.Open()
 	if err != nil {
-		logger.LogError(logFields, "Failed to open multipart file", "fileHeader.Open()", err)
+		logger.Error(ctx, "service:media", "Failed to open multipart file", err, logrus.Fields{
+			"file_name": fileHeader.Filename,
+		})
 		return nil, err
 	}
 	defer file.Close()
+
+	logger.Debug(ctx, "service:media", "Starting file upload to Cloudinary", logrus.Fields{
+		"file_name": fileHeader.Filename,
+		"folder":    s.folderName,
+	})
 
 	// 1. Upload ke Cloudinary
 	resp, err := s.cld.Upload.Upload(ctx, file, uploader.UploadParams{
 		Folder: s.folderName,
 	})
 	if err != nil {
-		logger.LogError(logFields, "Failed to upload file to Cloudinary", "s.cld.Upload.Upload()", err)
+		logger.Error(ctx, "service:media", "Failed to upload file to Cloudinary", err, logrus.Fields{
+			"file_name": fileHeader.Filename,
+		})
 		return nil, err
 	}
 
@@ -75,59 +81,70 @@ func (s *cloudinaryService) UploadFile(ctx context.Context, fileHeader *multipar
 	// 3. Simpan metadata ke DB via Repository
 	result, err := s.repo.Create(ctx, media)
 	if err != nil {
+		logger.Error(ctx, "service:media", "Failed to save media metadata to DB, initiating rollback", err, logrus.Fields{
+			"public_id": media.PublicID,
+		})
 
-		// 4. Delete media from claudinary if err save to db
-		_, err = s.cld.Upload.Destroy(ctx, uploader.DestroyParams{
+		// 4. Kompensasi: Hapus media dari Cloudinary jika gagal simpan ke DB
+		_, rbErr := s.cld.Upload.Destroy(ctx, uploader.DestroyParams{
 			PublicID: media.PublicID,
 		})
-		if err != nil {
-			logger.LogError(logFields, "Failed to destroy file in Cloudinary", "s.cld.Upload.Destroy()", err)
-			return nil, err
+		if rbErr != nil {
+			// Jika rollback gagal, ini adalah status CRITICAL (Orphan file terbentuk)
+			logger.Error(ctx, "service:media", "CRITICAL: Failed to destroy file in Cloudinary during rollback", rbErr, logrus.Fields{
+				"public_id": media.PublicID,
+			})
+		} else {
+			logger.Info(ctx, "service:media", "Rollback successful: Orphan file destroyed in Cloudinary", logrus.Fields{
+				"public_id": media.PublicID,
+			})
 		}
 
-		logger.LogError(logFields, "Failed to save file to db", "s.repo.Create()", err)
 		return nil, err
 	}
 
-	logger.Log.WithFields(logFields).Info("File uploaded and metadata saved successfully")
+	logger.Info(ctx, "service:media", "File uploaded and metadata saved successfully", logrus.Fields{
+		"media_id":  result.ID,
+		"public_id": result.PublicID,
+	})
 	return result, nil
 }
 
 func (s *cloudinaryService) UploadFiles(ctx context.Context, filesHeader []*multipart.FileHeader) ([]*model.Media, error) {
+	logger.Info(ctx, "service:media", "Initiating batch file upload", logrus.Fields{
+		"total_files": len(filesHeader),
+	})
 
-	logFields := logrus.Fields{
-		"layer": "Service",
-		"func":  "UploadFiles",
-		"files": filesHeader,
-	}
-
-	filesSuccess := []*model.Media{}
+	var filesSuccess []*model.Media
 
 	for idx, fileHeader := range filesHeader {
-
 		file, err := s.UploadFile(ctx, fileHeader)
 		if err != nil {
-			logger.LogError(logFields, fmt.Sprintf("Failed to upload file to Cloudinaryn from idx %d", idx), "s.UploadFile()", err)
+			// Gunakan Warn karena batch tetap berjalan meskipun 1 file gagal
+			logger.Warn(ctx, "service:media", fmt.Sprintf("Failed to upload file at index %d, skipping...", idx), logrus.Fields{
+				"file_name": fileHeader.Filename,
+				"error":     err.Error(),
+			})
 			continue
 		}
 		filesSuccess = append(filesSuccess, file)
 	}
 
-	return filesSuccess, nil
+	logger.Info(ctx, "service:media", "Batch file upload completed", logrus.Fields{
+		"successful_uploads": len(filesSuccess),
+		"failed_uploads":     len(filesHeader) - len(filesSuccess),
+	})
 
+	return filesSuccess, nil
 }
 
 func (s *cloudinaryService) DeleteFile(ctx context.Context, id string) error {
-	logFields := logrus.Fields{
-		"layer":    "Service",
-		"func":     "DeleteFile",
-		"media_id": id,
-	}
+	logger.Debug(ctx, "service:media", "Initiating file deletion", logrus.Fields{"media_id": id})
 
 	// 1. Cari data di DB untuk mendapatkan PublicID Cloudinary
 	media, err := s.repo.FindByID(ctx, id)
 	if err != nil {
-		logger.LogError(logFields, "Error find media by ID", "s.repo.FindByID()", err)
+		// Log error sudah di-handle oleh repository, cukup kembalikan error
 		return err
 	}
 
@@ -136,26 +153,29 @@ func (s *cloudinaryService) DeleteFile(ctx context.Context, id string) error {
 		PublicID: media.PublicID,
 	})
 	if err != nil {
-		logger.LogError(logFields, "Failed to destroy file in Cloudinary", "s.cld.Upload.Destroy()", err)
+		logger.Error(ctx, "service:media", "Failed to destroy file in Cloudinary", err, logrus.Fields{
+			"public_id": media.PublicID,
+		})
 		return err
 	}
 
 	// 3. Hapus metadata di DB
 	err = s.repo.Delete(ctx, media)
 	if err != nil {
-		logger.LogError(logFields, "Failed to delete media from database", " s.repo.Delete()", err)
+		// Log error sudah di-handle oleh repository
 		return err
 	}
 
-	logger.Log.WithFields(logFields).Info("File and metadata deleted successfully")
+	logger.Info(ctx, "service:media", "File and metadata deleted successfully", logrus.Fields{
+		"media_id": id,
+	})
 	return nil
 }
 
 func (s *cloudinaryService) DeleteFiles(ctx context.Context, ids []string) error {
-	logFields := logrus.Fields{
-		"layer": "Service",
-		"func":  "DeleteFiles",
-	}
+	logger.Info(ctx, "service:media", "Initiating batch file deletion", logrus.Fields{
+		"total_files": len(ids),
+	})
 
 	var failedFinal []string
 	const maxRetries = 5
@@ -168,20 +188,28 @@ func (s *cloudinaryService) DeleteFiles(ctx context.Context, ids []string) error
 				success = true
 				break
 			}
-			logger.LogError(logFields, "Failed to delete media", "  s.DeleteFile()", err)
+
+			// Log setiap percobaan retry yang gagal
+			logger.Warn(ctx, "service:media", fmt.Sprintf("Retrying deletion for media (Attempt %d/%d)", i+1, maxRetries), logrus.Fields{
+				"media_id": id,
+				"error":    err.Error(),
+			})
 			time.Sleep(time.Duration(i+1) * 500 * time.Millisecond)
 		}
 
-		// Jika setelah maxRetries masih gagal juga
 		if !success {
 			failedFinal = append(failedFinal, id)
 		}
 	}
 
-	// Jika ada ID yang benar-benar gagal setelah semua percobaan
 	if len(failedFinal) > 0 {
-		return fmt.Errorf("beberapa file gagal dihapus setelah %d percobaan: %v", maxRetries, failedFinal)
+		err := fmt.Errorf("failed to delete some files after %d retries: %v", maxRetries, failedFinal)
+		logger.Error(ctx, "service:media", "Batch deletion completed with errors", err, logrus.Fields{
+			"failed_count": len(failedFinal),
+		})
+		return err
 	}
 
+	logger.Info(ctx, "service:media", "Batch file deletion completed successfully", nil)
 	return nil
 }

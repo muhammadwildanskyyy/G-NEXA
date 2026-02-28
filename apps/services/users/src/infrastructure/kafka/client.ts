@@ -1,5 +1,5 @@
 import { Kafka, logLevel } from "kafkajs";
-import {logger} from "../../lib/logger.ts";
+import {log} from "../../lib/logger.ts"
 
 
 // Setup instance Kafka utama
@@ -8,9 +8,9 @@ export const kafkaClient = new Kafka({
     brokers: [process.env.KAFKA_BROKER || "kafka:29092"],
     logLevel: logLevel.ERROR, // Hindari log spamming dari KafkaJS
     logCreator: () => {
-        return ({ level, log }) => {
-            if (level === logLevel.ERROR) logger.error(log.message, log);
-            else if (level === logLevel.WARN) logger.warn(log.message, log);
+        return ({ level, log : logging }) => {
+            if (level === logLevel.ERROR) log.error("kafka",logging.message, logging);
+            else if (level === logLevel.WARN) log.error("kafka",logging.message, logging);
         };
     },
     retry: {

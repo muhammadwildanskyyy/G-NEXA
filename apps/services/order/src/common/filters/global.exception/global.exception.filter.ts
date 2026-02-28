@@ -1,24 +1,21 @@
-// src/infrastructure/filters/global-exception.filter.ts
 import {
   ArgumentsHost,
   Catch,
   ExceptionFilter,
   HttpException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { ZodError } from 'zod/v3';
+import { ZodError } from 'zod';
 import { Prisma } from '@prisma/client';
 import { AppException } from './app.exception';
+import { AppLogger } from '../../../infrastructure/logger/app.logger';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(GlobalExceptionFilter.name);
+  constructor(private readonly logger: AppLogger) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
-    const excaptionType = typeof exception;
-    console.log('excaptionType: ', excaptionType);
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -26,7 +23,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal Server Error';
     let isOperational = false;
-
     let details: unknown = null;
 
     let originalErrorMessage = 'Unknown Error';
@@ -34,38 +30,41 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       originalErrorMessage = exception.message;
     }
 
+    // 1. Handling Zod Validation Error
     if (exception instanceof ZodError) {
       statusCode = HttpStatus.BAD_REQUEST;
-      message = 'Validasi data gagal';
+      message = 'Data validation failed';
       isOperational = true;
       details = exception.issues.map((issue) => ({
         field: issue.path.join('.'),
         message: issue.message,
       }));
-
-      console.log('ini detail : ', details);
-    } else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+    }
+    // 2. Handling Prisma Database Error
+    else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       isOperational = true;
-      switch (exception.code) {
+      switch (String(exception.code)) {
         case 'P2002':
           statusCode = HttpStatus.CONFLICT;
-          message = 'Data sudah terdaftar di sistem';
+          message = 'Data already exists in the system';
           break;
         case 'P2025':
           statusCode = HttpStatus.NOT_FOUND;
-          message = 'Data tidak ditemukan';
+          message = 'Data not found';
           break;
         case 'P2003':
           statusCode = HttpStatus.BAD_REQUEST;
-          message = 'Data relasi tidak valid';
+          message = 'Invalid relational data';
           break;
         default:
           statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
-          message = 'Terjadi kesalahan pada database';
+          message = 'A database error occurred';
           isOperational = false;
           break;
       }
-    } else if (exception instanceof AppException) {
+    }
+    // 3. Handling Custom App Exception
+    else if (exception instanceof AppException) {
       statusCode = exception.getStatus();
       isOperational = true;
 
@@ -78,7 +77,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       } else if (typeof res === 'string') {
         message = res;
       }
-    } else if (exception instanceof HttpException) {
+    }
+    // 4. Handling Standard NestJS HttpException
+    else if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
       message = exception.message;
       isOperational = true;
@@ -93,22 +94,41 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       }
     }
 
-    this.logger.error({
+    // 5. GNEXA Logging Execution
+    const errorMeta = {
       url: request.originalUrl || request.url,
       method: request.method,
-      statusCode,
-      message: originalErrorMessage,
-      stack: exception instanceof Error ? exception.stack : undefined,
-    });
+      status: statusCode,
+      is_operational: isOperational,
+      details: details,
+    };
 
-    const isProduction = process.env.NODE_ENV === 'production';
+    if (statusCode >= HttpStatus.INTERNAL_SERVER_ERROR) {
+      this.logger.err(
+        'filter:exception',
+        `Server Error: ${originalErrorMessage}`,
+        exception,
+        errorMeta,
+      );
+    } else {
+      this.logger.warning(
+        'filter:exception',
+        `Client Error: ${message}`,
+        errorMeta,
+      );
+    }
 
+    const isProduction =
+      process.env.NODE_ENV === 'production' ||
+      process.env.APP_ENV === 'production';
+
+    // 6. Final JSON Response
     return response.status(statusCode).json({
       meta: {
-        status: statusCode,
+        code: statusCode,
         message:
           isProduction && !isOperational
-            ? 'Terjadi kesalahan internal pada server'
+            ? 'An internal server error occurred'
             : message,
       },
       data:

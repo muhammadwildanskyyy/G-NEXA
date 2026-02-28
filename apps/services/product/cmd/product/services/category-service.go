@@ -30,19 +30,14 @@ func NewCategoryService(categoryRepository repositories.CategoryRepository) Cate
 }
 
 func (c *categoryService) CreateCategory(ctx context.Context, param *model.CreateCategoryRequest) (*model.Category, error) {
-	logFields := logrus.Fields{
-		"layer":         "services",
-		"func":          "CreateCategory()",
-		"category_name": param.Name,
-	}
-
 	if param.ParentID != nil {
-		parentOID := *param.ParentID
-		parentIDString := parentOID.Hex()
+		parentIDString := param.ParentID.Hex()
 		_, err := c.CategoryRepository.SelectCategoryById(ctx, parentIDString)
 		if err != nil {
 			if errors.Is(err, mongo.ErrNoDocuments) {
-				logger.LogError(logFields, "Parent category not found", "c.CategoryRepository.SelectCategoryById()", err)
+				logger.Warn(ctx, "service:category", "Category creation denied: Parent category not found", logrus.Fields{
+					"parent_id": parentIDString,
+				})
 				return nil, err
 			}
 			return nil, err
@@ -58,20 +53,17 @@ func (c *categoryService) CreateCategory(ctx context.Context, param *model.Creat
 
 	newCategory, err := c.CategoryRepository.InsertCategory(ctx, category)
 	if err != nil {
-		logger.LogError(logFields, "Failed Create Category", "c.CategoryRepository.InsertCategory()", err)
 		return nil, err
 	}
-	return newCategory, nil
 
+	logger.Info(ctx, "service:category", "Category successfully created", logrus.Fields{
+		"category_id": newCategory.ID,
+		"name":        newCategory.Name,
+	})
+	return newCategory, nil
 }
 
 func (c *categoryService) UpdateCategory(ctx context.Context, param *model.CreateCategoryRequest, categoryId string) (*model.Category, error) {
-	logFields := logrus.Fields{
-		"layer":         "services",
-		"func":          "UpdateCategory()",
-		"category_name": param.Name,
-		"category_id":   categoryId,
-	}
 	category := &model.Category{
 		Name:      param.Name,
 		Slug:      param.Slug,
@@ -81,51 +73,49 @@ func (c *categoryService) UpdateCategory(ctx context.Context, param *model.Creat
 
 	newCategory, err := c.CategoryRepository.UpdateCategory(ctx, category, categoryId)
 	if err != nil {
-		logger.LogError(logFields, "Failed Update Category", "c.CategoryRepository.UpdateCategory()", err)
+		// Technical errors are already logged in Repository
 		return nil, err
 	}
-	return newCategory, nil
 
+	logger.Info(ctx, "service:category", "Category successfully updated", logrus.Fields{
+		"category_id": categoryId,
+	})
+	return newCategory, nil
 }
 
 func (c *categoryService) DeleteCategory(ctx context.Context, categoryId string) error {
-	logFields := logrus.Fields{
-		"layer":       "services",
-		"func":        "DeleteCategory()",
-		"category_id": categoryId,
-	}
 	err := c.CategoryRepository.DeleteCategory(ctx, categoryId)
 	if err != nil {
-		logger.LogError(logFields, "Failed Delete Category", "c.CategoryRepository.DeleteCategory()", err)
 		return err
 	}
+
+	logger.Info(ctx, "service:category", "Category successfully deleted", logrus.Fields{
+		"category_id": categoryId,
+	})
 	return nil
 }
 
 func (c *categoryService) GetCategoryById(ctx context.Context, categoryId string) (*model.Category, error) {
-	logFields := logrus.Fields{
-		"layer":       "services",
-		"func":        "GetCategoryById()",
-		"category_id": categoryId,
-	}
-
 	result, err := c.CategoryRepository.SelectCategoryById(ctx, categoryId)
 	if err != nil {
-		logger.LogError(logFields, "Failed Get CategoryById", "c.CategoryRepository.SelectCategoryById()", err)
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			logger.Warn(ctx, "service:category", "Category retrieval failed: Not found", logrus.Fields{
+				"category_id": categoryId,
+			})
+			return nil, err
+		}
 		return nil, err
 	}
 	return result, nil
 }
 
 func (c *categoryService) GetAllCategory(ctx context.Context) ([]*model.Category, error) {
-	logFields := logrus.Fields{
-		"layer": "services",
-		"func":  "GetAllCategory()",
-	}
-
 	result, err := c.CategoryRepository.SelectCategories(ctx)
 	if err != nil {
-		logger.LogError(logFields, "Failed GetAllCategory", "c.CategoryRepository.SelectCategories()", err)
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			logger.Warn(ctx, "service:category", "Categories retrieval: No records found", nil)
+			return nil, err
+		}
 		return nil, err
 	}
 	return result, nil

@@ -6,6 +6,7 @@ require (
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/cloudinary/cloudinary-go/v2 v2.14.1 // indirect
 	github.com/creasty/defaults v1.7.0 // indirect
+	github.com/fatih/color v1.18.0 // indirect
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.4.0 // indirect
 	github.com/gofiber/fiber/v3 v3.0.0 // indirect

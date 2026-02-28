@@ -3,11 +3,14 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-	"finance/cmd/wallet/usecases"
-	"finance/model"
-	"log"
 
+	"finance/cmd/wallet/usecases"
+	"finance/infrastructure/logger" // 🚀 Alias ke GNEXA Logger
+	"finance/model"
+
+	"github.com/google/uuid"
 	"github.com/segmentio/kafka-go"
+	"github.com/sirupsen/logrus"
 )
 
 type Consumer struct {
@@ -16,12 +19,11 @@ type Consumer struct {
 
 func NewConsumer(brokers []string, topic, groupID string) *Consumer {
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  brokers,
-		GroupID:  groupID,
-		Topic:    topic,
-		MinBytes: 10e3, // 10KB
-		MaxBytes: 10e6, // 10MB
-		// PENTING: Matikan interval commit otomatis
+		Brokers:        brokers,
+		GroupID:        groupID,
+		Topic:          topic,
+		MinBytes:       10e3,
+		MaxBytes:       10e6,
 		CommitInterval: 0,
 	})
 
@@ -29,66 +31,101 @@ func NewConsumer(brokers []string, topic, groupID string) *Consumer {
 }
 
 func (c *Consumer) Start(ctx context.Context, processFunc func(ctx context.Context, msg []byte) error) {
-	log.Println("Memulai Kafka Consumer...")
+	logger.Info(ctx, "infra:kafka", "Memulai Kafka Consumer...", nil)
 
 	for {
-		// 1. FETCH MESSAGE (Ambil pesan tanpa memindahkan offset/commit)
+
 		m, err := c.reader.FetchMessage(ctx)
 		if err != nil {
 			if ctx.Err() != nil {
-				log.Println("Consumer dihentikan secara graceful")
+				logger.Warn(ctx, "infra:kafka", "Consumer dihentikan secara graceful", nil)
 				break
 			}
-			log.Printf("Error fetching message: %v", err)
+			logger.Error(ctx, "infra:kafka", "Error fetching message", err, nil)
 			continue
 		}
 
-		// 2. PROCESS MESSAGE (Panggil Usecase / Logic Bisnis)
-		err = processFunc(ctx, m.Value)
+		var traceID string
+		for _, header := range m.Headers {
+			if header.Key == "X-Correlation-ID" {
+				traceID = string(header.Value)
+				break
+			}
+		}
+
+		if traceID == "" {
+			traceID = uuid.New().String()
+		}
+
+		msgCtx := context.WithValue(ctx, "trace_id", traceID)
+
+		logger.Debug(msgCtx, "infra:kafka", "Menerima pesan baru", logrus.Fields{
+			"topic":     m.Topic,
+			"partition": m.Partition,
+			"offset":    m.Offset,
+		})
+
+		err = processFunc(msgCtx, m.Value)
 
 		if err != nil {
-			// Jika gagal (misal DB down atau Optimistic Lock gagal),
-			// KITA JANGAN COMMIT. Biarkan pesan ini di-retry lagi nanti.
-			log.Printf("Gagal memproses pesan (Offset: %d): %v", m.Offset, err)
 
-			// Opsi Lanjutan: Kirim ke Dead Letter Queue (DLQ) jika error-nya unrecoverable (misal JSON cacat)
+			logger.Error(msgCtx, "infra:kafka", "Gagal memproses pesan (offset tidak di-commit)", err, logrus.Fields{
+				"offset": m.Offset,
+			})
 			continue
 		}
 
-		// 3. MANUAL COMMIT (Hanya jika proses bisnis berhasil 100%)
 		if err := c.reader.CommitMessages(ctx, m); err != nil {
-			log.Printf("Gagal melakukan commit offset: %v", err)
+			logger.Error(msgCtx, "infra:kafka", "Gagal melakukan commit offset ke broker", err, logrus.Fields{
+				"offset": m.Offset,
+			})
 		} else {
-			log.Printf("Sukses memproses & commit pesan. Offset: %d", m.Offset)
+			logger.Info(msgCtx, "infra:kafka", "Sukses memproses & commit pesan", logrus.Fields{
+				"offset": m.Offset,
+			})
 		}
 	}
 }
 
-func HandlerConsumer(c context.Context, msg []byte, walletUseCase usecases.WalletUsecase) error {
+func HandlerConsumer(ctx context.Context, msg []byte, walletUseCase usecases.WalletUsecase) error {
 	var payload model.UserEventMessage
 
 	if err := json.Unmarshal(msg, &payload); err != nil {
-		log.Printf("[Kafka] Gagal parsing pesan, format JSON salah: %v\n", err)
+
+		logger.Error(ctx, "handler:kafka", "Gagal parsing pesan, format JSON salah (Poison Pill diabaikan)", err, logrus.Fields{
+			"payload": string(msg),
+		})
 		return nil
+	}
+
+	ctx = context.WithValue(ctx, "user_id", payload.Data.UserID)
+
+	logFields := logrus.Fields{
+		"event":   payload.Event,
+		"user_id": payload.Data.UserID,
 	}
 
 	switch payload.Event {
 	case "user.created":
-		wallet, err := walletUseCase.CreateWallet(c, payload.Data.UserID)
-		log.Println(wallet)
+		logger.Info(ctx, "handler:kafka", "Menerima event pembuatan user, memproses wallet...", logFields)
+
+		wallet, err := walletUseCase.CreateWallet(ctx, payload.Data.UserID)
 		if err != nil {
+			logger.Error(ctx, "handler:kafka", "Gagal membuat wallet untuk user", err, logFields)
 			return err
 		}
 
+		logger.Info(ctx, "handler:kafka", "Wallet berhasil dibuat", logrus.Fields{
+			"wallet_id": wallet.ID,
+		})
 		return nil
 
 	case "user.deleted":
-
-		log.Printf("[Kafka] Mengabaikan event user.deleted...\n")
+		logger.Debug(ctx, "handler:kafka", "Mengabaikan event user.deleted", logFields)
 		return nil
 
 	default:
-
+		logger.Warn(ctx, "handler:kafka", "Menerima event yang tidak dikenal", logFields)
 		return nil
 	}
 }

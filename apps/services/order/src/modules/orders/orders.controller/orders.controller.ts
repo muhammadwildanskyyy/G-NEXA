@@ -25,16 +25,27 @@ import {
 import { User } from '../../../common/decorators/user/user.decorator';
 import { HttpStatusCode } from 'axios';
 import { AclGuard } from '../../../common/guards/acl/acl.guard';
+import { AppLogger } from '../../../infrastructure/logger/app.logger';
 
 @Controller('/v1/api/order')
 @UseGuards(JwtAuthGuard)
 export class OrdersController {
-  constructor(private readonly orderUsecase: OrdersUsecase) {}
+  constructor(
+    private readonly orderUsecase: OrdersUsecase,
+    private readonly logger: AppLogger, // 🚀 Inject logger di sini
+  ) {}
+
   @Post('/create')
   async createOrder(
     @Body(new ZodValidatePipe(CreateOrderSchema)) inputOrder: CreateOrderDto,
     @User('user_id') user_id: string,
   ): Promise<GlobalOrderResponse<Order>> {
+    this.logger.info('controller:order', 'Received request to create order', {
+      user_id,
+      idempotency_key: inputOrder.idempotensi_Key,
+      store_id: inputOrder.store_id,
+    });
+
     const result = await this.orderUsecase.checkoutOurder(user_id, inputOrder);
 
     return {
@@ -50,6 +61,12 @@ export class OrdersController {
   async getOrderbyUserId(
     @User('user_id') user_id: string,
   ): Promise<GlobalOrderResponse<Order[]>> {
+    this.logger.dbg(
+      'controller:order',
+      'Received request to get orders by user',
+      { user_id },
+    );
+
     const result = await this.orderUsecase.findOrderByUserId(user_id);
 
     return {
@@ -64,22 +81,33 @@ export class OrdersController {
   @Get('/store')
   @UseGuards(new AclGuard([USER_ROLE.ADMIN, USER_ROLE.SELLER]))
   async getOrdersBySeller(): Promise<GlobalOrderResponse<Order[]>> {
-    console.log(53453534543);
+    this.logger.dbg(
+      'controller:order',
+      'Received request to get orders by seller store',
+    );
+    // 🚀 console.log(53453534543); telah dihapus
+
     const result = await this.orderUsecase.findOrdersByOwnerStore();
+
     return {
       meta: {
-        message: 'Success Get Orders By Order Id',
+        message: 'Success Get Orders By Order Id', // Typo dari kode asli, mungkin mau diganti 'By Store Id'?
         code: HttpStatusCode.Ok,
       },
       data: result,
     };
   }
+
   @Put('/update/:id')
   @UseGuards(new AclGuard([USER_ROLE.SELLER, USER_ROLE.ADMIN]))
   async updateOrder(
     @Param('id') orderId: string,
     @Body(new ZodValidatePipe(UpdateOrderSchema)) params: UpdateOrderDto,
   ): Promise<GlobalOrderResponse<Order>> {
+    this.logger.info('controller:order', 'Received request to update order', {
+      order_id: orderId,
+    });
+
     const result = await this.orderUsecase.updateOrder(orderId, params);
 
     return {
@@ -96,6 +124,10 @@ export class OrdersController {
   async deleteOrder(
     @Param('id') orderId: string,
   ): Promise<GlobalOrderResponse<Order>> {
+    this.logger.info('controller:order', 'Received request to delete order', {
+      order_id: orderId,
+    });
+
     const result = await this.orderUsecase.deleteOrder(orderId);
 
     return {
@@ -106,10 +138,15 @@ export class OrdersController {
       data: result,
     };
   }
+
   @Get('/:id')
   async getOrderbyId(
     @Param('id') orderId: string,
   ): Promise<GlobalOrderResponse<Order>> {
+    this.logger.dbg('controller:order', 'Received request to get order by ID', {
+      order_id: orderId,
+    });
+
     const result = await this.orderUsecase.findOrderById(orderId);
 
     return {
@@ -124,10 +161,16 @@ export class OrdersController {
   @Get()
   @UseGuards(new AclGuard([USER_ROLE.ADMIN]))
   async getOrders(): Promise<GlobalOrderResponse<Order[]>> {
+    this.logger.dbg(
+      'controller:order',
+      'Received request to get all orders (Admin)',
+    );
+
     const result = await this.orderUsecase.findOrders();
+
     return {
       meta: {
-        message: 'Success Get Orders By Order Id',
+        message: 'Success Get Orders By Order Id', // Typo dari kode asli, mungkin 'All Orders'?
         code: HttpStatusCode.Ok,
       },
       data: result,
@@ -138,6 +181,10 @@ export class OrdersController {
   async cancelOrder(
     @Param('id') orderId: string,
   ): Promise<GlobalOrderResponse<Order>> {
+    this.logger.info('controller:order', 'Received request to cancel order', {
+      order_id: orderId,
+    });
+
     const result = await this.orderUsecase.cancelOrder(orderId);
 
     return {

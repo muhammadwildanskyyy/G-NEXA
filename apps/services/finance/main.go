@@ -2,6 +2,12 @@ package main
 
 import (
 	"context"
+	"finance/cmd/wallet/handlers"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"finance/cmd/wallet/repositories"
 	"finance/cmd/wallet/resources"
 	"finance/cmd/wallet/services"
@@ -9,78 +15,82 @@ import (
 	"finance/config"
 	"finance/infrastructure/delivery/kafka"
 	"finance/infrastructure/logger"
+	"finance/middleware"
 	"finance/model"
 	"finance/routes"
-	"fmt"
-	"log"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	// 1. SETUP CONTEXT
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// 2. INISIALISASI DEPENDENCY
-	config := config.LoadConfig()
-	port := config.App.Port
-	db := resources.InitDB(config)
-	db.AutoMigrate(model.Wallet{})
-	logger.SetupLogger()
+	cfg := config.LoadConfig()
+	logger.SetupLogger(cfg)
 
-	walletRepository := repositories.NewWalletrepository(db)
+	logger.Info(ctx, "infra:bootstrap", "Starting GNEXA Finance Service...", nil)
+
+	db := resources.InitDB(cfg)
+	err := db.AutoMigrate(&model.Wallet{})
+	if err != nil {
+		logger.Error(ctx, "infra:database", "Failed to run auto migration", err, nil)
+	} else {
+		logger.Info(ctx, "infra:database", "Database auto migration completed", nil)
+	}
+
+	walletRepository := repositories.NewWalletRepository(db)
 	walletService := services.NewWalletService(walletRepository)
 	walletUseCase := usecases.NewWalletUsecase(walletService)
-	fmt.Println("kafka confiq", config.Kafka.Topic)
-	// 3.  KAFKA CONSUMER
-	consumer := kafka.NewConsumer([]string{config.Kafka.Broker}, config.Kafka.Topic, "finance-group")
+	walletHandler := handlers.NewWalletHandler(walletUseCase)
+
+	consumer := kafka.NewConsumer([]string{cfg.Kafka.Broker}, cfg.Kafka.Topic, "finance-group")
 	go func() {
 		consumer.Start(ctx, func(c context.Context, msg []byte) error {
 			return kafka.HandlerConsumer(c, msg, walletUseCase)
 		})
 	}()
 
-	// 4. SETUP ROUTING GIN
-	router := gin.Default()
+	router := gin.New()
+
+	router.Use(gin.Recovery())
+	router.Use(middleware.RequestLogger())
+
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "X-Correlation-ID"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
 
-	routes.SetupRoutes(router, config.App.AuthSecret)
-
-	// 5.  GIN HTTP SERVER
+	routes.SetupRoutes(router, cfg.App.AuthSecret, walletHandler)
 
 	go func() {
-		logger.Log.Println("Server run on port " + port)
-		if err := router.Run(":" + port); err != nil {
-			log.Fatalf("Gagal menjalankan server HTTP Gin: %v\n", err)
+		logger.Info(ctx, "infra:bootstrap", "Server HTTP Gin is running", logrus.Fields{
+			"port": cfg.App.Port,
+		})
+		if err := router.Run(":" + cfg.App.Port); err != nil {
+			logger.Error(ctx, "infra:bootstrap", "Failed to start Gin HTTP Server", err, nil)
 		}
 	}()
 
-	// 6. TAHAN MAIN THREAD & TUNGGU SINYAL OS
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	log.Println("Menerima sinyal shutdown, mematikan service...")
-
-	// 7. SHUTDOWN SEQUENCE
+	logger.Warn(ctx, "infra:bootstrap", "Received OS shutdown signal, initiating graceful shutdown...", nil)
 
 	cancel()
 
 	if err := consumer.Close(); err != nil {
-		log.Printf("Error saat menutup consumer: %v", err)
+		logger.Error(ctx, "infra:kafka", "Error while closing Kafka consumer", err, nil)
+	} else {
+		logger.Info(ctx, "infra:kafka", "Kafka consumer closed successfully", nil)
 	}
 
-	log.Println("Service Finance dimatikan.")
+	logger.Info(ctx, "infra:bootstrap", "GNEXA Finance Service successfully stopped", nil)
 }

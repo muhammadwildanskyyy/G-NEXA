@@ -12,7 +12,7 @@ COPY prisma ./prisma/
 FROM base AS development
 # Install semua dependencies
 RUN npm install -g @nestjs/cli
-RUN npm install
+tasRUN npm install
 # Generate Prisma agar type-safe
 RUN npx prisma generate
 # Copy semua source code

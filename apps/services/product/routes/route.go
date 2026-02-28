@@ -10,7 +10,7 @@ import (
 
 func SetupRoutes(router *gin.Engine, productHandler handlers.ProductHandler, categoryHandler handlers.CategoryHandler, authSecret string) {
 
-	router.Use(middleware.RequestLogger())
+	router.Use(middleware.TracingMiddleware())
 	router.Use(middleware.AuthMiddleware(authSecret))
 
 	// product

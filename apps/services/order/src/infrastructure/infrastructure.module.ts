@@ -1,10 +1,9 @@
 import { Global, Module } from '@nestjs/common';
-import { WinstonLoggerService } from './logger/logger.service';
+import { AppLogger } from './logger/app.logger';
 
 @Global()
 @Module({
-  // imports: [HttpClientsModule],
-  providers: [WinstonLoggerService],
-  exports: [WinstonLoggerService],
+  providers: [AppLogger],
+  exports: [AppLogger],
 })
 export class InfrastructureModule {}

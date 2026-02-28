@@ -2,46 +2,68 @@ package middleware
 
 import (
 	"context"
-	"media-service/infrastructure/logger"
 	"time"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
+
+	"media-service/infrastructure/logger"
 )
 
 func RequestLogger() fiber.Handler {
 	return func(c fiber.Ctx) error {
-		requestId := uuid.New().String()
-		ctx := context.WithValue(c.Context(), "request_id", requestId)
-		c.SetContext(ctx)
-		c.Set("X-Request-ID", requestId)
+
+		traceId := c.Get("X-Correlation-ID")
+		if traceId == "" {
+			traceId = uuid.New().String()
+		}
+
+		c.Set("X-Correlation-ID", traceId)
+		c.Locals("trace_id", traceId)
+
+		ctx := context.WithValue(context.Background(), "trace_id", traceId)
 
 		startTime := time.Now()
+		method := c.Method()
+		path := c.Path()
+
+		incomingFields := logrus.Fields{
+			"method":     method,
+			"path":       path,
+			"ip":         c.IP(),
+			"user_agent": c.Get("User-Agent"),
+		}
+
+		logger.Info(ctx, "delivery:http", "Incoming HTTP request", incomingFields)
 
 		err := c.Next()
+
+		if userID, ok := c.Locals("user_id").(string); ok && userID != "" {
+
+			ctx = context.WithValue(ctx, "user_id", userID)
+		}
 
 		latency := time.Since(startTime)
 		statusCode := c.Response().StatusCode()
 
-		requestLog := logrus.Fields{
-			"request_id": requestId,
-			"method":     c.Method(),
-			"path":       c.Path(),
-			"status":     statusCode,
-			"latency":    latency.String(),
-			"ip":         c.IP(),
+		outgoingFields := logrus.Fields{
+			"method":  method,
+			"path":    path,
+			"status":  statusCode,
+			"latency": latency.String(),
 		}
 
-		// 5. Logging berdasarkan status code
-		if statusCode >= 200 && statusCode < 300 {
-			logger.Log.WithFields(requestLog).Info("Request Processed Successfully")
-		} else {
-
+		if statusCode >= 500 {
+			
+			logger.Error(ctx, "delivery:http", "HTTP request finished with server error", err, outgoingFields)
+		} else if statusCode >= 400 {
 			if err != nil {
-				requestLog["error"] = err.Error()
+				outgoingFields["error"] = err.Error()
 			}
-			logger.Log.WithFields(requestLog).Warn("Request Finished with Issues")
+			logger.Warn(ctx, "delivery:http", "HTTP request finished with client error", outgoingFields)
+		} else {
+			logger.Info(ctx, "delivery:http", "HTTP request completed successfully", outgoingFields)
 		}
 
 		return err

@@ -15,6 +15,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ProductService interface {
@@ -26,6 +27,7 @@ type ProductService interface {
 	GetProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error)
 	CreateProductBulk(ctx context.Context, products []*model.CreateProductRequest) ([]*model.Product, error)
 }
+
 type productService struct {
 	ProductRepository  repositories.ProductRepository
 	CategoryRepository repositories.CategoryRepository
@@ -41,27 +43,20 @@ func NewProductService(productRepository repositories.ProductRepository, categor
 }
 
 func (p *productService) CreateProduct(ctx context.Context, product *model.CreateProductRequest) (*model.Product, error) {
-
-	logField := logrus.Fields{
-		"layer":       "services",
-		"func":        "CreateProduct()",
-		"productName": product.Name,
-	}
-
-	httpClient := &http.Client{
-		Timeout: time.Second * 10,
-	}
-
+	// 1. External Service Call (User-Service to verify Store)
+	httpClient := &http.Client{Timeout: time.Second * 10}
 	targetURL := fmt.Sprintf("http://user-service:8081/v1/api/store/%v", product.StoreID)
+
+	logger.Info(ctx, "infra:user-service", "Fetching store data from upstream", logrus.Fields{"store_id": product.StoreID})
+
 	req, err := http.NewRequestWithContext(ctx, "GET", targetURL, nil)
 	if err != nil {
-		logger.LogError(logField, "Create Request to User Service failed", "http.NewRequestWithContext()", err)
 		return nil, err
 	}
 
 	accessToken, ok := ctx.Value("access_token").(string)
 	if !ok {
-		logger.LogError(logField, "Access Token Missing", "ctx.Value()", nil)
+		logger.Warn(ctx, "service:product", "Product creation denied: Access token missing", nil)
 		return nil, errors.New("access token missing from header")
 	}
 
@@ -70,226 +65,167 @@ func (p *productService) CreateProduct(ctx context.Context, product *model.Creat
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		logger.LogError(logField, "Error sending request", "httpClient.Do()", err)
+		logger.Error(ctx, "infra:user-service", "Upstream request failed", err, nil)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		errStatus := fmt.Errorf("upstream API returned status: %d", resp.StatusCode)
-		logger.LogError(logField, "API Response Error", "StatusCheck", errStatus)
-		return nil, errStatus
+		logger.Warn(ctx, "infra:user-service", "Upstream returned non-OK status", logrus.Fields{"status": resp.StatusCode})
+		return nil, fmt.Errorf("upstream API returned status: %d", resp.StatusCode)
 	}
 
 	var response model.APIResponseStore
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		logger.LogError(logField, "Error parsing Response", "json.Decode", err)
-		return nil, fmt.Errorf("failed to parse JSON: %w", err)
+		return nil, err
 	}
 	store := response.Data
 
-	CategoryId, err := primitive.ObjectIDFromHex(product.CategoryID)
-	if err != nil {
-		logger.LogError(logField, "Category Id Invalid", "primitive.ObjectIDFromHex()", err)
-		return nil, err
-	}
-
+	// 2. Category & Specs Validation
 	category, err := p.CategoryRepository.SelectCategoryById(ctx, product.CategoryID)
 	if err != nil {
-		logger.LogError(logField, "Category Not Found", "categoryId", err)
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			logger.Warn(ctx, "service:product", "Product creation denied: Category not found", logrus.Fields{"category_id": product.CategoryID})
+		}
 		return nil, err
 	}
 
-	if err := p.validateProductSpecs(category, product.Specs); err != nil {
-		logger.LogError(logField, "Product specs validation failed:", "p.validateProductSpecs()", err)
+	if err := p.validateProductSpecs(ctx, category, product.Specs); err != nil {
+		logger.Warn(ctx, "service:product", "Product creation denied: Specs validation failed", logrus.Fields{"error": err.Error()})
 		return nil, err
 	}
 
+	categoryId, _ := primitive.ObjectIDFromHex(product.CategoryID)
 	productInput := &model.Product{
-		StoreID:    store.ID,
-		CategoryID: &CategoryId,
-
+		StoreID:     store.ID,
+		CategoryID:  &categoryId,
 		Name:        product.Name,
 		Slug:        product.Slug,
 		Description: product.Description,
 		Condition:   product.Condition,
-
-		Price:    product.Price,
-		Stock:    product.Stock,
-		IsActive: product.IsActive,
-
-		Weight:     product.Weight,
-		Dimensions: product.Dimensions,
-
-		Images:    product.Images,
-		Thumbnail: product.Thumbnail,
-
-		Specs: product.Specs,
-
-		Tags: product.Tags,
+		Price:       product.Price,
+		Stock:       product.Stock,
+		IsActive:    product.IsActive,
+		Weight:      product.Weight,
+		Dimensions:  product.Dimensions,
+		Images:      product.Images,
+		Thumbnail:   product.Thumbnail,
+		Specs:       product.Specs,
+		Tags:        product.Tags,
 	}
 
 	newProduct, err := p.ProductRepository.InsertProduct(ctx, productInput)
 	if err != nil {
-		logger.LogError(logField, "Failed to insert product", " p.ProductRepository.InsertProduct()", err)
 		return nil, err
 	}
+
+	logger.Info(ctx, "service:product", "Product successfully created", logrus.Fields{"product_id": newProduct.ID})
 	return newProduct, nil
 }
 
 func (p *productService) UpdateProduct(ctx context.Context, product *model.UpdateProductRequest, productId string) (*model.Product, error) {
-	logField := logrus.Fields{
-		"layer":        "services",
-		"func":         "UpdateProduct()",
-		"product_name": product.Name,
-	}
-
-	CategoryId, err := primitive.ObjectIDFromHex(product.CategoryID)
+	categoryId, err := primitive.ObjectIDFromHex(product.CategoryID)
 	if err != nil {
-		logger.LogError(logField, "Category Id Invalid", "primitive.ObjectIDFromHex()", err)
+		logger.Warn(ctx, "service:product", "Product update denied: Invalid category ID", logrus.Fields{"category_id": product.CategoryID})
 		return nil, err
 	}
 
 	productInput := &model.Product{
-		StoreID:    product.StoreID,
-		CategoryID: &CategoryId,
-
+		StoreID:     product.StoreID,
+		CategoryID:  &categoryId,
 		Name:        product.Name,
 		Slug:        product.Slug,
 		Description: product.Description,
 		Condition:   product.Condition,
-
-		Price:    product.Price,
-		Stock:    product.Stock,
-		IsActive: product.IsActive,
-
-		Weight:     product.Weight,
-		Dimensions: product.Dimensions,
-
-		Images:    product.Images,
-		Thumbnail: product.Thumbnail,
-
-		Specs: product.Specs,
-
-		Tags: product.Tags,
+		Price:       product.Price,
+		Stock:       product.Stock,
+		IsActive:    product.IsActive,
+		Weight:      product.Weight,
+		Dimensions:  product.Dimensions,
+		Images:      product.Images,
+		Thumbnail:   product.Thumbnail,
+		Specs:       product.Specs,
+		Tags:        product.Tags,
 	}
+
 	newProduct, err := p.ProductRepository.UpdateProduct(ctx, productInput, productId)
 	if err != nil {
-		logger.LogError(logField, "Failed to update product", " p.ProductRepository.UpdateProduct()", err)
 		return nil, err
 	}
+
+	logger.Info(ctx, "service:product", "Product successfully updated", logrus.Fields{"product_id": productId})
 	return newProduct, nil
 }
 
 func (p *productService) DeleteProduct(ctx context.Context, productId string) error {
-	logField := logrus.Fields{
-		"layer":     "services",
-		"func":      "DeleteProduct()",
-		"productId": productId,
-	}
 	err := p.ProductRepository.DeleteProduct(ctx, productId)
 	if err != nil {
-		logger.LogError(logField, "Failed to delete product", " p.ProductRepository.DeleteProduct()", err)
 		return err
 	}
-	return nil
 
+	logger.Info(ctx, "service:product", "Product successfully deleted", logrus.Fields{"product_id": productId})
+	return nil
 }
 
 func (p *productService) GetProductById(ctx context.Context, productId string) (*model.Product, error) {
-
-	logField := logrus.Fields{
-		"layer":     "services",
-		"func":      "GetProductById()",
-		"productId": productId,
-	}
 	product, err := p.ProductRepository.FindProductByID(ctx, productId)
 	if err != nil {
-		logger.LogError(logField, "Failed to get product", " p.ProductRepository.FindProductByID()", err)
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			logger.Warn(ctx, "service:product", "Product retrieval failed: Not found", logrus.Fields{"product_id": productId})
+		}
 		return nil, err
 	}
 	return product, nil
 }
 
 func (p *productService) GetProducts(ctx context.Context, params *model.ProductQueryParam) (*model.PaginationProductResult, error) {
-	logField := logrus.Fields{
-		"layer": "services",
-		"func":  "GetProducts()",
-	}
-
-	// Default Pagination Logic
 	if params.Page <= 0 {
 		params.Page = 1
 	}
 	if params.Limit <= 0 {
 		params.Limit = 10
 	}
-	if params.Limit > 100 {
-		params.Limit = 100
-	}
 
 	products, totalProduct, err := p.ProductRepository.FindAllProducts(ctx, params)
 	if err != nil {
-		logger.LogError(logField, "Failed to get products", "p.ProductRepository.FindAllProducts()", err)
 		return nil, err
 	}
 
-	// Hitung Total Pages
 	totalPages := int64(math.Ceil(float64(totalProduct) / float64(params.Limit)))
-
-	result := &model.PaginationProductResult{
+	return &model.PaginationProductResult{
 		Products:  products,
 		TotalData: totalProduct,
 		TotalPage: totalPages,
 		Page:      params.Page,
 		Limit:     params.Limit,
-	}
-	return result, nil
+	}, nil
 }
 
 func (p *productService) GetProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error) {
-
-	logField := logrus.Fields{
-		"layer":      "services",
-		"func":       "GetProductsByCategoryId()",
-		"categoryId": categoryId,
-	}
-
 	result, err := p.ProductRepository.SelectProductsByCategoryId(ctx, categoryId)
 	if err != nil {
-		logger.LogError(logField, "Failed to get products by Category Id", " p.ProductRepository.SelectProductsByCategoryId()", err)
 		return nil, err
 	}
 	return result, nil
 }
 
-// Helper function untuk validasi specs
-func (p *productService) validateProductSpecs(category *model.Category, inputSpecs map[string]interface{}) error {
-
-	// Loop setiap template yang ada di Category (Misal: Brand, RAM, Storage)
+func (p *productService) validateProductSpecs(ctx context.Context, category *model.Category, inputSpecs map[string]interface{}) error {
 	for _, template := range category.Templates {
-
-		// Ambil value dari input user berdasarkan Key template (misal: "ram")
 		value, exists := inputSpecs[template.Key]
 
-		// 1. CEK REQUIRED (Wajib Diisi)
 		if template.Required {
-			// Jika key tidak ada, atau nil, atau string kosong
 			if !exists || value == nil || value == "" {
-				return fmt.Errorf("field spesifikasi '%s' wajib diisi", template.Label)
+				return fmt.Errorf("specification field '%s' is required", template.Label)
 			}
 		}
 
-		// Jika user tidak mengisi (dan tidak required), skip validasi opsi
 		if !exists || value == nil {
 			continue
 		}
 
-		// 2. CEK TIPE DATA DROPDOWN (Pilihan Terbatas)
-		// Jika template tipe-nya dropdown, pastikan value user ada di dalam opsi
 		if template.Type == "dropdown" && len(template.Options) > 0 {
 			isValidOption := false
-			inputString := fmt.Sprintf("%v", value) // Konversi input user ke string biar aman
+			inputString := fmt.Sprintf("%v", value)
 
 			for _, option := range template.Options {
 				if option == inputString {
@@ -299,11 +235,10 @@ func (p *productService) validateProductSpecs(category *model.Category, inputSpe
 			}
 
 			if !isValidOption {
-				return fmt.Errorf("nilai '%s' tidak valid untuk field '%s'. Pilihan: %v", inputString, template.Label, template.Options)
+				return fmt.Errorf("value '%s' is invalid for field '%s'. Options: %v", inputString, template.Label, template.Options)
 			}
 		}
 	}
-
 	return nil
 }
 
@@ -311,22 +246,21 @@ func (s *productService) CreateProductBulk(ctx context.Context, products []*mode
 	var successProducts []*model.Product
 	var failedCount int
 
-	for i, req := range products {
+	logger.Info(ctx, "service:product", "Starting bulk product creation", logrus.Fields{"total_items": len(products)})
 
+	for _, req := range products {
 		newProduct, err := s.CreateProduct(ctx, req)
-
 		if err != nil {
-
-			logrus.Warnf("[BulkInsert] Gagal pada index ke-%d (Nama: %s): %v", i, req.Name, err)
 			failedCount++
 			continue
 		}
-
 		successProducts = append(successProducts, newProduct)
 	}
 
-	// Opsional: Log summary
-	logrus.Infof("[BulkInsert] Selesai. Sukses: %d, Gagal: %d", len(successProducts), failedCount)
+	logger.Info(ctx, "service:product", "Bulk product creation completed", logrus.Fields{
+		"success": len(successProducts),
+		"failed":  failedCount,
+	})
 
 	return successProducts, nil
 }

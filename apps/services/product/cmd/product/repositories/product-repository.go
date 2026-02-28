@@ -18,21 +18,18 @@ const (
 )
 
 func (r *productRepository) InsertProduct(ctx context.Context, product *model.Product) (*model.Product, error) {
-
-	logFields := logrus.Fields{
-		"layer":    "Repository",
-		"func":     "InsertProduct()",
-		"store_id": product.StoreID,
-		"name":     product.Name,
-		"price":    product.Price,
-	}
 	now := time.Now()
 	product.CreatedAt = now
 	product.UpdatedAt = now
 
+	logger.Debug(ctx, "repository:product", "Executing InsertOne product", logrus.Fields{
+		"store_id": product.StoreID,
+		"name":     product.Name,
+	})
+
 	result, err := r.DB.Collection(productCollection).InsertOne(ctx, product)
 	if err != nil {
-		logger.LogError(logFields, "❌ Failed to insert product into MongoDB", "r.DB.Collection().Find()", err)
+		logger.Error(ctx, "repository:product", "Database error: InsertOne failed", err, nil)
 		return nil, err
 	}
 
@@ -44,41 +41,23 @@ func (r *productRepository) InsertProduct(ctx context.Context, product *model.Pr
 }
 
 func (r *productRepository) FindAllProducts(ctx context.Context, param *model.ProductQueryParam) ([]*model.Product, int64, error) {
-	logFields := logrus.Fields{
-		"layer": "Repository",
-		"func":  "FindAllProducts()",
-	}
-
-	// --- 1. MEMBANGUN QUERY FILTER (bson.M) ---
+	// --- 1. BUILD QUERY FILTER ---
 	filter := bson.M{}
-
-	// Filter Search (Nama Produk - Case Insensitive)
 	if param.Search != "" {
-		filter["name"] = bson.M{
-			"$regex":   param.Search,
-			"$options": "i",
-		}
+		filter["name"] = bson.M{"$regex": param.Search, "$options": "i"}
 	}
-
-	// Filter Category ID (Convert string ke ObjectID)
 	if param.CategoryID != "" {
 		catObjID, err := primitive.ObjectIDFromHex(param.CategoryID)
 		if err == nil {
 			filter["category_id"] = catObjID
 		}
 	}
-
-	// Filter Store ID
 	if param.StoreID != "" {
 		filter["store_id"] = param.StoreID
 	}
-
-	// Filter Condition (new/used)
 	if param.Condition != "" {
 		filter["condition"] = param.Condition
 	}
-
-	// Filter Range Harga (Min & Max)
 	if param.MinPrice > 0 || param.MaxPrice > 0 {
 		priceFilter := bson.M{}
 		if param.MinPrice > 0 {
@@ -89,55 +68,49 @@ func (r *productRepository) FindAllProducts(ctx context.Context, param *model.Pr
 		}
 		filter["price"] = priceFilter
 	}
-
-	// Hanya ambil yang aktif
 	filter["is_active"] = true
 
-	// --- 2. MEMBANGUN SORTING ---
+	// --- 2. BUILD SORTING ---
 	sortOpts := bson.D{{Key: "_id", Value: -1}}
-
 	switch param.SortBy {
 	case "price_asc":
-		sortOpts = bson.D{{Key: "price", Value: 1}} // Termurah
+		sortOpts = bson.D{{Key: "price", Value: 1}}
 	case "price_desc":
-		sortOpts = bson.D{{Key: "price", Value: -1}} // Termahal
+		sortOpts = bson.D{{Key: "price", Value: -1}}
 	case "views":
-		sortOpts = bson.D{{Key: "views", Value: -1}} // Populer
+		sortOpts = bson.D{{Key: "views", Value: -1}}
 	case "oldest":
 		sortOpts = bson.D{{Key: "_id", Value: 1}}
 	}
 
-	// --- 3. EKSEKUSI QUERY ---
+	// --- 3. EXECUTE QUERY ---
 	var products []*model.Product
 	skip := (param.Page - 1) * param.Limit
 
 	opts := options.Find()
-	opts.SetLimit(param.Limit)
-	opts.SetSkip(skip)
-	opts.SetSort(sortOpts)
-	logger.Log.Infof("🔍 Filter MongoDB: %+v", filter)
+	opts.SetLimit(param.Limit).SetSkip(skip).SetSort(sortOpts)
+
+	logger.Debug(ctx, "repository:product", "Executing Find products with filter", logrus.Fields{"filter": filter})
 
 	cursor, err := r.DB.Collection(productCollection).Find(ctx, filter, opts)
 	if err != nil {
-		logger.LogError(logFields, "❌ Failed to find products", "Find()", err)
+		logger.Error(ctx, "repository:product", "Database error: Find failed", err, nil)
 		return nil, 0, err
 	}
 	defer cursor.Close(ctx)
 
 	if err = cursor.All(ctx, &products); err != nil {
-		logger.LogError(logFields, "❌ Failed to decode products", "cursor.All()", err)
+		logger.Error(ctx, "repository:product", "Database error: Cursor decoding failed", err, nil)
 		return nil, 0, err
 	}
 
-	// --- 4. HITUNG TOTAL DATA (Sesuai Filter) ---
-
+	// --- 4. COUNT TOTAL DOCUMENTS ---
 	totalCount, err := r.DB.Collection(productCollection).CountDocuments(ctx, filter)
 	if err != nil {
-		logger.LogError(logFields, "❌ Failed to count products", "CountDocuments()", err)
+		logger.Error(ctx, "repository:product", "Database error: CountDocuments failed", err, nil)
 		return nil, 0, err
 	}
 
-	// Jika data kosong, return array kosong (nil) dan error NoDocuments
 	if len(products) == 0 {
 		return nil, 0, mongo.ErrNoDocuments
 	}
@@ -146,120 +119,99 @@ func (r *productRepository) FindAllProducts(ctx context.Context, param *model.Pr
 }
 
 func (r *productRepository) FindProductByID(ctx context.Context, productId string) (*model.Product, error) {
-	logFields := logrus.Fields{
-		"layer":      "Repository",
-		"func":       "FindProductByID()",
-		"product_id": productId,
-	}
-
 	objID, err := primitive.ObjectIDFromHex(productId)
 	if err != nil {
-		logger.LogError(logFields, "Objec Id is invalid", "primitive.ObjectIDFromHex()", err)
+		logger.Warn(ctx, "repository:product", "Operation failed: Invalid ObjectID hex", logrus.Fields{"id": productId})
 		return nil, err
 	}
+
+	logger.Debug(ctx, "repository:product", "Executing FindOne product by ID", logrus.Fields{"id": productId})
 
 	var product model.Product
 	err = r.DB.Collection(productCollection).FindOne(ctx, bson.M{"_id": objID}).Decode(&product)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			logger.Log.WithFields(logFields).Warn("Product not found")
 			return nil, err
 		}
-		logger.LogError(logFields, "❌ Failed to find product into MongoDB by id", "r.DB.Collection().FindOne()", err)
+		logger.Error(ctx, "repository:product", "Database error: FindOne failed", err, logrus.Fields{"id": productId})
 		return nil, err
 	}
 	return &product, nil
-
 }
 
 func (r *productRepository) UpdateProduct(ctx context.Context, product *model.Product, productId string) (*model.Product, error) {
-	logFields := logrus.Fields{
-		"layer":      "Repository",
-		"func":       "UpdateProduct()",
-		"store_id":   product.StoreID,
-		"product_id": product.ID,
-		"name":       product.Name,
-	}
 	now := time.Now()
 	product.UpdatedAt = now
 
 	validProductId, err := primitive.ObjectIDFromHex(productId)
 	if err != nil {
-		logger.LogError(logFields, "Objec Id is invalid", "primitive.ObjectIDFromHex()", err)
+		logger.Warn(ctx, "repository:product", "Operation failed: Invalid ObjectID hex", logrus.Fields{"id": productId})
 		return nil, err
 	}
 
+	logger.Debug(ctx, "repository:product", "Executing FindOneAndUpdate product", logrus.Fields{"id": productId})
+
 	var productUpdate model.Product
-	err = r.DB.Collection(productCollection).FindOneAndUpdate(ctx, bson.M{"_id": validProductId}, bson.M{
-		"$set": product}, options.FindOneAndUpdate().SetReturnDocument(options.After)).Decode(&productUpdate)
+	err = r.DB.Collection(productCollection).FindOneAndUpdate(
+		ctx,
+		bson.M{"_id": validProductId},
+		bson.M{"$set": product},
+		options.FindOneAndUpdate().SetReturnDocument(options.After),
+	).Decode(&productUpdate)
+
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			logger.Log.WithFields(logFields).Warn("Product not found")
 			return nil, err
 		}
-		logger.LogError(logFields, "Failed to update product into MongoDB", "r.DB.Collection().FindOneAndUpdate()", err)
+		logger.Error(ctx, "repository:product", "Database error: FindOneAndUpdate failed", err, logrus.Fields{"id": productId})
 		return nil, err
 	}
 	return &productUpdate, nil
-
 }
 
 func (r *productRepository) DeleteProduct(ctx context.Context, productId string) error {
-	logFields := logrus.Fields{
-		"layer":      "Repository",
-		"func":       "DeleteProduct()",
-		"product_id": productId,
-	}
-
 	objID, err := primitive.ObjectIDFromHex(productId)
 	if err != nil {
-		logger.LogError(logFields, "Objec Id is invalid", "primitive.ObjectIDFromHex()", err)
+		logger.Warn(ctx, "repository:product", "Operation failed: Invalid ObjectID hex", logrus.Fields{"id": productId})
 		return err
 	}
+
+	logger.Debug(ctx, "repository:product", "Executing FindOneAndDelete product", logrus.Fields{"id": productId})
+
 	err = r.DB.Collection(productCollection).FindOneAndDelete(ctx, bson.M{"_id": objID}).Err()
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			logger.Log.WithFields(logFields).Warn("Product not found")
 			return err
 		}
-		logger.LogError(logFields, "Failed to delete product from MongoDB", "r.DB.Collection().FindOneAndDelete()", err)
+		logger.Error(ctx, "repository:product", "Database error: FindOneAndDelete failed", err, logrus.Fields{"id": productId})
 		return err
 	}
-
 	return nil
-
 }
 
-func (r *productRepository) SelectProductsByCategoryId(ctx context.Context, categoriId string) ([]*model.Product, error) {
-
-	logFields := logrus.Fields{
-		"layer":       "Repository",
-		"func":        "SelectProductsByCategoriId()",
-		"category_id": categoriId,
-	}
-
-	objID, err := primitive.ObjectIDFromHex(categoriId)
+func (r *productRepository) SelectProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error) {
+	objID, err := primitive.ObjectIDFromHex(categoryId)
 	if err != nil {
-		logger.LogError(logFields, "Objec Id is invalid", "categoriId", err)
+		logger.Warn(ctx, "repository:product", "Operation failed: Invalid ObjectID hex", logrus.Fields{"id": categoryId})
 		return nil, err
 	}
 
-	var products []*model.Product
+	logger.Debug(ctx, "repository:product", "Executing Find products by category", logrus.Fields{"category_id": categoryId})
 
+	var products []*model.Product
 	cursor, err := r.DB.Collection(productCollection).Find(ctx, bson.M{"category_id": objID})
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			logger.Log.WithFields(logFields).Warn("Product not found")
 			return nil, err
 		}
-		logger.LogError(logFields, "Failed to find products by categoriId", "r.DB.Collection().Find()", err)
+		logger.Error(ctx, "repository:product", "Database error: Find failed", err, logrus.Fields{"category_id": categoryId})
 		return nil, err
 	}
-	err = cursor.All(ctx, &products)
-	if err != nil {
-		logger.LogError(logFields, "Failed to find all products by categoriId", "cursor.All()", err)
-	}
 	defer cursor.Close(ctx)
-	return products, nil
 
+	if err = cursor.All(ctx, &products); err != nil {
+		logger.Error(ctx, "repository:product", "Database error: Decoding products failed", err, nil)
+		return nil, err
+	}
+	return products, nil
 }

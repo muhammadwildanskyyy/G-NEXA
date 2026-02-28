@@ -2,67 +2,85 @@ package resources
 
 import (
 	"context"
-	"log"
+	"fmt"
 	"product-service/config"
+	"product-service/infrastructure/logger"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/event"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func ConnectMongoDB(cfg config.DatabaseConfig) *mongo.Database {
-	// 1. Langsung pakai URI String dari Config
 	uri := cfg.ConnectionURI
 
-	// 2. Setup Client Options
+	// 1. Setup Client Options dengan Monitor kustom
 	clientOptions := options.Client().ApplyURI(uri)
-	clientOptions.SetMonitor(getMonitor()) // Logger tetap nyala
+	clientOptions.SetMonitor(getMonitor())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// 3. Connect
+	// 2. Connect
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		log.Fatalf("Fatal: Gagal connect ke Mongo: %v", err)
+		logger.Error(nil, "infra:database", "Fatal: Failed to connect to MongoDB", err, nil)
+		panic(err)
 	}
 
-	// 4. Ping
+	// 3. Ping
 	if err := client.Ping(ctx, nil); err != nil {
-		log.Fatalf("Fatal: Ping Mongo gagal: %v", err)
+		logger.Error(nil, "infra:database", "Fatal: MongoDB ping failed", err, nil)
+		panic(err)
 	}
 
-	log.Println("✅ Berhasil terhubung ke MongoDB!")
+	logger.Info(nil, "infra:database", "Database connected successfully to MongoDB", logrus.Fields{
+		"db_name": cfg.Name,
+	})
 
 	return client.Database(cfg.Name)
 }
 
-// getMonitor mengembalikan konfigurasi event listener untuk logging
+// getMonitor mengintegrasikan event MongoDB ke Logger kustom kita
 func getMonitor() *event.CommandMonitor {
 	return &event.CommandMonitor{
-		// Callback saat Query DIMULAI
 		Started: func(ctx context.Context, evt *event.CommandStartedEvent) {
-			// Filter: Jangan logger perintah sistem internal (biar gak spam)
-			if evt.CommandName == "ping" || evt.CommandName == "hello" || evt.CommandName == "ismaster" {
+			if isInternalCommand(evt.CommandName) {
 				return
 			}
-
-			// Print Query (JSON Raw)
-			log.Printf("📝 [MONGO-REQ] Command: %s | Payload: %s", evt.CommandName, evt.Command)
+			// Gunakan logger kita, bukan log.Printf
+			logger.Debug(ctx, "repository:mongodb", "Command Started", logrus.Fields{
+				"command": evt.CommandName,
+				"payload": evt.Command.String(),
+			})
 		},
-
-		// Callback saat Query SUKSES
 		Succeeded: func(ctx context.Context, evt *event.CommandSucceededEvent) {
-			if evt.CommandName == "ping" || evt.CommandName == "hello" || evt.CommandName == "ismaster" {
+			if isInternalCommand(evt.CommandName) {
 				return
 			}
-			log.Printf("✅ [MONGO-OK]  Command: %s | Duration: %dms", evt.CommandName, evt.DurationNanos/1e6)
+			logger.Debug(ctx, "repository:mongodb", "Command Succeeded", logrus.Fields{
+				"command":  evt.CommandName,
+				"duration": fmt.Sprintf("%dms", evt.DurationNanos/1e6),
+			})
 		},
 
-		// Callback saat Query GAGAL
 		Failed: func(ctx context.Context, evt *event.CommandFailedEvent) {
-			log.Printf("❌ [MONGO-ERR] Command: %s | Error: %s", evt.CommandName, evt.Failure)
+			logger.Error(ctx, "repository:mongodb", "Command Failed", nil, logrus.Fields{
+				"command": evt.CommandName,
+				"error":   evt.Failure,
+			})
 		},
 	}
+}
+
+func isInternalCommand(name string) bool {
+	internal := []string{"ping", "hello", "ismaster", "buildInfo", "getFreeMonitoringStatus"}
+	for _, cmd := range internal {
+		if cmd == name {
+			return true
+		}
+	}
+	return false
 }

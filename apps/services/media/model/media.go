@@ -8,13 +8,13 @@ import (
 )
 
 type Media struct {
-	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
-	FileName  string    `gorm:"type:varchar(255)"`
-	FileURL   string    `gorm:"type:text;not null"`
-	PublicID  string    `gorm:"type:varchar(255);not null;uniqueIndex"` // Cloudinary ID
-	MediaType string    `gorm:"type:varchar(50)"`                       // image/video
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
+	FileName  string    `gorm:"type:varchar(255)" json:"file_name"`
+	FileURL   string    `gorm:"type:text;not null" json:"file_url"`
+	PublicID  string    `gorm:"type:varchar(255);not null;uniqueIndex" json:"public_id"`
+	MediaType string    `gorm:"type:varchar(50)"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (m *Media) BeforeCreate(tx *gorm.DB) (err error) {

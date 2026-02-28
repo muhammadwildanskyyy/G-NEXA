@@ -18,6 +18,7 @@ type ProductUsecase interface {
 	SelectProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error)
 	CreateProductBulk(ctx context.Context, products []*model.CreateProductRequest) ([]*model.Product, error)
 }
+
 type productUsecase struct {
 	ProductService services.ProductService
 }
@@ -27,99 +28,79 @@ func NewProductUsecase(productService services.ProductService) ProductUsecase {
 }
 
 func (p *productUsecase) CreateProduct(ctx context.Context, product *model.CreateProductRequest) (*model.Product, error) {
-	logFields := logrus.Fields{
-		"layer":       "Usecase",
-		"func":        "CreateProduct()",
-		"productName": product.Name,
-	}
-
 	result, err := p.ProductService.CreateProduct(ctx, product)
 	if err != nil {
-		logger.LogError(logFields, "Failed to create product", " p.ProductService.CreateProduct()", err)
 		return nil, err
 	}
-	return result, nil
 
+	logger.Info(ctx, "usecase:product", "Product creation orchestrated successfully", logrus.Fields{
+		"product_name": product.Name,
+	})
+	return result, nil
 }
 
 func (p *productUsecase) GetProductByID(ctx context.Context, id string) (*model.Product, error) {
-	logFields := logrus.Fields{
-		"layer":     "Usecase",
-		"func":      "GetProductByID()",
-		"productId": id,
-	}
 	result, err := p.ProductService.GetProductById(ctx, id)
 	if err != nil {
-		logger.LogError(logFields, "Failed to get product", " p.ProductService.GetProductById()", err)
 		return nil, err
 	}
+
+	// Silent success for read operations
 	return result, nil
 }
 
 func (p *productUsecase) GetProducts(ctx context.Context, params *model.ProductQueryParam) (*model.PaginationProductResult, error) {
-	logFields := logrus.Fields{
-		"layer": "Usecase",
-		"func":  "GetProducts()",
-	}
-
 	result, err := p.ProductService.GetProducts(ctx, params)
 	if err != nil {
-		logger.LogError(logFields, "Failed to get products", "p.ProductService.GetProducts()", err)
 		return nil, err
 	}
+
+	// Silent success for read operations
 	return result, nil
 }
 
 func (p *productUsecase) UpodateProduct(ctx context.Context, product *model.UpdateProductRequest, productId string) (*model.Product, error) {
-	logFields := logrus.Fields{
-		"layer":        "Usecase",
-		"func":         "UpodateProduct()",
-		"product_name": product.Name,
-	}
-
 	result, err := p.ProductService.UpdateProduct(ctx, product, productId)
 	if err != nil {
-		logger.LogError(logFields, "Failed to update product", " p.ProductService.UpdateProduct()", err)
 		return nil, err
 	}
-	return result, nil
 
+	logger.Info(ctx, "usecase:product", "Product update orchestrated successfully", logrus.Fields{
+		"product_id": productId,
+	})
+	return result, nil
 }
 
 func (p *productUsecase) DeleteProduct(ctx context.Context, id string) error {
-	logFields := logrus.Fields{
-		"layer": "Usecase",
-		"func":  "DeleteProduct()",
-	}
 	err := p.ProductService.DeleteProduct(ctx, id)
 	if err != nil {
-		logger.LogError(logFields, "Failed to delete product", " p.ProductService.DeleteProduct()", err)
 		return err
 	}
+
+	logger.Info(ctx, "usecase:product", "Product deletion orchestrated successfully", logrus.Fields{
+		"product_id": id,
+	})
 	return nil
 }
 
 func (p *productUsecase) SelectProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error) {
-	logFields := logrus.Fields{
-		"layer":      "Usecase",
-		"func":       "SelectProductsByCategoryId()",
-		"categoryId": categoryId,
-	}
-
 	result, err := p.ProductService.GetProductsByCategoryId(ctx, categoryId)
 	if err != nil {
-		logger.LogError(logFields, "Failed to get products", " p.ProductService.GetProductsByCategoryId()", err)
 		return nil, err
 	}
-	return result, nil
 
+	// Silent success for read operations
+	return result, nil
 }
 
 func (p *productUsecase) CreateProductBulk(ctx context.Context, products []*model.CreateProductRequest) ([]*model.Product, error) {
-
 	result, err := p.ProductService.CreateProductBulk(ctx, products)
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Info(ctx, "usecase:product", "Bulk product creation orchestrated successfully", logrus.Fields{
+		"total_processed": len(result),
+	})
 	return result, nil
 }

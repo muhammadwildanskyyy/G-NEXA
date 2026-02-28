@@ -11,6 +11,7 @@ type AppConfig struct {
 type APP struct {
 	Port       string `mapstructure:"PORT"`
 	AuthSecret string `mapstructure:"AUTH_SECRET"`
+	Env        string `mapstructure:"ENV"`
 }
 
 type ElasticsearchConfig struct {

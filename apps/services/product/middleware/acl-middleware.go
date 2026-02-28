@@ -11,21 +11,15 @@ import (
 
 func AclMiddleware(allowedRoles []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 1. Setup Base Log Fields
-		logFields := logrus.Fields{
-			"layer":         "Middleware",
-			"func":          "AclMiddleware()",
-			"path":          c.Request.URL.Path,
-			"allowed_roles": allowedRoles,
-		}
+		ctx := c.Request.Context()
 
-		if userID, exists := c.Get("user_id"); exists {
-			logFields["user_id"] = userID
-		}
-
+		// 1. Check for User Role in Gin Context (usually set by AuthMiddleware)
 		val, exists := c.Get("user_role")
 		if !exists {
-			logger.Log.WithFields(logFields).Warn("🚨 User role not found in context (AuthMiddleware might have failed)")
+			logger.Warn(ctx, "middleware:acl", "Access denied: User role missing from context", logrus.Fields{
+				"path":          c.Request.URL.Path,
+				"allowed_roles": allowedRoles,
+			})
 			utils.ResponseError(c, http.StatusUnauthorized, "access not permitted")
 			c.Abort()
 			return
@@ -33,14 +27,13 @@ func AclMiddleware(allowedRoles []string) gin.HandlerFunc {
 
 		userRole, ok := val.(string)
 		if !ok {
-			logger.Log.WithFields(logFields).Warn("🚨 User role in context is not a string")
+			logger.Warn(ctx, "middleware:acl", "Access denied: Invalid user role type", nil)
 			utils.ResponseError(c, http.StatusUnauthorized, "access not permitted")
 			c.Abort()
 			return
 		}
 
-		logFields["user_role"] = userRole
-
+		// 2. Role Validation Logic
 		isAllowed := false
 		for _, r := range allowedRoles {
 			if r == userRole {
@@ -50,12 +43,17 @@ func AclMiddleware(allowedRoles []string) gin.HandlerFunc {
 		}
 
 		if !isAllowed {
-			logger.Log.WithFields(logFields).Warn("⛔ Access Denied: User role does not match allowed roles")
+			logger.Warn(ctx, "middleware:acl", "Access denied: Role not authorized", logrus.Fields{
+				"user_role":     userRole,
+				"allowed_roles": allowedRoles,
+				"path":          c.Request.URL.Path,
+			})
 			utils.ResponseError(c, http.StatusUnauthorized, "access not permitted")
 			c.Abort()
 			return
 		}
 
+		// Silent success: move to next handler
 		c.Next()
 	}
 }

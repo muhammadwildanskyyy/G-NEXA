@@ -2,12 +2,14 @@ package repositories
 
 import (
 	"context"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
-	"media-service/infrastructure/logger"
+
+	"media-service/infrastructure/logger" // Sesuaikan path GNEXA logger Anda
 	"media-service/model"
-	"time"
 )
 
 type MediaRepository interface {
@@ -25,19 +27,17 @@ func NewMediaRepository(db *gorm.DB) MediaRepository {
 }
 
 func (r *mediaRepository) Create(ctx context.Context, media *model.Media) (*model.Media, error) {
-	logFields := logrus.Fields{
-		"layer":    "Repository",
-		"func":     "Create",
-		"filename": media.FileName,
-	}
-
 	now := time.Now()
 	media.CreatedAt = now
 	media.UpdatedAt = now
 
+	// 🚀 WithContext(ctx) memastikan GORM GNEXA Adapter mencetak query dengan Trace ID!
 	err := r.DB.WithContext(ctx).Create(media).Error
 	if err != nil {
-		logger.LogError(logFields, "Failed to create media metadata", "r.DB.Create()", err)
+		// Gunakan helper Error standar GNEXA
+		logger.Error(ctx, "repository:media", "Failed to create media metadata in database", err, logrus.Fields{
+			"file_name": media.FileName,
+		})
 		return nil, err
 	}
 
@@ -45,15 +45,13 @@ func (r *mediaRepository) Create(ctx context.Context, media *model.Media) (*mode
 }
 
 func (r *mediaRepository) FindByID(ctx context.Context, id string) (*model.Media, error) {
-	logFields := logrus.Fields{
-		"layer":    "Repository",
-		"func":     "FindByID",
-		"media_id": id,
-	}
-
 	validID, err := uuid.Parse(id)
 	if err != nil {
-		logger.LogError(logFields, "Invalid UUID format", "uuid.Parse()", err)
+		// Invalid format adalah kesalahan input (Client Error), jadi gunakan Warn
+		logger.Warn(ctx, "repository:media", "Invalid UUID format provided", logrus.Fields{
+			"media_id": id,
+			"error":    err.Error(),
+		})
 		return nil, err
 	}
 
@@ -61,10 +59,17 @@ func (r *mediaRepository) FindByID(ctx context.Context, id string) (*model.Media
 	err = r.DB.WithContext(ctx).Where("id = ?", validID).First(&media).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			logger.Log.WithFields(logFields).Warn("Media record not found")
+			// Data tidak ditemukan adalah hal lumrah di bisnis logik, gunakan Debug agar production senyap
+			logger.Debug(ctx, "repository:media", "Media record not found in database", logrus.Fields{
+				"media_id": id,
+			})
 			return nil, err
 		}
-		logger.LogError(logFields, "Error find media by ID", "r.DB.First()", err)
+
+		// Jika error selain tidak ketemu (misal koneksi putus), gunakan Error
+		logger.Error(ctx, "repository:media", "Failed to find media by ID", err, logrus.Fields{
+			"media_id": id,
+		})
 		return nil, err
 	}
 
@@ -72,15 +77,11 @@ func (r *mediaRepository) FindByID(ctx context.Context, id string) (*model.Media
 }
 
 func (r *mediaRepository) Delete(ctx context.Context, media *model.Media) error {
-	logFields := logrus.Fields{
-		"layer":    "Repository",
-		"func":     "Delete",
-		"media_id": media.ID,
-	}
-
 	err := r.DB.WithContext(ctx).Delete(media).Error
 	if err != nil {
-		logger.LogError(logFields, "Failed to delete media from database", "r.DB.Delete()", err)
+		logger.Error(ctx, "repository:media", "Failed to delete media from database", err, logrus.Fields{
+			"media_id": media.ID, // Pastikan media.ID memiliki nilai
+		})
 		return err
 	}
 

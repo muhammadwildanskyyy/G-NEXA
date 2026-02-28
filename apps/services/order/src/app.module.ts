@@ -6,7 +6,7 @@ import { validateEnv } from './config/env.validation';
 import { OrdersModule } from './modules/orders/orders.module';
 import { CommonModule } from './common/common.module';
 import { InfrastructureModule } from './infrastructure/infrastructure.module';
-import { HttpLoggerMiddleware } from './common/middleware/auth/auth.middleware';
+import { HttpLoggerMiddleware } from './common/middleware/logger/logger.middleware';
 import { ClsModule } from 'nestjs-cls';
 
 @Module({

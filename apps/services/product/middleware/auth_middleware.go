@@ -13,39 +13,37 @@ import (
 
 func AuthMiddleware(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// 1. Setup Base Log Fields
-		logFields := logrus.Fields{
-			"layer": "Middleware",
-			"func":  "AuthMiddleware()",
-			"path":  c.Request.URL.Path,
-			"ip":    c.ClientIP(),
-		}
+		ctx := c.Request.Context()
 
 		authHeader := c.Request.Header.Get("Authorization")
 		if authHeader == "" {
-			logger.Log.WithFields(logFields).Warn("Authorization header is empty")
+			logger.Warn(ctx, "middleware:auth", "Authentication denied: Missing authorization header", nil)
 			utils.ResponseError(c, http.StatusUnauthorized, "Authorization header is empty")
 			c.Abort()
 			return
 		}
 
-		tokenString := strings.Split(authHeader, " ")
-		if len(tokenString) != 2 {
-			logger.Log.WithFields(logFields).Warn("Authorization header format is invalid (must be 'Bearer <token>')")
+		tokenParts := strings.Split(authHeader, " ")
+		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
+			logger.Warn(ctx, "middleware:auth", "Authentication denied: Invalid token format", logrus.Fields{
+				"header": authHeader,
+			})
 			utils.ResponseError(c, http.StatusUnauthorized, "Authorization header is invalid")
 			c.Abort()
 			return
 		}
 
-		c.Set("access_token", tokenString[1])
+		tokenString := tokenParts[1]
+		c.Set("access_token", tokenString)
 
-		token, err := jwt.Parse(tokenString[1], func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return []byte(secret), nil
 		})
 
 		if err != nil || !token.Valid {
-			// Menggunakan format log error seperti di repository kamu
-			logger.LogError(logFields, "❌ Failed to parse or validate JWT token", "jwt.Parse()", err)
+			logger.Warn(ctx, "middleware:auth", "Authentication denied: Invalid or expired token", logrus.Fields{
+				"error": err.Error(),
+			})
 			utils.ResponseError(c, http.StatusUnauthorized, "invalid token")
 			c.Abort()
 			return
@@ -53,34 +51,33 @@ func AuthMiddleware(secret string) gin.HandlerFunc {
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			logger.Log.WithFields(logFields).Warn("Invalid token claims format")
+			logger.Warn(ctx, "middleware:auth", "Authentication denied: Invalid token claims format", nil)
 			utils.ResponseError(c, http.StatusUnauthorized, "invalid token")
 			c.Abort()
 			return
 		}
 
-		// 2. Ambil User ID secara aman
-		if userID, ok := claims["user_id"].(string); ok {
-			c.Set("user_id", userID)
-			// Tambahkan userID ke logFields agar log berikutnya (di controller/repo) tahu ini request siapa
-			logFields["user_id"] = userID
-		} else {
-			logger.Log.WithFields(logFields).Warn("user_id missing or invalid in token claims")
+		// 1. Securely Extract User ID
+		userID, userOk := claims["user_id"].(string)
+		if !userOk {
+			logger.Warn(ctx, "middleware:auth", "Authentication denied: user_id missing in claims", nil)
 			utils.ResponseError(c, http.StatusUnauthorized, "invalid token")
 			c.Abort()
 			return
 		}
+		c.Set("user_id", userID)
 
-		// 3. Ambil User Role secara aman
-		if userRole, ok := claims["user_role"].(string); ok {
-			c.Set("user_role", userRole)
-		} else {
-			logger.Log.WithFields(logFields).Warn("user_role missing or invalid in token claims")
+		// 2. Securely Extract User Role
+		userRole, roleOk := claims["user_role"].(string)
+		if !roleOk {
+			logger.Warn(ctx, "middleware:auth", "Authentication denied: user_role missing in claims", nil)
 			utils.ResponseError(c, http.StatusUnauthorized, "invalid token")
 			c.Abort()
 			return
 		}
+		c.Set("user_role", userRole)
 
+		// Silent success for valid authentication
 		c.Next()
 	}
 }

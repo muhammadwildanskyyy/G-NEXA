@@ -1,6 +1,6 @@
 import app from "./app";
 import { connectDB } from "./lib/database";
-import { logger } from "./lib/logger";
+import {log} from "./lib/logger";
 import {connectConsumer, disconnectConsumer} from "./infrastructure/kafka/consumer.ts";
 import {connectProducer, disconnectProducer} from "./infrastructure/kafka/producer.ts"; // Opsional: gunakan logger kamu daripada console.log
 
@@ -13,13 +13,13 @@ async function bootstrap() {
 
     // 1. Hubungkan Database
     await connectDB();
-    console.log("Database connected successfully");
+
 
     // 2. Jalankan Server
-    const server = app.listen(PORT, () => logger.info("Server running"));
+    const server = app.listen(PORT, () => log.info("APP",`Server Running on localhost:${PORT}`,));
 
     const shutdown = async () => {
-      logger.info("Shutting down gracefully...");
+      log.info("APP","APP SHUTDOWN");
       server.close();
       await disconnectProducer();
       await disconnectConsumer();
@@ -29,7 +29,8 @@ async function bootstrap() {
     process.on("SIGTERM", shutdown); // Trigger dari Docker/K8s
     process.on("SIGINT", shutdown);
   } catch (error) {
-    console.error("Critical error during server startup:", error);
+
+    log.error("APP","Critical error during server startup",error);
     process.exit(1);
   }
 }

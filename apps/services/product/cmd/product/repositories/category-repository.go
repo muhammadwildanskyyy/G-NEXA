@@ -34,18 +34,15 @@ func NewCategoryRepository(db *mongo.Database) CategoryRepository {
 }
 
 func (c *categoryRepository) InsertCategory(ctx context.Context, category *model.Category) (*model.Category, error) {
-	logFields := logrus.Fields{
-		"layer":         "Repository",
-		"func":          "InsertCategory",
-		"category_name": category.Name,
-	}
 	now := time.Now()
 	category.CreatedAt = now
 	category.UpdatedAt = now
 
+	logger.Debug(ctx, "repository:category", "Executing InsertOne category", logrus.Fields{"name": category.Name})
+
 	result, err := c.DB.Collection(CategoryCollection).InsertOne(ctx, category)
 	if err != nil {
-		logger.LogError(logFields, "❌ Failed to insert category into MongoDB", "c.DB.Collection().InsertOne()", err)
+		logger.Error(ctx, "repository:category", "Database error: InsertOne failed", err, nil)
 		return nil, err
 	}
 
@@ -57,83 +54,72 @@ func (c *categoryRepository) InsertCategory(ctx context.Context, category *model
 }
 
 func (c *categoryRepository) UpdateCategory(ctx context.Context, category *model.Category, categoryId string) (*model.Category, error) {
-	logFields := logrus.Fields{
-		"layer":         "Repository",
-		"func":          "UpdateCategory",
-		"category_name": category.Name,
-		"category_id":   category.ID,
-	}
 	now := time.Now()
 	category.UpdatedAt = now
 
-	validcategoryId, err := primitive.ObjectIDFromHex(categoryId)
+	validCategoryId, err := primitive.ObjectIDFromHex(categoryId)
 	if err != nil {
-		logger.LogError(logFields, "Objec id is invalid", "primitive.ObjectIDFromHex()", err)
+		logger.Warn(ctx, "repository:category", "Operation failed: Invalid ObjectID hex", logrus.Fields{"id": categoryId})
 		return nil, err
 	}
 
+	logger.Debug(ctx, "repository:category", "Executing FindOneAndUpdate category", logrus.Fields{"id": categoryId})
+
 	var categoryUpdate model.Category
-	err = c.DB.Collection(CategoryCollection).FindOneAndUpdate(ctx, bson.M{"_id": validcategoryId}, bson.M{
-		"$set": category}, options.FindOneAndUpdate().SetReturnDocument(options.After)).Decode(&categoryUpdate)
+	err = c.DB.Collection(CategoryCollection).FindOneAndUpdate(
+		ctx,
+		bson.M{"_id": validCategoryId},
+		bson.M{"$set": category},
+		options.FindOneAndUpdate().SetReturnDocument(options.After),
+	).Decode(&categoryUpdate)
+
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			logger.Log.WithFields(logFields).Warn("Category not found")
-			return nil, err
+			return nil, err // Biarkan layer di atasnya yang melakukan log Warn "Not Found"
 		}
-		logger.LogError(logFields, "Failed to update category", "c.DB.Collection().FindOneAndUpdate()", err)
+		logger.Error(ctx, "repository:category", "Database error: FindOneAndUpdate failed", err, logrus.Fields{"id": categoryId})
 		return nil, err
 	}
 	return &categoryUpdate, nil
-
 }
 
 func (c *categoryRepository) DeleteCategory(ctx context.Context, categoryId string) error {
-	logFields := logrus.Fields{
-		"layer":       "Repository",
-		"func":        "DeleteCategory",
-		"category_id": categoryId,
-	}
-
 	isValidCategoryId, err := primitive.ObjectIDFromHex(categoryId)
 	if err != nil {
-		logger.LogError(logFields, "Objec id is invalid", "primitive.ObjectIDFromHex()", err)
+		logger.Warn(ctx, "repository:category", "Operation failed: Invalid ObjectID hex", logrus.Fields{"id": categoryId})
 		return err
 	}
+
+	logger.Debug(ctx, "repository:category", "Executing FindOneAndDelete category", logrus.Fields{"id": categoryId})
+
 	err = c.DB.Collection(CategoryCollection).FindOneAndDelete(ctx, bson.M{"_id": isValidCategoryId}).Err()
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			logger.Log.WithFields(logFields).Warn("Category not found")
 			return err
 		}
-		logger.LogError(logFields, "Failed to delete category", "c.DB.Collection().FindOneAndDelete()", err)
+		logger.Error(ctx, "repository:category", "Database error: FindOneAndDelete failed", err, logrus.Fields{"id": categoryId})
 		return err
 	}
 	return nil
 }
 
 func (c *categoryRepository) SelectCategories(ctx context.Context) ([]*model.Category, error) {
-	logFields := logrus.Fields{
-		"layer": "Repository",
-		"func":  "SelectCategories",
-	}
+	logger.Debug(ctx, "repository:category", "Executing Find all categories", nil)
 
 	var categories []*model.Category
-
 	cursor, err := c.DB.Collection(CategoryCollection).Find(ctx, bson.M{})
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-
-			logger.Log.WithFields(logFields).Warn("Category not found")
 			return nil, err
 		}
-		logger.LogError(logFields, " Failed to find all category into MongoDB", "c.DB.Collection().Find()", err)
+		logger.Error(ctx, "repository:category", "Database error: Find failed", err, nil)
 		return nil, err
 	}
+	defer cursor.Close(ctx)
 
 	err = cursor.All(ctx, &categories)
-	defer cursor.Close(ctx)
 	if err != nil {
-		logger.LogError(logFields, "Failed to find all category into MongoDB", "cursor.All()", err)
+		logger.Error(ctx, "repository:category", "Database error: Cursor decoding failed", err, nil)
 		return nil, err
 	}
 
@@ -145,27 +131,22 @@ func (c *categoryRepository) SelectCategories(ctx context.Context) ([]*model.Cat
 }
 
 func (c *categoryRepository) SelectCategoryById(ctx context.Context, categoryId string) (*model.Category, error) {
-	logFields := logrus.Fields{
-		"layer":       "Repository",
-		"func":        "SelectCategoryById",
-		"category_id": categoryId,
-	}
 	isValidCategoryId, err := primitive.ObjectIDFromHex(categoryId)
 	if err != nil {
-		logger.LogError(logFields, "Objec id is invalid", "primitive.ObjectIDFromHex()", err)
+		logger.Warn(ctx, "repository:category", "Operation failed: Invalid ObjectID hex", logrus.Fields{"id": categoryId})
 		return nil, err
 	}
+
+	logger.Debug(ctx, "repository:category", "Executing FindOne category by ID", logrus.Fields{"id": categoryId})
 
 	var category *model.Category
 	err = c.DB.Collection(CategoryCollection).FindOne(ctx, bson.M{"_id": isValidCategoryId}).Decode(&category)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			logger.Log.WithFields(logFields).Warn("Category not found")
 			return nil, err
 		}
-		logger.LogError(logFields, "Failed to find category", "c.DB.Collection().FindOne()", err)
+		logger.Error(ctx, "repository:category", "Database error: FindOne failed", err, logrus.Fields{"id": categoryId})
 		return nil, err
 	}
 	return category, nil
-
 }

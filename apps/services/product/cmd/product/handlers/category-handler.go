@@ -32,132 +32,112 @@ func NewCategoryHandler(categoryUsecase usecases.CategoryUsecase) CategoryHandle
 }
 
 func (ch *categoryHandler) CreateCategory(c *gin.Context) {
-	logFields := logrus.Fields{
-		"layer":  "handler",
-		"func":   "CreateCategory()",
-		"method": c.Request.Method,
-	}
+	ctx := c.Request.Context()
 	var param *model.CreateCategoryRequest
+
 	if err := c.ShouldBindJSON(&param); err != nil {
-		logger.LogError(logFields, "Failed validate Request", "c.ShouldBindJSON(&param)", err)
+		logger.Warn(ctx, "delivery:http", "Category registration denied: Invalid request body", nil)
 		utils.ResponseError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	result, err := ch.CategoryUsecase.CreateCategory(c.Request.Context(), param)
+	result, err := ch.CategoryUsecase.CreateCategory(ctx, param)
 	if err != nil {
-		logger.LogError(logFields, "Failed Create Category", "ch.CategoryUsecase.CreateCategory()", err)
+		// Error ditangani middleware global atau logged di layer usecase/repo
 		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	logger.Info(ctx, "delivery:http", "Category created successfully response sent", logrus.Fields{
+		"category_id": result.ID,
+	})
 	utils.ResponseSuccess(c, result, "Success Create Category", http.StatusCreated)
 }
 
 func (ch *categoryHandler) Updatecategory(c *gin.Context) {
-	logFields := logrus.Fields{
-		"layer":  "handler",
-		"func":   "UpdateCategory()",
-		"method": c.Request.Method,
-	}
+	ctx := c.Request.Context()
 	categoryId := c.Param("category_id")
+
 	if categoryId == "" {
-		logger.LogError(logFields, "Category Id empty", "c.ShouldBindJSON()", errors.New("Product Id empty"))
-		utils.ResponseError(c, http.StatusBadRequest, "Product Id is required")
+		logger.Warn(ctx, "delivery:http", "Category update denied: Missing category_id parameter", nil)
+		utils.ResponseError(c, http.StatusBadRequest, "Category Id is required")
 		return
 	}
 
 	var param *model.CreateCategoryRequest
 	if err := c.ShouldBindJSON(&param); err != nil {
-		logger.LogError(logFields, "Failed validate Request", "c.ShouldBindJSON(&param)", err)
+		logger.Warn(ctx, "delivery:http", "Category update denied: Invalid request body", nil)
 		utils.ResponseError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	result, err := ch.CategoryUsecase.UpdateCategory(c.Request.Context(), param, categoryId)
+	result, err := ch.CategoryUsecase.UpdateCategory(ctx, param, categoryId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			logger.Log.WithFields(logFields).Warn("Category not found")
+			logger.Warn(ctx, "delivery:http", "Category update failed: Document not found", logrus.Fields{"category_id": categoryId})
 			utils.ResponseError(c, http.StatusNotFound, "Category not found")
 			return
 		}
-		logger.LogError(logFields, "Failed Update Category", "ch.CategoryUsecase.UpdateCategory()", err)
 		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	logger.Info(ctx, "delivery:http", "Category update response sent", logrus.Fields{"category_id": categoryId})
 	utils.ResponseSuccess(c, result, "Success Update Category", http.StatusOK)
 }
 
 func (ch *categoryHandler) Deletecategory(c *gin.Context) {
-	logFields := logrus.Fields{
-		"layer":  "handler",
-		"func":   "DeleteCategory()",
-		"method": c.Request.Method,
-	}
+	ctx := c.Request.Context()
 	categoryId := c.Param("category_id")
+
 	if categoryId == "" {
-		logger.LogError(logFields, "Category Id empty", "c.ShouldBindJSON()", errors.New("Product Id empty"))
-		utils.ResponseError(c, http.StatusBadRequest, "Product Id is required")
+		logger.Warn(ctx, "delivery:http", "Category deletion denied: Missing category_id", nil)
+		utils.ResponseError(c, http.StatusBadRequest, "Category Id is required")
 		return
 	}
 
-	err := ch.CategoryUsecase.DeleteCategory(c.Request.Context(), categoryId)
+	err := ch.CategoryUsecase.DeleteCategory(ctx, categoryId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			logger.Log.WithFields(logFields).Warn("Category not found")
+			logger.Warn(ctx, "delivery:http", "Category deletion failed: Document not found", logrus.Fields{"category_id": categoryId})
 			utils.ResponseError(c, http.StatusNotFound, "Category not found")
 			return
 		}
-		logger.LogError(logFields, "Failed Delete Category", "ch.CategoryUsecase.DeleteCategory()", err)
 		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	logger.Info(ctx, "delivery:http", "Category deletion response sent", logrus.Fields{"category_id": categoryId})
 	utils.ResponseSuccess(c, nil, "Success Delete Category", http.StatusOK)
 }
 
 func (ch *categoryHandler) GetCategoryById(c *gin.Context) {
-	logFields := logrus.Fields{
-		"layer":  "handler",
-		"func":   "GetCategoryById()",
-		"method": c.Request.Method,
-	}
+	ctx := c.Request.Context()
 	categoryId := c.Param("category_id")
-	if categoryId == "" {
-		logger.LogError(logFields, "Category Id empty", "c.ShouldBindJSON()", errors.New("Product Id empty"))
-		utils.ResponseError(c, http.StatusBadRequest, "Product Id is required")
-		return
-	}
 
-	result, err := ch.CategoryUsecase.GetCategoryById(c.Request.Context(), categoryId)
+	result, err := ch.CategoryUsecase.GetCategoryById(ctx, categoryId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			logger.Log.WithFields(logFields).Warn("Category not found")
+			logger.Warn(ctx, "delivery:http", "Category retrieval: No document found", logrus.Fields{"category_id": categoryId})
 			utils.ResponseError(c, http.StatusNotFound, "Category not found")
 			return
 		}
-		logger.LogError(logFields, "Failed Get Category", "ch.CategoryUsecase.GetCategoryById()", err)
 		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	// Silent success for read operations
 	utils.ResponseSuccess(c, result, "Success Get Category", http.StatusOK)
 }
 
 func (ch *categoryHandler) GetAllCategory(c *gin.Context) {
-	logFields := logrus.Fields{
-		"layer":  "handler",
-		"func":   "GetAllCategory()",
-		"method": c.Request.Method,
-	}
-
-	result, err := ch.CategoryUsecase.GetAllCategory(c.Request.Context())
+	ctx := c.Request.Context()
+	result, err := ch.CategoryUsecase.GetAllCategory(ctx)
 	if err != nil {
-		if errors.Is(err, mongo.ErrNoDocuments) {
-			logger.Log.WithFields(logFields).Warn("Category not found")
-			utils.ResponseError(c, http.StatusNotFound, "Category not found")
-			return
-		}
-		logger.LogError(logFields, "Failed Get Category", "ch.CategoryUsecase.GetAllCategory()", err)
 		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	utils.ResponseSuccess(c, result, "Success Get Category", http.StatusOK)
+
+	// Silent success for read operations
+	utils.ResponseSuccess(c, result, "Success Get All Categories", http.StatusOK)
 }

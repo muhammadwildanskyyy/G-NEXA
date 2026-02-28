@@ -1,5 +1,6 @@
 import { kafkaClient } from "./client";
-import {logger} from "../../lib/logger.ts";
+import {log} from "../../lib/logger.ts";
+
 
 export const KAFKA_TOPIC_USER:string = "user.events"
 
@@ -17,12 +18,12 @@ const producer = kafkaClient.producer({
 
 export const connectProducer = async () => {
     await producer.connect();
-    logger.info("✅ Kafka Producer connected");
+    log.info("kafka","✅ Kafka Producer connected");
 };
 
 export const disconnectProducer = async () => {
     await producer.disconnect();
-    logger.info("❌ Kafka Producer disconnected");
+    log.info("kafka","❌ Kafka Producer disconnected");
 };
 
 export const publishEvent = async (topic: string, key: string, payload: any) => {
@@ -32,9 +33,9 @@ export const publishEvent = async (topic: string, key: string, payload: any) => 
             messages: [{ key, value: JSON.stringify(payload) }],
 
         });
-        logger.info(`Event published to ${topic}`, { key });
+        log.info("kafka",`Event published to ${topic}`, { key });
     } catch (error) {
-        logger.error(`Failed to publish event to ${topic}`, { error });
+        log.error("kafka",`Failed to publish event to ${topic}`, { error });
         throw error;
     }
 };

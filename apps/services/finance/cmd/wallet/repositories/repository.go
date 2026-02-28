@@ -2,55 +2,62 @@ package repositories
 
 import (
 	"context"
-	"finance/infrastructure/logger"
-	"finance/model"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+
+	"finance/infrastructure/logger"
+	"finance/model"
 )
 
 type WalletRepository interface {
-	InserWallet(ctx context.Context, userId string) (*model.Wallet, error)
-	SelectWalletByUSerId(ctx context.Context, userId string) (*model.Wallet, error)
+	InsertWallet(ctx context.Context, userId string) (*model.Wallet, error)
+	SelectWalletByUserID(ctx context.Context, userId string) (*model.Wallet, error)
 }
+
 type walletRepository struct {
 	DB *gorm.DB
 }
 
-func NewWalletrepository(db *gorm.DB) WalletRepository {
+func NewWalletRepository(db *gorm.DB) WalletRepository {
 	return &walletRepository{DB: db}
 }
 
-func (w *walletRepository) InserWallet(ctx context.Context, userId string) (*model.Wallet, error) {
-	logFields := logrus.Fields{
-		"layer":   "Repository",
-		"func":    "InserWallet",
-		"user_id": userId,
-	}
+func (w *walletRepository) InsertWallet(ctx context.Context, userId string) (*model.Wallet, error) {
 	var wallet model.Wallet
 	wallet.UserID = userId
-	err := w.DB.Model(model.Wallet{}).WithContext(ctx).Create(&wallet).Error
+
+	err := w.DB.WithContext(ctx).Create(&wallet).Error
 	if err != nil {
-		logger.LogError(logFields, "Failed Create Wallet", "err := w.DB.Model().WithContext().Create().Error", err)
+
+		logger.Error(ctx, "repository:wallet", "Failed to insert wallet to database", err, logrus.Fields{
+			"wallet_user_id": userId,
+		})
 		return nil, err
 	}
 
 	return &wallet, nil
-
 }
 
-func (w *walletRepository) SelectWalletByUSerId(ctx context.Context, userId string) (*model.Wallet, error) {
-	logFields := logrus.Fields{
-		"layer":   "Repository",
-		"func":    "SelectWalletByUSerId",
-		"user_id": userId,
-	}
+func (w *walletRepository) SelectWalletByUserID(ctx context.Context, userId string) (*model.Wallet, error) {
 	var wallet model.Wallet
-	err := w.DB.Model(model.Wallet{}).WithContext(ctx).First(&wallet).Error
+
+	err := w.DB.WithContext(ctx).Where("user_id = ?", userId).First(&wallet).Error
+
 	if err != nil {
-		logger.LogError(logFields, "Failed Select Wallet Bi User", "w.DB.Model().WithContext().First().Error", err)
+
+		if err == gorm.ErrRecordNotFound {
+			logger.Debug(ctx, "repository:wallet", "Wallet record not found for user", logrus.Fields{
+				"wallet_user_id": userId,
+			})
+			return nil, err
+		}
+
+		logger.Error(ctx, "repository:wallet", "Failed to select wallet by User ID", err, logrus.Fields{
+			"wallet_user_id": userId,
+		})
 		return nil, err
 	}
-	return &wallet, nil
 
+	return &wallet, nil
 }

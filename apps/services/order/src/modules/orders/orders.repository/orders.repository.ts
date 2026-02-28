@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Order, Prisma } from '@prisma/client';
 import { PrismaService } from 'src/database/prisma/prisma.service';
-import { WinstonLoggerService } from '../../../infrastructure/logger/logger.service';
+import { AppLogger } from '../../../infrastructure/logger/app.logger';
 
 @Injectable()
 export class OrdersRepository {
   s;
   constructor(
     private readonly database: PrismaService,
-    private readonly logger: WinstonLoggerService,
+    private readonly logger: AppLogger,
   ) {}
 
   async createOrderWithItems(
