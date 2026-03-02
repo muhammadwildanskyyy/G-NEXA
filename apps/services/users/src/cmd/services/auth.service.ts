@@ -10,7 +10,11 @@ import {
 } from "../repository/user.repository";
 import { CLIENT_HOST, EMAIL_SMTP_USER } from "../../utils/env";
 import { renderMailHtml, sendMail } from "../../utils/mail/mail";
-import { KAFKA_TOPIC_USER, publishEvent, type UserEventPayload } from "../../infrastructure/kafka/producer";
+import {
+  KAFKA_USER_TOPIC,
+  publishEvent,
+  type UserEventPayload,
+} from "../../infrastructure/kafka/producer";
 import { log } from "../../lib/logger";
 
 export class AuthService {
@@ -19,10 +23,14 @@ export class AuthService {
   register = async (user: Prisma.UserCreateInput): Promise<User> => {
     const userExist = await this.userRepository.findByEmail(user.email);
     if (userExist) {
-      log.warn("service:auth", "Registration failed: Email already registered", { email: user.email });
+      log.warn(
+        "service:auth",
+        "Registration failed: Email already registered",
+        { email: user.email },
+      );
       throw new AppError(
-          "This Email or Phone Number Already Registered",
-          HttpStatus.BAD_REQUEST,
+        "This Email or Phone Number Already Registered",
+        HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -38,7 +46,9 @@ export class AuthService {
 
     const UserCreate = await this.userRepository.createUser(finalUser);
 
-    log.info("service:auth", "New user successfully registered", { user_id: UserCreate.id });
+    log.info("service:auth", "New user successfully registered", {
+      user_id: UserCreate.id,
+    });
     this.sendActivationCode(UserCreate);
 
     return UserCreate;
@@ -47,29 +57,37 @@ export class AuthService {
   login = async (userData: TUserLogin): Promise<string> => {
     const userExist = await this.userRepository.findByEmail(userData.email);
     if (!userExist) {
-      log.warn("service:auth", "Login failed: Email not registered", { email: userData.email });
+      log.warn("service:auth", "Login failed: Email not registered", {
+        email: userData.email,
+      });
       throw new AppError("Email Not Registered", HttpStatus.UNAUTHORIZED);
     }
 
     const isPasswordMatch = await PasswordHelper.compare(
-        userData.password,
-        userExist.password,
+      userData.password,
+      userExist.password,
     );
 
     if (!isPasswordMatch) {
-      log.warn("service:auth", "Login failed: Incorrect password", { email: userData.email });
+      log.warn("service:auth", "Login failed: Incorrect password", {
+        email: userData.email,
+      });
       throw new AppError(
-          "Email and Password Not Match",
-          HttpStatus.UNAUTHORIZED,
+        "Email and Password Not Match",
+        HttpStatus.UNAUTHORIZED,
       );
     }
 
     if (!userExist.is_Active) {
-      log.warn("service:auth", "Login failed: Account not active", { user_id: userExist.id });
+      log.warn("service:auth", "Login failed: Account not active", {
+        user_id: userExist.id,
+      });
       throw new AppError("User Not Active", HttpStatus.CONFLICT);
     }
 
-    log.info("service:auth", "User successfully logged in", { user_id: userExist.id });
+    log.info("service:auth", "User successfully logged in", {
+      user_id: userExist.id,
+    });
     const token = generateToken({
       user_id: userExist.id,
       user_email: userExist.email,
@@ -97,7 +115,9 @@ export class AuthService {
         html: contentMail,
       });
     } catch (error) {
-      log.error("infra:mail", "Failed to send activation email", error, { email: user.email });
+      log.error("infra:mail", "Failed to send activation email", error, {
+        email: user.email,
+      });
     }
   };
 
@@ -108,7 +128,7 @@ export class AuthService {
       throw new AppError("User Not Found", HttpStatus.NOT_FOUND);
     }
 
-    if(user.is_Active){
+    if (user.is_Active) {
       return user;
     }
 
@@ -118,8 +138,8 @@ export class AuthService {
     };
 
     const updateStatusUser = await this.userRepository.updateUser(
-        user.id,
-        userdata,
+      user.id,
+      userdata,
     );
 
     const eventPayload: UserEventPayload = {
@@ -132,15 +152,15 @@ export class AuthService {
       },
     };
 
-    log.info("infra:kafka", "Publishing user.created event", { user_id: updateStatusUser.id });
+    log.info("infra:kafka", "Publishing user.created event", {
+      user_id: updateStatusUser.id,
+    });
 
-    publishEvent(
-        KAFKA_TOPIC_USER,
-        updateStatusUser.id,
-        eventPayload
-    );
+    publishEvent(KAFKA_USER_TOPIC, updateStatusUser.id, eventPayload);
 
-    log.info("service:auth", "Account successfully activated", { user_id: updateStatusUser.id });
+    log.info("service:auth", "Account successfully activated", {
+      user_id: updateStatusUser.id,
+    });
     return updateStatusUser;
   };
 }

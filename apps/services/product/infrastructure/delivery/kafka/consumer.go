@@ -3,14 +3,12 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-
-	"finance/cmd/wallet/usecases"
-	"finance/infrastructure/logger"
-	"finance/model"
-
 	"github.com/google/uuid"
 	"github.com/segmentio/kafka-go"
 	"github.com/sirupsen/logrus"
+	"product-service/cmd/product/usecases"
+	"product-service/infrastructure/logger"
+	"product-service/model"
 )
 
 type Consumer struct {
@@ -59,7 +57,7 @@ func (c *Consumer) Start(ctx context.Context, processFunc func(ctx context.Conte
 
 		msgCtx := context.WithValue(ctx, "trace_id", traceID)
 
-		logger.Debug(msgCtx, "infra:kafka", "Menerima pesan baru", logrus.Fields{
+		logger.Debug(msgCtx, "infra:kafka", "receive new massage", logrus.Fields{
 			"topic":     m.Topic,
 			"partition": m.Partition,
 			"offset":    m.Offset,
@@ -69,26 +67,26 @@ func (c *Consumer) Start(ctx context.Context, processFunc func(ctx context.Conte
 
 		if err != nil {
 
-			logger.Error(msgCtx, "infra:kafka", "Gagal memproses pesan (offset tidak di-commit)", err, logrus.Fields{
+			logger.Error(msgCtx, "infra:kafka", "Failed receive message", err, logrus.Fields{
 				"offset": m.Offset,
 			})
 			continue
 		}
 
 		if err := c.reader.CommitMessages(ctx, m); err != nil {
-			logger.Error(msgCtx, "infra:kafka", "Gagal melakukan commit offset ke broker", err, logrus.Fields{
+			logger.Error(msgCtx, "infra:kafka", "Failed commit offset to broker", err, logrus.Fields{
 				"offset": m.Offset,
 			})
 		} else {
-			logger.Info(msgCtx, "infra:kafka", "Sukses memproses & commit pesan", logrus.Fields{
+			logger.Info(msgCtx, "infra:kafka", "Successfully processed & committed message", logrus.Fields{
 				"offset": m.Offset,
 			})
 		}
 	}
 }
 
-func HandlerConsumer(ctx context.Context, msg []byte, walletUseCase usecases.WalletUsecase) error {
-	var payload model.UserEventMessage
+func HandlerConsumer(ctx context.Context, msg []byte, orderUsecase usecases.ProductUsecase) error {
+	var payload model.OrderEventMessage[*model.OrderCreatedEventData]
 
 	if err := json.Unmarshal(msg, &payload); err != nil {
 
@@ -98,32 +96,22 @@ func HandlerConsumer(ctx context.Context, msg []byte, walletUseCase usecases.Wal
 		return nil
 	}
 
-	ctx = context.WithValue(ctx, "user_id", payload.Data.UserID)
-
 	logFields := logrus.Fields{
-		"event":   payload.Event,
-		"user_id": payload.Data.UserID,
+		"event": payload.Event,
 	}
 
 	switch payload.Event {
-	case "user.created":
-		logger.Info(ctx, "handler:kafka", "Menerima event pembuatan user, memproses wallet...", logFields)
+	case "order.created":
+		logger.Info(ctx, "handler:kafka", "recieve event created order, reduce product", logFields)
 
-		wallet, err := walletUseCase.CreateWallet(ctx, payload.Data.UserID)
+		err := orderUsecase.ReduceQuantityProduct(ctx, payload.Data.OrderItems)
 		if err != nil {
-			logger.Error(ctx, "handler:kafka", "Gagal membuat wallet untuk user", err, logFields)
+			logger.Error(ctx, "handler:kafka", "Failed reduce quantity Product", err, logFields)
 			return err
 		}
 
-		logger.Info(ctx, "handler:kafka", "Wallet berhasil dibuat", logrus.Fields{
-			"wallet_id": wallet.ID,
-		})
+		logger.Info(ctx, "handler:kafka", "quantity product succes reduce", logFields)
 		return nil
-
-	case "user.deleted":
-		logger.Debug(ctx, "handler:kafka", "Mengabaikan event user.deleted", logFields)
-		return nil
-
 	default:
 		logger.Warn(ctx, "handler:kafka", "Menerima event yang tidak dikenal", logFields)
 		return nil
