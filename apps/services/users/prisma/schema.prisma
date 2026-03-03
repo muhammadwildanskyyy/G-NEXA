@@ -31,7 +31,7 @@ model User {
   is_Active       Boolean @default(false)
 
   // --- Atribut Opsional  ---
-  phone_number    String? @unique @db.VarChar(20)
+  phone_number    String  @unique @db.VarChar(20)
   profile_picture String? @db.Text
   bio             String? @db.VarChar(255)
 

@@ -72,6 +72,29 @@ export class AuthController {
     }
   };
 
+  getVerificationCode = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+      const userEmail = req.body.email;
+      if (!userEmail) {
+        log.warn("delivery:http", `Profile access denied: Invalid or missing token`);
+        return response.unauthorized(res, "email is required");
+      }
+
+      const user = await this.userService.getUserByEmail(userEmail);
+      await this.authService.sendActivationCode(user)
+
+      return response.success(
+          res,
+          "success send activation code",
+          user,
+          HttpStatus.OK,
+      );
+    }catch (error) {
+      next(error);
+    }
+  }
+
   activationUser = async (req: IReqUser, res: Response, next: NextFunction) => {
     try {
       const code = req.query.code as string;
