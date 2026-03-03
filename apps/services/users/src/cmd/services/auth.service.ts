@@ -18,19 +18,20 @@ export class AuthService {
 
   register = async (user: Prisma.UserCreateInput): Promise<User> => {
     const userExist = await this.userRepository.findByEmail(user.email);
+    const existUserPhone = await this.userRepository.findByPhone(user.phone_number);
     if (userExist) {
       log.warn("service:auth", "Registration failed: Email already registered", { email: user.email });
       throw new AppError(
-          "This Email or Phone Number Already Registered",
+          "This Email Already Registered",
           HttpStatus.BAD_REQUEST,
       );
     }
-
-    const existUserEmail = await this.userRepository.findByEmail(user.email);
-    const existUserPhone = await this.userRepository.findByPhone(user.phone_number);
-
-    if (!existUserPhone || !existUserEmail) {
-      throw new AppError("Email or Phone Number Already Registered", HttpStatus.BAD_REQUEST);
+    if (existUserPhone ) {
+      log.warn("service:auth", "Registration failed: Email already registered", { email: user.email });
+      throw new AppError(
+          "This Phone Number Already Registered",
+          HttpStatus.BAD_REQUEST,
+      );
     }
 
     const hasedPassword = await PasswordHelper.hash(user.password);
