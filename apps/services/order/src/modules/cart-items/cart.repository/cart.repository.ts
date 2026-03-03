@@ -117,4 +117,12 @@ export class CartRepository {
       },
     });
   }
+
+  async selectCartItemsByUserIdAndSelected(
+    userId: string,
+  ): Promise<CartItem[]> {
+    return this.database.cartItem.findMany({
+      where: { user_id: userId, is_selected: true },
+    });
+  }
 }

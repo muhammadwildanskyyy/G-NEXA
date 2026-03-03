@@ -21,5 +21,6 @@ import { HttpClientsModule } from '../../infrastructure/http-clients/http-client
   ],
   controllers: [CartController],
   providers: [CartRepository, CartUsecase, CartService],
+  exports: [CartService],
 })
 export class CartItemsModule {}

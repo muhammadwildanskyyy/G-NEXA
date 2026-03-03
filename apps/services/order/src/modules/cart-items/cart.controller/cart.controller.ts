@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
+  Param,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -69,6 +71,40 @@ export class CartController {
         code: HttpStatus.OK,
       },
       data: result,
+    };
+  }
+
+  @Delete('/:product_id')
+  async deleteCartItems(
+    @Param('product_id') productId: string,
+    @User('user_id') userId: string,
+  ): Promise<GlobalOrderResponse<CartItem>> {
+    const result = await this.cartUsecase.deleteMyCartItem(userId, productId);
+
+    return {
+      meta: {
+        message: 'Seccess Delete Cart Items',
+        code: HttpStatus.OK,
+      },
+      data: result,
+    };
+  }
+
+  @Get('/total-price')
+  async getTotalPrice(
+    @User('user_id') userId: string,
+  ): Promise<GlobalOrderResponse<{ total_price: number }>> {
+    const result =
+      await this.cartUsecase.getTotalPriceFromSelectedCartItems(userId);
+
+    return {
+      meta: {
+        message: 'Success Get Total Price',
+        code: HttpStatus.OK,
+      },
+      data: {
+        total_price: result,
+      },
     };
   }
 }

@@ -12,6 +12,7 @@ import { PrismaModule } from '../../database/prisma/prisma.module';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { logLevel } from 'kafkajs';
 import { AppLogger } from '../../infrastructure/logger/app.logger';
+import { CartItemsModule } from '../cart-items/cart-items.module';
 
 const appLogger = new AppLogger();
 @Module({
@@ -54,6 +55,7 @@ const appLogger = new AppLogger();
       },
     ]),
     PrismaModule,
+    CartItemsModule,
   ],
   providers: [OrdersService, OrdersRepository, OrdersUsecase],
   controllers: [OrdersController],

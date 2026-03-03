@@ -11,12 +11,14 @@ import { AppException } from 'src/common/filters/global.exception/app.exception'
 import { Product } from '../../../infrastructure/http-clients/product-client/dto/product.dto';
 import { AppLogger } from '../../../infrastructure/logger/app.logger';
 import { ClientKafka } from '@nestjs/microservices';
+import { CartService } from '../../cart-items/cart.service/cart.service';
 
 @Injectable()
 export class OrdersUsecase implements OnModuleInit {
   constructor(
     private readonly orderService: OrdersService,
     private readonly logger: AppLogger,
+    private readonly cartService: CartService,
     @Inject('KAFKA_PRODUCER') private readonly kafkaClient: ClientKafka,
   ) {}
 
@@ -69,8 +71,8 @@ export class OrdersUsecase implements OnModuleInit {
     }
 
     // 3. Validasi Product & Stock
-    const product = await this.orderService.getValidProduct(params);
-    if (!product) {
+    const products = await this.orderService.getValidProduct(params);
+    if (!products) {
       this.logger.warning(
         'usecase:order',
         'Checkout failed: Product validation returned empty',
@@ -80,7 +82,7 @@ export class OrdersUsecase implements OnModuleInit {
 
     // 4. Kalkulasi Harga
     const { orderItems, totalAmount } = this.constructOrderItems(
-      product,
+      products,
       params,
     );
 
@@ -107,6 +109,15 @@ export class OrdersUsecase implements OnModuleInit {
       },
     };
 
+    for (const item of orderItems) {
+      await this.cartService.upsertCartItem(
+        userId,
+        item.product_id,
+        savedOrder.store_id,
+        -item.quantity,
+      );
+    }
+
     this.kafkaClient.emit(KAFKA_ORDER_TOPIC, {
       key: savedOrder.id,
       value: payloadEvent,
@@ -117,6 +128,7 @@ export class OrdersUsecase implements OnModuleInit {
       'Order checkout orchestrated successfully',
       { order_id: savedOrder.id },
     );
+
     return savedOrder;
   }
 
