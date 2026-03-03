@@ -59,6 +59,11 @@ export class AuthService {
       throw new AppError("Email Not Registered", HttpStatus.UNAUTHORIZED);
     }
 
+    if(!userExist.is_Active){
+      log.warn("service:auth", "Login failed: User Not Active", { email: userData.email });
+      throw new AppError("User Not Active", HttpStatus.UNAUTHORIZED);
+    }
+
     const isPasswordMatch = await PasswordHelper.compare(
         userData.password,
         userExist.password,
