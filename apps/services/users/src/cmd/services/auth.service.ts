@@ -26,6 +26,13 @@ export class AuthService {
       );
     }
 
+    const existUserEmail = await this.userRepository.findByEmail(user.email);
+    const existUserPhone = await this.userRepository.findByPhone(user.phone_number);
+
+    if (!existUserPhone || !existUserEmail) {
+      throw new AppError("Email or Phone Number Already Registered", HttpStatus.BAD_REQUEST);
+    }
+
     const hasedPassword = await PasswordHelper.hash(user.password);
     const ActicationCode = await PasswordHelper.hash(user.email);
 
