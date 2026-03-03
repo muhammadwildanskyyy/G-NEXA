@@ -78,7 +78,7 @@ func (c *Consumer) Start(ctx context.Context, processFunc func(ctx context.Conte
 				"offset": m.Offset,
 			})
 		} else {
-			logger.Info(msgCtx, "infra:kafka", "Successfully processed & committed message", logrus.Fields{
+			logger.Info(msgCtx, "infra:kafka", "Successfully processed & committed message0", logrus.Fields{
 				"offset": m.Offset,
 			})
 		}

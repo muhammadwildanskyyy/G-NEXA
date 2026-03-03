@@ -7,6 +7,7 @@ import { EnvConfig } from '../../../config/env.validation';
 import {
   ErrProductResponse,
   GetProductInfoResponse,
+  GetProductsByStoreResponse,
   Product,
 } from './dto/product.dto';
 import { AppException } from '../../../common/filters/global.exception/app.exception';
@@ -142,5 +143,31 @@ export class ProductClientService implements OnModuleInit {
     const response = await firstValueFrom(request$);
 
     return response.data.data;
+  }
+  async getProductsByStoreId(storeId: string): Promise<Product[]> {
+    const token: string = this.cls.get('access_token');
+    const request$ = this.httpService
+      .get<GetProductsByStoreResponse>(`${this.baseUrl}/v1/products`, {
+        params: {
+          store_id: storeId,
+        },
+        headers: {
+          Authorization: token,
+        },
+      })
+      .pipe(
+        retry(2),
+        catchError((error: AxiosError<ErrProductResponse>) => {
+          if (error.response) {
+            throw new AppException(
+              error.response.data.meta.message,
+              error.response.status,
+            );
+          }
+          throw new AppException('Product Service is unavailable');
+        }),
+      );
+    const response = await firstValueFrom(request$);
+    return response.data.data.products;
   }
 }
