@@ -19,4 +19,8 @@ export class CartUsecase {
       quantityToAdd,
     );
   }
+
+  async getAllMyListCartItems(userId: string): Promise<CartItem[]> {
+    return this.cartService.findAllCartItemsByUserIdAndThrow(userId);
+  }
 }

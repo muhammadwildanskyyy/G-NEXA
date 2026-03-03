@@ -83,9 +83,10 @@ export class CartService {
     return cartItems;
   }
 
-  async findCartItemsByUserIdAndThrow(userId: string): Promise<CartItem> {
-    const cartItems = await this.cartRepository.selectCartItemUserId(userId);
-    if (!cartItems) {
+  async findAllCartItemsByUserIdAndThrow(userId: string): Promise<CartItem[]> {
+    const cartItems =
+      await this.cartRepository.selectAllCartItemByUserId(userId);
+    if (!cartItems || cartItems.length === 0) {
       throw new AppException('Cart not found', HttpStatus.NOT_FOUND);
     }
     return cartItems;

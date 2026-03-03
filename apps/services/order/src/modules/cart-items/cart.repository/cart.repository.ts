@@ -98,8 +98,12 @@ export class CartRepository {
     return this.database.cartItem.findFirst({ where: { id: cartId } });
   }
 
-  async selectCartItemUserId(userId: string): Promise<CartItem | null> {
+  async selectOneCartItemByUserId(userId: string): Promise<CartItem | null> {
     return this.database.cartItem.findFirst({ where: { user_id: userId } });
+  }
+
+  async selectAllCartItemByUserId(userId: string): Promise<CartItem[]> {
+    return this.database.cartItem.findMany({ where: { user_id: userId } });
   }
 
   async selectCartItemByUserAndProductId(

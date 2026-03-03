@@ -1,4 +1,11 @@
-import { Body, Controller, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../../../common/guards/auth/auth.guard';
 import { AppLogger } from '../../../infrastructure/logger/app.logger';
 import { ZodValidatePipe } from '../../../common/pipe/zod-validate/zod-validate.pipe';
@@ -18,6 +25,21 @@ export class CartController {
     private readonly cartUsecase: CartUsecase,
     private readonly logger: AppLogger,
   ) {}
+
+  @Get()
+  async getMyListCartItems(
+    @User('user_id') userId: string,
+  ): Promise<GlobalOrderResponse<CartItem[]>> {
+    const result = await this.cartUsecase.getAllMyListCartItems(userId);
+
+    return {
+      meta: {
+        message: 'success get all my cart items',
+        code: HttpStatus.OK,
+      },
+      data: result,
+    };
+  }
 
   @Post('/upsert')
   async upsertMyCartItems(
