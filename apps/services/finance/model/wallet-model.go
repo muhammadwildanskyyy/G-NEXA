@@ -13,6 +13,12 @@ const (
 	WalletStatusFrozen    string = "FROZEN"
 )
 
+type TopUpRequest struct {
+	Amount       float64 `json:"amount" binding:"required,gt=10000"` // Misal minimum top-up Rp 10.000
+	BankCode     string  `json:"bank_code" binding:"required"`
+	CustomerName string  `json:"customer_name" binding:"required"`
+}
+
 type Wallet struct {
 	ID     uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
 	UserID string    `gorm:"type:varchar(100);uniqueIndex:idx_user_currency;not null" json:"user_id"`

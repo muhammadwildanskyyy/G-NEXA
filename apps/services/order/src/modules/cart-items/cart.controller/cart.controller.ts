@@ -20,7 +20,8 @@ import { CartItem } from '@prisma/client';
 import { CartUsecase } from '../cart.usecase/cart.usecase';
 import { User } from '../../../common/decorators/user/user.decorator';
 
-@Controller('/v1/api/cart')
+// 🚀 Standardized API route prefix (plural noun is best practice for REST)
+@Controller('api/v1/carts')
 @UseGuards(JwtAuthGuard)
 export class CartController {
   constructor(
@@ -32,12 +33,22 @@ export class CartController {
   async getMyListCartItems(
     @User('user_id') userId: string,
   ): Promise<GlobalOrderResponse<CartItem[]>> {
+    this.logger.log(
+      `Received request to fetch cart items for user: ${userId}`,
+      'CartController',
+    );
+
     const result = await this.cartUsecase.getAllMyListCartItems(userId);
+
+    this.logger.log(
+      `Successfully retrieved ${result.length} cart items for user: ${userId}`,
+      'CartController',
+    );
 
     return {
       meta: {
-        message: 'success get all my cart items',
         code: HttpStatus.OK,
+        message: 'Successfully retrieved all cart items',
       },
       data: result,
     };
@@ -48,6 +59,11 @@ export class CartController {
     @Body(new ZodValidatePipe(UpsertCartItemSchema)) param: UpsertCartItemsDto,
     @User('user_id') userId: string,
   ): Promise<GlobalOrderResponse<CartItem | null>> {
+    this.logger.log(
+      `Received upsert request for product: ${param.product_id}, qty_to_add: ${param.quantity_to_add}`,
+      'CartController',
+    );
+
     const result = await this.cartUsecase.upsertCartItems(
       userId,
       param.product_id,
@@ -55,20 +71,31 @@ export class CartController {
       param.quantity_to_add,
     );
 
+    // If result is null, it means the quantity dropped to 0 and the item was removed
     if (result === null) {
+      this.logger.log(
+        `Cart item removed because quantity reached zero. Product ID: ${param.product_id}`,
+        'CartController',
+      );
+
       return {
         meta: {
           code: HttpStatus.OK,
-          message: 'Success delete cart items',
+          message: 'Successfully removed item from cart',
         },
         data: null,
       };
     }
 
+    this.logger.log(
+      `Successfully upserted cart item. Product ID: ${param.product_id}`,
+      'CartController',
+    );
+
     return {
       meta: {
-        message: 'success upsert cart Items',
         code: HttpStatus.OK,
+        message: 'Successfully upserted cart item',
       },
       data: result,
     };
@@ -79,12 +106,22 @@ export class CartController {
     @Param('product_id') productId: string,
     @User('user_id') userId: string,
   ): Promise<GlobalOrderResponse<CartItem>> {
+    this.logger.log(
+      `Received delete request for cart item. Product ID: ${productId}`,
+      'CartController',
+    );
+
     const result = await this.cartUsecase.deleteMyCartItem(userId, productId);
+
+    this.logger.log(
+      `Successfully deleted cart item. Product ID: ${productId}`,
+      'CartController',
+    );
 
     return {
       meta: {
-        message: 'Seccess Delete Cart Items',
         code: HttpStatus.OK,
+        message: 'Successfully deleted cart item', // Fixed typo 'Seccess'
       },
       data: result,
     };
@@ -94,13 +131,23 @@ export class CartController {
   async getTotalPrice(
     @User('user_id') userId: string,
   ): Promise<GlobalOrderResponse<{ total_price: number }>> {
+    this.logger.log(
+      `Received request to calculate total cart price for user: ${userId}`,
+      'CartController',
+    );
+
     const result =
       await this.cartUsecase.getTotalPriceFromSelectedCartItems(userId);
 
+    this.logger.log(
+      `Successfully calculated total price: ${result}`,
+      'CartController',
+    );
+
     return {
       meta: {
-        message: 'Success Get Total Price',
         code: HttpStatus.OK,
+        message: 'Successfully calculated total cart price',
       },
       data: {
         total_price: result,

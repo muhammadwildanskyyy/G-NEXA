@@ -2,8 +2,11 @@ package services
 
 import (
 	"context"
+	"errors"
+	"finance/constant"
 
 	"github.com/sirupsen/logrus"
+	"github.com/xendit/xendit-go/v7/payment_request"
 
 	"finance/cmd/wallet/repositories"
 	"finance/infrastructure/logger"
@@ -13,6 +16,7 @@ import (
 type WalletService interface {
 	CreateWallet(ctx context.Context, userId string) (*model.Wallet, error)
 	FindWalletByUser(ctx context.Context, userId string) (*model.Wallet, error)
+	AddBalance(ctx context.Context, userID string, amount float64, bankCode string) error
 }
 
 type walletService struct {
@@ -23,13 +27,13 @@ func NewWalletService(walletRepository repositories.WalletRepository) WalletServ
 	return &walletService{WalletRepository: walletRepository}
 }
 
-func (w *walletService) CreateWallet(ctx context.Context, userId string) (*model.Wallet, error) {
+func (ws *walletService) CreateWallet(ctx context.Context, userId string) (*model.Wallet, error) {
 
 	logger.Debug(ctx, "service:wallet", "Attempting to create a new wallet for user", logrus.Fields{
 		"target_user_id": userId,
 	})
 
-	newWallet, err := w.WalletRepository.InsertWallet(ctx, userId)
+	newWallet, err := ws.WalletRepository.InsertWallet(ctx, userId)
 	if err != nil {
 		logger.Error(ctx, "service:wallet", "Failed to create wallet via repository", err, logrus.Fields{
 			"target_user_id": userId,
@@ -43,12 +47,12 @@ func (w *walletService) CreateWallet(ctx context.Context, userId string) (*model
 	return newWallet, nil
 }
 
-func (w *walletService) FindWalletByUser(ctx context.Context, userId string) (*model.Wallet, error) {
+func (ws *walletService) FindWalletByUser(ctx context.Context, userId string) (*model.Wallet, error) {
 	logger.Debug(ctx, "service:wallet", "Fetching wallet for user", logrus.Fields{
 		"target_user_id": userId,
 	})
 
-	wallet, err := w.WalletRepository.SelectWalletByUserID(ctx, userId)
+	wallet, err := ws.WalletRepository.SelectWalletByUserID(ctx, userId)
 	if err != nil {
 
 		logger.Error(ctx, "service:wallet", "Failed to find wallet via repository", err, logrus.Fields{
@@ -58,4 +62,42 @@ func (w *walletService) FindWalletByUser(ctx context.Context, userId string) (*m
 	}
 
 	return wallet, nil
+}
+
+func (ws *walletService) AddBalance(ctx context.Context, userID string, amount float64, bankCode string) error {
+	switch bankCode {
+	case string(payment_request.VIRTUALACCOUNTCHANNELCODE_BCA):
+		amount -= constant.BCA_ADMIN_FEE
+	case string(payment_request.VIRTUALACCOUNTCHANNELCODE_MANDIRI):
+		amount -= constant.MANDIRI_ADMIN_FEE
+	case string(payment_request.VIRTUALACCOUNTCHANNELCODE_BRI):
+		amount -= constant.BRI_ADMIN_FEE
+	}
+
+	if userID == "" {
+		logger.Warn(ctx, "service:wallet", "Attempted to add balance with empty user ID", nil)
+		return errors.New("user ID cannot be empty")
+	}
+
+	if amount <= 0 {
+		logger.Warn(ctx, "service:wallet", "Invalid top-up amount after admin fee deduction", logrus.Fields{
+			"target_user_id": userID,
+			"bank_code":      bankCode,
+			"final_amount":   amount,
+		})
+		return errors.New("top-up amount must be greater than zero after fee deduction")
+	}
+
+	err := ws.WalletRepository.AddBalance(ctx, userID, amount)
+	if err != nil {
+		return err
+	}
+
+	logger.Info(ctx, "service:wallet", "Successfully processed add balance request", logrus.Fields{
+		"target_user_id": userID,
+		"bank_code":      bankCode,
+		"final_amount":   amount,
+	})
+
+	return nil
 }

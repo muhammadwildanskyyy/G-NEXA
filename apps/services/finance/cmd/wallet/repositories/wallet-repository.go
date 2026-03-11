@@ -2,9 +2,12 @@ package repositories
 
 import (
 	"context"
+	"errors"
 
+	"github.com/shopspring/decimal"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"finance/infrastructure/logger"
 	"finance/model"
@@ -13,6 +16,7 @@ import (
 type WalletRepository interface {
 	InsertWallet(ctx context.Context, userId string) (*model.Wallet, error)
 	SelectWalletByUserID(ctx context.Context, userId string) (*model.Wallet, error)
+	AddBalance(ctx context.Context, userID string, amount float64) error
 }
 
 type walletRepository struct {
@@ -60,4 +64,46 @@ func (w *walletRepository) SelectWalletByUserID(ctx context.Context, userId stri
 	}
 
 	return &wallet, nil
+}
+func (w *walletRepository) AddBalance(ctx context.Context, userID string, amount float64) error {
+	return w.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var wallet model.Wallet
+
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("user_id = ?", userID).
+			First(&wallet).Error; err != nil {
+
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				logger.Warn(ctx, "repository:wallet", "Wallet not found during add balance operation", logrus.Fields{
+					"target_user_id": userID,
+				})
+				return errors.New("wallet not found for the specified user")
+			}
+
+			logger.Error(ctx, "repository:wallet", "Failed to lock wallet for update", err, logrus.Fields{
+				"target_user_id": userID,
+			})
+			return err
+		}
+
+		amountToAdd := decimal.NewFromFloat(amount)
+		wallet.AvailableBalance = wallet.AvailableBalance.Add(amountToAdd)
+
+		if err := tx.Save(&wallet).Error; err != nil {
+			logger.Error(ctx, "repository:wallet", "Failed to save updated wallet balance", err, logrus.Fields{
+				"target_user_id": userID,
+				"target_amount":  amount,
+			})
+			return err
+		}
+
+		logger.Debug(ctx, "repository:wallet", "Successfully added balance to wallet", logrus.Fields{
+			"target_user_id": userID,
+			"added_amount":   amount,
+			"new_balance":    wallet.AvailableBalance.String(),
+		})
+
+		return nil
+	})
+}
 }
