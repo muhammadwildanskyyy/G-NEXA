@@ -17,6 +17,7 @@ type WalletRepository interface {
 	InsertWallet(ctx context.Context, userId string) (*model.Wallet, error)
 	SelectWalletByUserID(ctx context.Context, userId string) (*model.Wallet, error)
 	AddBalance(ctx context.Context, userID string, amount float64) error
+	GetAllWallets(ctx context.Context) ([]model.Wallet, error)
 }
 
 type walletRepository struct {
@@ -106,4 +107,19 @@ func (w *walletRepository) AddBalance(ctx context.Context, userID string, amount
 		return nil
 	})
 }
+
+func (w *walletRepository) GetAllWallets(ctx context.Context) ([]model.Wallet, error) {
+	var wallets []model.Wallet
+
+	err := w.DB.WithContext(ctx).Find(&wallets).Error
+	if err != nil {
+		logger.Error(ctx, "repository:wallet", "Failed to fetch all wallets", err, nil)
+		return nil, err
+	}
+
+	logger.Debug(ctx, "repository:wallet", "Fetched all wallets", logrus.Fields{
+		"count": len(wallets),
+	})
+
+	return wallets, nil
 }

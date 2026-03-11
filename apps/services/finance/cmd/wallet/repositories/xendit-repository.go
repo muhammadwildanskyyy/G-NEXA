@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -15,6 +16,7 @@ import (
 
 type XenditRepository interface {
 	CreatePaymentWithVA(ctx context.Context, param *model.CreateVAParam) (*model.PaymentResponse, error)
+	GetPaymentByReferenceID(ctx context.Context, referenceID []string) (*payment_request.PaymentRequest, error)
 }
 
 type xenditRepository struct {
@@ -99,4 +101,35 @@ func (xr *xenditRepository) CreatePaymentWithVA(ctx context.Context, param *mode
 		ExpiresAt:     expiredAt,
 		FinalAmount:   *resp.Amount,
 	}, nil
+}
+
+func (xr *xenditRepository) GetPaymentByReferenceID(ctx context.Context, referenceID []string) (*payment_request.PaymentRequest, error) {
+	resp, _, sdkErr := xr.xenditClient.PaymentRequestApi.
+		GetAllPaymentRequests(ctx).
+		ReferenceId(referenceID).
+		Execute()
+
+	if sdkErr != nil {
+		logger.Error(ctx, "repository:xendit", "Failed to fetch payment request from Xendit SDK", sdkErr, logrus.Fields{
+			"reference_ids": referenceID,
+		})
+		return nil, fmt.Errorf("failed to fetch payment request: %w", sdkErr)
+	}
+
+	if len(resp.GetData()) == 0 {
+		logger.Warn(ctx, "repository:xendit", "Payment request not found in Xendit", logrus.Fields{
+			"reference_ids": referenceID,
+		})
+		return nil, fmt.Errorf("payment request with reference_id %v not found", referenceID)
+	}
+
+	result := resp.GetData()[0]
+
+	logger.Debug(ctx, "repository:xendit", "Successfully retrieved payment request from Xendit", logrus.Fields{
+		"reference_ids": referenceID,
+		"payment_id":    result.GetId(),
+		"status":        result.GetStatus(),
+	})
+
+	return &result, nil
 }

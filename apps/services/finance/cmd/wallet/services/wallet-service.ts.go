@@ -17,6 +17,7 @@ type WalletService interface {
 	CreateWallet(ctx context.Context, userId string) (*model.Wallet, error)
 	FindWalletByUser(ctx context.Context, userId string) (*model.Wallet, error)
 	AddBalance(ctx context.Context, userID string, amount float64, bankCode string) error
+	GetAllWallets(ctx context.Context) ([]model.Wallet, error)
 }
 
 type walletService struct {
@@ -101,3 +102,16 @@ func (ws *walletService) AddBalance(ctx context.Context, userID string, amount f
 
 	return nil
 }
+
+func (ws *walletService) GetAllWallets(ctx context.Context) ([]model.Wallet, error) {
+	logger.Debug(ctx, "service:wallet", "Fetching all wallets", nil)
+
+	wallets, err := ws.WalletRepository.GetAllWallets(ctx)
+	if err != nil {
+		logger.Error(ctx, "service:wallet", "Failed to fetch all wallets", err, nil)
+		return nil, err
+	}
+
+	return wallets, nil
+}
+

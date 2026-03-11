@@ -15,6 +15,10 @@ type PaymentUsecase interface {
 	GetRecord(ctx context.Context, transactionID string) (*model.Payment, error)
 	CancelPayment(ctx context.Context, transactionID string) error
 	UpdateStatus(ctx context.Context, transactionID string, status string) error
+	GetStalePendingPayments(ctx context.Context) ([]model.Payment, error)
+	GetExpiredPendingPayments(ctx context.Context) ([]model.Payment, error)
+	ExpireOldPayments(ctx context.Context) error
+	GetSucceededPaymentTotalsByUser(ctx context.Context) ([]model.UserPaymentTotals, error)
 }
 
 type paymentUsecase struct {
@@ -118,4 +122,81 @@ func (u *paymentUsecase) UpdateStatus(ctx context.Context, transactionID string,
 	})
 
 	return nil
+}
+
+func (u *paymentUsecase) GetStalePendingPayments(ctx context.Context) ([]model.Payment, error) {
+	logger.Debug(ctx, "usecase:payment", "Fetching stale pending payments", nil)
+
+	records, err := u.paymentService.GetStalePendingPayments(ctx)
+	if err != nil {
+		logger.Error(ctx, "usecase:payment", "Failed to fetch stale pending payments", err, nil)
+		return nil, err
+	}
+
+	return records, nil
+}
+
+func (u *paymentUsecase) GetExpiredPendingPayments(ctx context.Context) ([]model.Payment, error) {
+	logger.Debug(ctx, "usecase:payment", "Fetching expired pending payments", nil)
+
+	records, err := u.paymentService.GetExpiredPendingPayments(ctx)
+	if err != nil {
+		logger.Error(ctx, "usecase:payment", "Failed to fetch expired pending payments", err, nil)
+		return nil, err
+	}
+
+	return records, nil
+}
+
+func (u *paymentUsecase) ExpireOldPayments(ctx context.Context) error {
+	logger.Info(ctx, "usecase:expiry", "Starting Expiry Guard job", nil)
+
+	expiredPayments, err := u.GetExpiredPendingPayments(ctx)
+	if err != nil {
+		logger.Error(ctx, "usecase:expiry", "Failed to fetch expired pending payments", err, nil)
+		return err
+	}
+
+	if len(expiredPayments) == 0 {
+		logger.Info(ctx, "usecase:expiry", "No expired pending payments found, skipping", nil)
+		return nil
+	}
+
+	logger.Info(ctx, "usecase:expiry", "Found expired pending payments to process", logrus.Fields{
+		"count": len(expiredPayments),
+	})
+
+	for _, payment := range expiredPayments {
+		err := u.paymentService.UpdatePaymentStatus(ctx, payment.TransactionID, "EXPIRED")
+		if err != nil {
+			logger.Error(ctx, "usecase:expiry", "Failed to expire payment", err, logrus.Fields{
+				"transaction_id": payment.TransactionID,
+			})
+			continue
+		}
+
+		logger.Info(ctx, "usecase:expiry", "Payment marked as EXPIRED by Expiry Guard", logrus.Fields{
+			"transaction_id":   payment.TransactionID,
+			"transaction_type": payment.TransactionType,
+			"expires_at":       payment.ExpiresAt.Format("2006-01-02 15:04:05"),
+		})
+	}
+
+	logger.Info(ctx, "usecase:expiry", "Expiry Guard job completed", logrus.Fields{
+		"processed_count": len(expiredPayments),
+	})
+
+	return nil
+}
+
+func (u *paymentUsecase) GetSucceededPaymentTotalsByUser(ctx context.Context) ([]model.UserPaymentTotals, error) {
+	logger.Debug(ctx, "usecase:payment", "Fetching succeeded payment totals by user", nil)
+
+	totals, err := u.paymentService.GetSucceededPaymentTotalsByUser(ctx)
+	if err != nil {
+		logger.Error(ctx, "usecase:payment", "Failed to fetch payment totals", err, nil)
+		return nil, err
+	}
+
+	return totals, nil
 }

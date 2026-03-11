@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -17,6 +18,9 @@ type PaymentRepository interface {
 	Delete(ctx context.Context, transactionID string) error
 	UpdateStatus(ctx context.Context, transactionID string, status string) error
 	Update(ctx context.Context, record *model.Payment) error
+	GetStalePendingPayments(ctx context.Context, threshold time.Time) ([]model.Payment, error)
+	GetExpiredPendingPayments(ctx context.Context) ([]model.Payment, error)
+	GetSucceededPaymentTotalsByUser(ctx context.Context) ([]model.UserPaymentTotals, error)
 }
 
 type paymentRepository struct {
@@ -115,4 +119,71 @@ func (pr *paymentRepository) Update(ctx context.Context, record *model.Payment) 
 		"transaction_id": record.TransactionID,
 	})
 	return nil
+}
+
+func (pr *paymentRepository) GetStalePendingPayments(ctx context.Context, threshold time.Time) ([]model.Payment, error) {
+	var records []model.Payment
+
+	err := pr.db.WithContext(ctx).
+		Where("status = ? AND created_at < ?", "PENDING", threshold).
+		Find(&records).Error
+
+	if err != nil {
+		logger.Error(ctx, "repository:payment", "Failed to fetch stale pending payments", err, nil)
+		return nil, err
+	}
+
+	logger.Debug(ctx, "repository:payment", "Fetched stale pending payments", logrus.Fields{
+		"count":     len(records),
+		"threshold": threshold.Format(time.RFC3339),
+	})
+
+	return records, nil
+}
+
+func (pr *paymentRepository) GetExpiredPendingPayments(ctx context.Context) ([]model.Payment, error) {
+	var records []model.Payment
+
+	err := pr.db.WithContext(ctx).
+		Where("status = ? AND expires_at < ?", "PENDING", time.Now()).
+		Find(&records).Error
+
+	if err != nil {
+		logger.Error(ctx, "repository:payment", "Failed to fetch expired pending payments", err, nil)
+		return nil, err
+	}
+
+	logger.Debug(ctx, "repository:payment", "Fetched expired pending payments", logrus.Fields{
+		"count": len(records),
+	})
+
+	return records, nil
+}
+
+func (pr *paymentRepository) GetSucceededPaymentTotalsByUser(ctx context.Context) ([]model.UserPaymentTotals, error) {
+	var results []model.UserPaymentTotals
+
+	// transaction_id format: {TYPE}-{userID}-{timestamp}
+	// Extract user_id by removing the first segment (TYPE-) and last segment (-timestamp)
+	query := `
+		SELECT 
+			SUBSTRING(transaction_id FROM '-(.+)-[^-]+$') AS user_id,
+			COALESCE(SUM(CASE WHEN transaction_type = 'TOPUP' THEN amount ELSE 0 END), 0) AS total_topup,
+			COALESCE(SUM(CASE WHEN transaction_type = 'ORDER' THEN amount ELSE 0 END), 0) AS total_order
+		FROM payments
+		WHERE status = 'SUCCEEDED' AND deleted_at IS NULL
+		GROUP BY SUBSTRING(transaction_id FROM '-(.+)-[^-]+$')
+	`
+
+	err := pr.db.WithContext(ctx).Raw(query).Scan(&results).Error
+	if err != nil {
+		logger.Error(ctx, "repository:payment", "Failed to fetch succeeded payment totals by user", err, nil)
+		return nil, err
+	}
+
+	logger.Debug(ctx, "repository:payment", "Fetched succeeded payment totals by user", logrus.Fields{
+		"user_count": len(results),
+	})
+
+	return results, nil
 }

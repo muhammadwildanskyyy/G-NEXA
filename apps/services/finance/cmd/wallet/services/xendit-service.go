@@ -15,6 +15,7 @@ import (
 
 type XenditService interface {
 	GenerateVABill(ctx context.Context, userId string, TransactionID string, idempotencyKey string, rawAmount float64, bankCode string, customerName string) (*model.PaymentResponse, error)
+	GetPaymentStatus(ctx context.Context, referenceID string) (*payment_request.PaymentRequest, error)
 }
 
 type xenditService struct {
@@ -84,4 +85,27 @@ func (xs *xenditService) GenerateVABill(ctx context.Context, userId string, Tran
 	})
 
 	return resp, nil
+}
+
+func (xs *xenditService) GetPaymentStatus(ctx context.Context, referenceID string) (*payment_request.PaymentRequest, error) {
+	if referenceID == "" {
+		logger.Warn(ctx, "service:xendit", "Attempted to get payment status with empty reference ID", nil)
+		return nil, errors.New("reference ID cannot be empty")
+	}
+
+	logger.Debug(ctx, "service:xendit", "Fetching payment status from Xendit", logrus.Fields{
+		"reference_id": referenceID,
+	})
+
+	result, err := xs.XenditRepository.GetPaymentByReferenceID(ctx, []string{referenceID})
+	if err != nil {
+		return nil, err
+	}
+
+	logger.Info(ctx, "service:xendit", "Successfully fetched payment status from Xendit", logrus.Fields{
+		"reference_id": referenceID,
+		"status":       result.GetStatus(),
+	})
+
+	return result, nil
 }
