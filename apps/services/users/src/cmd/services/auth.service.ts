@@ -22,6 +22,7 @@ export class AuthService {
 
   register = async (user: Prisma.UserCreateInput): Promise<User> => {
     const userExist = await this.userRepository.findByEmail(user.email);
+    const existUserPhone = await this.userRepository.findByPhone(user.phone_number);
     if (userExist) {
       log.warn(
         "service:auth",
@@ -29,8 +30,15 @@ export class AuthService {
         { email: user.email },
       );
       throw new AppError(
-        "This Email or Phone Number Already Registered",
-        HttpStatus.BAD_REQUEST,
+          "This Email Already Registered",
+          HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (existUserPhone ) {
+      log.warn("service:auth", "Registration failed: Email already registered", { email: user.email });
+      throw new AppError(
+          "This Phone Number Already Registered",
+          HttpStatus.BAD_REQUEST,
       );
     }
 
@@ -61,6 +69,11 @@ export class AuthService {
         email: userData.email,
       });
       throw new AppError("Email Not Registered", HttpStatus.UNAUTHORIZED);
+    }
+
+    if(!userExist.is_Active){
+      log.warn("service:auth", "Login failed: User Not Active", { email: userData.email });
+      throw new AppError("User Not Active", HttpStatus.UNAUTHORIZED);
     }
 
     const isPasswordMatch = await PasswordHelper.compare(

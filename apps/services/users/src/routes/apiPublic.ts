@@ -5,6 +5,8 @@ import {
   userLoginSchema,
   userRegisterSchema,
 } from "../validation/user.validation";
+import {userController} from "../cmd/controllers/user.controller.ts";
+import routerPrivate from "./apiPrivate.ts";
 
 const routerPublic = express.Router();
 
@@ -18,6 +20,7 @@ routerPublic.post(
   validateRequest(userLoginSchema),
   authController.login,
 );
+routerPublic.get("/auth/send-activation", authController.getVerificationCode);
 routerPublic.get("/auth/activation", authController.activationUser);
 
 export default routerPublic;

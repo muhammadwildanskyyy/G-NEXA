@@ -14,6 +14,7 @@ routerPrivate.use(authMiddleware);
 
 routerPrivate.get("/users/me", authController.me);
 routerPrivate.put("/users/update-user", userController.updateUser);
+routerPrivate.get("/users/activation-code", userController.updateUser);
 
 routerPrivate.post(
   "/store/register",
