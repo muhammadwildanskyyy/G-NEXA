@@ -26,6 +26,7 @@ type ProductService interface {
 	GetProducts(ctx context.Context, paginationParam *model.ProductQueryParam) (*model.PaginationProductResult, error)
 	GetProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error)
 	CreateProductBulk(ctx context.Context, products []*model.CreateProductRequest) ([]*model.Product, error)
+	ReduceQuantityProduct(ctx context.Context, product *model.Product, reduceStoct int) error
 }
 
 type productService struct {
@@ -42,7 +43,7 @@ func NewProductService(productRepository repositories.ProductRepository, categor
 	}
 }
 
-func (p *productService) CreateProduct(ctx context.Context, product *model.CreateProductRequest) (*model.Product, error) {
+func (ps *productService) CreateProduct(ctx context.Context, product *model.CreateProductRequest) (*model.Product, error) {
 	// 1. External Service Call (User-Service to verify Store)
 	httpClient := &http.Client{Timeout: time.Second * 10}
 	targetURL := fmt.Sprintf("http://user-service:8081/v1/api/store/%v", product.StoreID)
@@ -82,7 +83,7 @@ func (p *productService) CreateProduct(ctx context.Context, product *model.Creat
 	store := response.Data
 
 	// 2. Category & Specs Validation
-	category, err := p.CategoryRepository.SelectCategoryById(ctx, product.CategoryID)
+	category, err := ps.CategoryRepository.SelectCategoryById(ctx, product.CategoryID)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			logger.Warn(ctx, "service:product", "Product creation denied: Category not found", logrus.Fields{"category_id": product.CategoryID})
@@ -90,7 +91,7 @@ func (p *productService) CreateProduct(ctx context.Context, product *model.Creat
 		return nil, err
 	}
 
-	if err := p.validateProductSpecs(ctx, category, product.Specs); err != nil {
+	if err := ps.validateProductSpecs(ctx, category, product.Specs); err != nil {
 		logger.Warn(ctx, "service:product", "Product creation denied: Specs validation failed", logrus.Fields{"error": err.Error()})
 		return nil, err
 	}
@@ -114,7 +115,7 @@ func (p *productService) CreateProduct(ctx context.Context, product *model.Creat
 		Tags:        product.Tags,
 	}
 
-	newProduct, err := p.ProductRepository.InsertProduct(ctx, productInput)
+	newProduct, err := ps.ProductRepository.InsertProduct(ctx, productInput)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +124,7 @@ func (p *productService) CreateProduct(ctx context.Context, product *model.Creat
 	return newProduct, nil
 }
 
-func (p *productService) UpdateProduct(ctx context.Context, product *model.UpdateProductRequest, productId string) (*model.Product, error) {
+func (ps *productService) UpdateProduct(ctx context.Context, product *model.UpdateProductRequest, productId string) (*model.Product, error) {
 	categoryId, err := primitive.ObjectIDFromHex(product.CategoryID)
 	if err != nil {
 		logger.Warn(ctx, "service:product", "Product update denied: Invalid category ID", logrus.Fields{"category_id": product.CategoryID})
@@ -148,7 +149,7 @@ func (p *productService) UpdateProduct(ctx context.Context, product *model.Updat
 		Tags:        product.Tags,
 	}
 
-	newProduct, err := p.ProductRepository.UpdateProduct(ctx, productInput, productId)
+	newProduct, err := ps.ProductRepository.UpdateProduct(ctx, productInput, productId)
 	if err != nil {
 		return nil, err
 	}
@@ -157,8 +158,8 @@ func (p *productService) UpdateProduct(ctx context.Context, product *model.Updat
 	return newProduct, nil
 }
 
-func (p *productService) DeleteProduct(ctx context.Context, productId string) error {
-	err := p.ProductRepository.DeleteProduct(ctx, productId)
+func (ps *productService) DeleteProduct(ctx context.Context, productId string) error {
+	err := ps.ProductRepository.DeleteProduct(ctx, productId)
 	if err != nil {
 		return err
 	}
@@ -167,8 +168,8 @@ func (p *productService) DeleteProduct(ctx context.Context, productId string) er
 	return nil
 }
 
-func (p *productService) GetProductById(ctx context.Context, productId string) (*model.Product, error) {
-	product, err := p.ProductRepository.FindProductByID(ctx, productId)
+func (ps *productService) GetProductById(ctx context.Context, productId string) (*model.Product, error) {
+	product, err := ps.ProductRepository.FindProductByID(ctx, productId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			logger.Warn(ctx, "service:product", "Product retrieval failed: Not found", logrus.Fields{"product_id": productId})
@@ -178,7 +179,7 @@ func (p *productService) GetProductById(ctx context.Context, productId string) (
 	return product, nil
 }
 
-func (p *productService) GetProducts(ctx context.Context, params *model.ProductQueryParam) (*model.PaginationProductResult, error) {
+func (ps *productService) GetProducts(ctx context.Context, params *model.ProductQueryParam) (*model.PaginationProductResult, error) {
 	if params.Page <= 0 {
 		params.Page = 1
 	}
@@ -186,7 +187,7 @@ func (p *productService) GetProducts(ctx context.Context, params *model.ProductQ
 		params.Limit = 10
 	}
 
-	products, totalProduct, err := p.ProductRepository.FindAllProducts(ctx, params)
+	products, totalProduct, err := ps.ProductRepository.FindAllProducts(ctx, params)
 	if err != nil {
 		return nil, err
 	}
@@ -201,15 +202,15 @@ func (p *productService) GetProducts(ctx context.Context, params *model.ProductQ
 	}, nil
 }
 
-func (p *productService) GetProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error) {
-	result, err := p.ProductRepository.SelectProductsByCategoryId(ctx, categoryId)
+func (ps *productService) GetProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error) {
+	result, err := ps.ProductRepository.SelectProductsByCategoryId(ctx, categoryId)
 	if err != nil {
 		return nil, err
 	}
 	return result, nil
 }
 
-func (p *productService) validateProductSpecs(ctx context.Context, category *model.Category, inputSpecs map[string]interface{}) error {
+func (ps *productService) validateProductSpecs(ctx context.Context, category *model.Category, inputSpecs map[string]interface{}) error {
 	for _, template := range category.Templates {
 		value, exists := inputSpecs[template.Key]
 
@@ -242,14 +243,14 @@ func (p *productService) validateProductSpecs(ctx context.Context, category *mod
 	return nil
 }
 
-func (s *productService) CreateProductBulk(ctx context.Context, products []*model.CreateProductRequest) ([]*model.Product, error) {
+func (ps *productService) CreateProductBulk(ctx context.Context, products []*model.CreateProductRequest) ([]*model.Product, error) {
 	var successProducts []*model.Product
 	var failedCount int
 
 	logger.Info(ctx, "service:product", "Starting bulk product creation", logrus.Fields{"total_items": len(products)})
 
 	for _, req := range products {
-		newProduct, err := s.CreateProduct(ctx, req)
+		newProduct, err := ps.CreateProduct(ctx, req)
 		if err != nil {
 			failedCount++
 			continue
@@ -263,4 +264,16 @@ func (s *productService) CreateProductBulk(ctx context.Context, products []*mode
 	})
 
 	return successProducts, nil
+}
+
+func (ps *productService) ReduceQuantityProduct(ctx context.Context, product *model.Product, reduceStoct int) error {
+
+	product.Stock = product.Stock - reduceStoct
+	idString := product.ID.Hex()
+	_, err := ps.ProductRepository.UpdateProduct(ctx, product, idString)
+	if err != nil {
+		logger.Error(ctx, "service:product", "Failed Reduce Quantity of Product", err, logrus.Fields{"product_id": idString})
+		return err
+	}
+	return nil
 }

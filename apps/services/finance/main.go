@@ -35,16 +35,28 @@ func main() {
 	logger.Info(ctx, "infra:bootstrap", "Starting GNEXA Finance Service...", nil)
 
 	db := resources.InitDB(cfg)
-	err := db.AutoMigrate(&model.Wallet{})
+	xendit := resources.InitXendit(cfg)
+	err := db.AutoMigrate(&model.Wallet{}, &model.Payment{})
 	if err != nil {
 		logger.Error(ctx, "infra:database", "Failed to run auto migration", err, nil)
 	} else {
 		logger.Info(ctx, "infra:database", "Database auto migration completed", nil)
 	}
 
+	paymentRepository := repositories.NewPaymentRepository(db)
 	walletRepository := repositories.NewWalletRepository(db)
+	xenditRepository := repositories.NewXenditRepository(xendit)
+
+	paymentService := services.NewPaymentService(paymentRepository)
 	walletService := services.NewWalletService(walletRepository)
-	walletUseCase := usecases.NewWalletUsecase(walletService)
+	xenditService := services.NewXenditService(xenditRepository)
+
+	paymentUsecase := usecases.NewPaymentUsecase(paymentService)
+	walletUseCase := usecases.NewWalletUsecase(walletService, nil, paymentUsecase)
+	xenditUsecase := usecases.NewXenditUsecase(xenditService, paymentUsecase, walletUseCase)
+	walletUseCase.SetXenditUsecase(xenditUsecase)
+
+	xenditHandler := handlers.NewWebhookHandler(xenditUsecase, cfg.Xendit.WebhookSecret)
 	walletHandler := handlers.NewWalletHandler(walletUseCase)
 
 	consumer := kafka.NewConsumer([]string{cfg.Kafka.Broker}, cfg.Kafka.Topic, "finance-group")
@@ -67,7 +79,7 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	routes.SetupRoutes(router, cfg.App.AuthSecret, walletHandler)
+	routes.SetupRoutes(router, cfg.App.AuthSecret, walletHandler, xenditHandler)
 
 	go func() {
 		logger.Info(ctx, "infra:bootstrap", "Server HTTP Gin is running", logrus.Fields{

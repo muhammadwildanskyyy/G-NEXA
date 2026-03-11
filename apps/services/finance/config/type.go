@@ -6,6 +6,7 @@ type AppConfig struct {
 	Database      DatabaseConfig      `mapstructure:"DATABASE"`
 	Kafka         KafkaConfig         `mapstructure:"KAFKA"`
 	HostService   HostServices        `mapstructure:"HOST_SERVICES"`
+	Xendit        Xendit              `mapstructure:"XENDIT"`
 }
 
 type APP struct {
@@ -35,4 +36,9 @@ type DatabaseConfig struct {
 
 type HostServices struct {
 	UserService string `mapstructure:"USER_SERVICE"`
+}
+
+type Xendit struct {
+	APIKey        string `mapstructure:"API_KEY"`
+	WebhookSecret string `mapstructure:"WEBHOOK_SECRET"`
 }

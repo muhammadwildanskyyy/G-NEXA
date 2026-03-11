@@ -8,6 +8,7 @@ import { CommonModule } from './common/common.module';
 import { InfrastructureModule } from './infrastructure/infrastructure.module';
 import { HttpLoggerMiddleware } from './common/middleware/logger/logger.middleware';
 import { ClsModule } from 'nestjs-cls';
+import { CartItemsModule } from './modules/cart-items/cart-items.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ClsModule } from 'nestjs-cls';
     OrdersModule,
     CommonModule,
     InfrastructureModule,
+    CartItemsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

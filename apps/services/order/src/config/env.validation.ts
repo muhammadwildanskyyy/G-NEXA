@@ -8,6 +8,8 @@ export const envSchema = z.object({
   PRODUCT_SERVICE_URL: z.string().url(),
   USER_SERVICE_URL: z.string().url(),
 
+  KAFKA_BROKER: z.string(),
+
   SECRET: z.string(),
 });
 

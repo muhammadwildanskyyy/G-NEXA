@@ -17,6 +17,7 @@ type ProductUsecase interface {
 	DeleteProduct(ctx context.Context, id string) error
 	SelectProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error)
 	CreateProductBulk(ctx context.Context, products []*model.CreateProductRequest) ([]*model.Product, error)
+	ReduceQuantityProduct(ctx context.Context, params []*model.OrderItem) error
 }
 
 type productUsecase struct {
@@ -27,8 +28,8 @@ func NewProductUsecase(productService services.ProductService) ProductUsecase {
 	return &productUsecase{ProductService: productService}
 }
 
-func (p *productUsecase) CreateProduct(ctx context.Context, product *model.CreateProductRequest) (*model.Product, error) {
-	result, err := p.ProductService.CreateProduct(ctx, product)
+func (pu *productUsecase) CreateProduct(ctx context.Context, product *model.CreateProductRequest) (*model.Product, error) {
+	result, err := pu.ProductService.CreateProduct(ctx, product)
 	if err != nil {
 		return nil, err
 	}
@@ -39,8 +40,8 @@ func (p *productUsecase) CreateProduct(ctx context.Context, product *model.Creat
 	return result, nil
 }
 
-func (p *productUsecase) GetProductByID(ctx context.Context, id string) (*model.Product, error) {
-	result, err := p.ProductService.GetProductById(ctx, id)
+func (pu *productUsecase) GetProductByID(ctx context.Context, id string) (*model.Product, error) {
+	result, err := pu.ProductService.GetProductById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -49,8 +50,8 @@ func (p *productUsecase) GetProductByID(ctx context.Context, id string) (*model.
 	return result, nil
 }
 
-func (p *productUsecase) GetProducts(ctx context.Context, params *model.ProductQueryParam) (*model.PaginationProductResult, error) {
-	result, err := p.ProductService.GetProducts(ctx, params)
+func (pu *productUsecase) GetProducts(ctx context.Context, params *model.ProductQueryParam) (*model.PaginationProductResult, error) {
+	result, err := pu.ProductService.GetProducts(ctx, params)
 	if err != nil {
 		return nil, err
 	}
@@ -59,8 +60,8 @@ func (p *productUsecase) GetProducts(ctx context.Context, params *model.ProductQ
 	return result, nil
 }
 
-func (p *productUsecase) UpodateProduct(ctx context.Context, product *model.UpdateProductRequest, productId string) (*model.Product, error) {
-	result, err := p.ProductService.UpdateProduct(ctx, product, productId)
+func (pu *productUsecase) UpodateProduct(ctx context.Context, product *model.UpdateProductRequest, productId string) (*model.Product, error) {
+	result, err := pu.ProductService.UpdateProduct(ctx, product, productId)
 	if err != nil {
 		return nil, err
 	}
@@ -71,8 +72,8 @@ func (p *productUsecase) UpodateProduct(ctx context.Context, product *model.Upda
 	return result, nil
 }
 
-func (p *productUsecase) DeleteProduct(ctx context.Context, id string) error {
-	err := p.ProductService.DeleteProduct(ctx, id)
+func (pu *productUsecase) DeleteProduct(ctx context.Context, id string) error {
+	err := pu.ProductService.DeleteProduct(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -83,8 +84,8 @@ func (p *productUsecase) DeleteProduct(ctx context.Context, id string) error {
 	return nil
 }
 
-func (p *productUsecase) SelectProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error) {
-	result, err := p.ProductService.GetProductsByCategoryId(ctx, categoryId)
+func (pu *productUsecase) SelectProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error) {
+	result, err := pu.ProductService.GetProductsByCategoryId(ctx, categoryId)
 	if err != nil {
 		return nil, err
 	}
@@ -93,8 +94,8 @@ func (p *productUsecase) SelectProductsByCategoryId(ctx context.Context, categor
 	return result, nil
 }
 
-func (p *productUsecase) CreateProductBulk(ctx context.Context, products []*model.CreateProductRequest) ([]*model.Product, error) {
-	result, err := p.ProductService.CreateProductBulk(ctx, products)
+func (pu *productUsecase) CreateProductBulk(ctx context.Context, products []*model.CreateProductRequest) ([]*model.Product, error) {
+	result, err := pu.ProductService.CreateProductBulk(ctx, products)
 	if err != nil {
 		return nil, err
 	}
@@ -103,4 +104,28 @@ func (p *productUsecase) CreateProductBulk(ctx context.Context, products []*mode
 		"total_processed": len(result),
 	})
 	return result, nil
+}
+
+func (pu *productUsecase) ReduceQuantityProduct(ctx context.Context, params []*model.OrderItem) error {
+
+	for _, item := range params {
+
+		product, err := pu.GetProductByID(ctx, item.ProductId)
+		if err != nil {
+			logger.Error(ctx, "usecase:product", "Failed Get Product By Id", err, logrus.Fields{
+				"product_id": item.Id,
+			})
+			return err
+		}
+
+		err = pu.ProductService.ReduceQuantityProduct(ctx, product, item.Quantity)
+		if err != nil {
+			logger.Error(ctx, "usecase:product", "Failed reduce quantity product", err, logrus.Fields{
+				"product_id": item.Id,
+			})
+			return err
+		}
+
+	}
+	return nil
 }

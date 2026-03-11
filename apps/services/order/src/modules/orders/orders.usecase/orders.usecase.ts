@@ -1,17 +1,42 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { OrdersService } from '../orders.service/orders.service';
-import { CreateOrderDto, UpdateOrderDto } from '../dto/order.dto';
+import {
+  CreateOrderDto,
+  KAFKA_ORDER_TOPIC,
+  OrderEventPayload,
+  UpdateOrderDto,
+} from '../dto/order.dto';
 import { Order, Prisma } from '@prisma/client';
 import { AppException } from 'src/common/filters/global.exception/app.exception';
 import { Product } from '../../../infrastructure/http-clients/product-client/dto/product.dto';
 import { AppLogger } from '../../../infrastructure/logger/app.logger';
+import { ClientKafka } from '@nestjs/microservices';
+import { CartService } from '../../cart-items/cart.service/cart.service';
 
 @Injectable()
-export class OrdersUsecase {
+export class OrdersUsecase implements OnModuleInit {
   constructor(
     private readonly orderService: OrdersService,
-    private readonly logger: AppLogger, // 🚀 Inject Logger di sini
+    private readonly logger: AppLogger,
+    private readonly cartService: CartService,
+    @Inject('KAFKA_PRODUCER') private readonly kafkaClient: ClientKafka,
   ) {}
+
+  async onModuleInit() {
+    try {
+      await this.kafkaClient.connect();
+      this.logger.info(
+        'INFRA:KAFKA',
+        '✅ Kafka Producer connected and ready to emit events',
+      );
+    } catch (error) {
+      this.logger.err(
+        'INFRA:KAFKA',
+        '❌ Failed to Connect Kafka Producer',
+        error,
+      );
+    }
+  }
 
   async checkoutOurder(userId: string, params: CreateOrderDto): Promise<Order> {
     this.logger.info('usecase:order', 'Initiating order checkout process', {
@@ -46,8 +71,8 @@ export class OrdersUsecase {
     }
 
     // 3. Validasi Product & Stock
-    const product = await this.orderService.getValidProduct(params);
-    if (!product) {
+    const products = await this.orderService.getValidProduct(params);
+    if (!products) {
       this.logger.warning(
         'usecase:order',
         'Checkout failed: Product validation returned empty',
@@ -57,7 +82,7 @@ export class OrdersUsecase {
 
     // 4. Kalkulasi Harga
     const { orderItems, totalAmount } = this.constructOrderItems(
-      product,
+      products,
       params,
     );
 
@@ -76,11 +101,34 @@ export class OrdersUsecase {
       orderItems,
     );
 
+    const payloadEvent: OrderEventPayload = {
+      event: 'order.created',
+      timestamp: new Date().toISOString(),
+      data: {
+        order_items: orderItems,
+      },
+    };
+
+    for (const item of orderItems) {
+      await this.cartService.upsertCartItem(
+        userId,
+        item.product_id,
+        savedOrder.store_id,
+        -item.quantity,
+      );
+    }
+
+    this.kafkaClient.emit(KAFKA_ORDER_TOPIC, {
+      key: savedOrder.id,
+      value: payloadEvent,
+    });
+
     this.logger.info(
       'usecase:order',
       'Order checkout orchestrated successfully',
       { order_id: savedOrder.id },
     );
+
     return savedOrder;
   }
 

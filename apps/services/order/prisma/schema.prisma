@@ -64,3 +64,17 @@ model OrderItem {
   @@index([product_id])
   @@map("order_items")
 }
+
+model CartItem {
+  id          String   @id @default(uuid())
+  user_id     String
+  store_id    String
+  product_id  String
+  quantity    Int      @default(1)
+  is_selected Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@unique([user_id, product_id])
+  @@map("chart_items")
+}

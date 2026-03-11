@@ -15,7 +15,7 @@ export class Dimensions {
 export class Product {
   id!: string;
   store_id!: string;
-  category_id!: string ;
+  category_id!: string;
   // --- Basic Info ---
   name!: string;
   slug?: string;
@@ -38,7 +38,6 @@ export class Product {
   // --- Dynamic Part ---
   specs!: Record<string, unknown>;
 
-
   // --- Metadata ---
   tags?: string[];
   views?: number;
@@ -47,5 +46,10 @@ export class Product {
   updated_at?: Date;
 }
 
+export class Products {
+  products: Product[];
+}
+
 export class ErrProductResponse extends GlobalProductResponse<null> {}
 export class GetProductInfoResponse extends GlobalProductResponse<Product> {}
+export class GetProductsByStoreResponse extends GlobalProductResponse<Products> {}

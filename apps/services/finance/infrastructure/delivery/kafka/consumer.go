@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 
 	"finance/cmd/wallet/usecases"
-	"finance/infrastructure/logger" // 🚀 Alias ke GNEXA Logger
+	"finance/infrastructure/logger"
 	"finance/model"
 
 	"github.com/google/uuid"

@@ -34,3 +34,10 @@ export class GlobalOrderResponse<T> {
   };
   data: T;
 }
+
+export const KAFKA_ORDER_TOPIC: string = 'order.events';
+export interface OrderEventPayload {
+  event: 'order.created' | 'order.update';
+  timestamp: string;
+  data: any;
+}
