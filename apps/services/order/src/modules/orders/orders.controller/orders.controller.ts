@@ -10,8 +10,6 @@ import {
 } from '@nestjs/common';
 import { ZodValidatePipe } from 'src/common/pipe/zod-validate/zod-validate.pipe';
 import {
-  type CreateOrderDto,
-  CreateOrderSchema,
   GlobalOrderResponse,
   type UpdateOrderDto,
   UpdateOrderSchema,
@@ -34,28 +32,6 @@ export class OrdersController {
     private readonly orderUsecase: OrdersUsecase,
     private readonly logger: AppLogger, // 🚀 Inject logger di sini
   ) {}
-
-  @Post('/create')
-  async createOrder(
-    @Body(new ZodValidatePipe(CreateOrderSchema)) inputOrder: CreateOrderDto,
-    @User('user_id') user_id: string,
-  ): Promise<GlobalOrderResponse<Order>> {
-    this.logger.info('controller:order', 'Received request to create order', {
-      user_id,
-      idempotency_key: inputOrder.idempotensi_Key,
-      store_id: inputOrder.store_id,
-    });
-
-    const result = await this.orderUsecase.checkoutOurder(user_id, inputOrder);
-
-    return {
-      meta: {
-        message: 'Success Create Order',
-        code: HttpStatusCode.Created,
-      },
-      data: result,
-    };
-  }
 
   @Get('/user')
   async getOrderbyUserId(

@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { OrdersRepository } from '../orders.repository/orders.repository';
-import { CreateOrderDto, UpdateOrderDto } from '../dto/order.dto';
+import { StoreOrderDto, UpdateOrderDto } from '../dto/order.dto';
 import { Product } from '../../../infrastructure/http-clients/product-client/dto/product.dto';
 import { AppException } from '../../../common/filters/global.exception/app.exception';
 import { ProductClientService } from '../../../infrastructure/http-clients/product-client/product-client.service';
@@ -19,44 +19,7 @@ export class OrdersService {
     private readonly logger: AppLogger, // 🚀 Inject logger di sini
   ) {}
 
-  async saveOrder(
-    userId: string,
-    idempotencyKey: string,
-    storeId: string,
-    shippingAddress: Prisma.InputJsonValue,
-    totalAmount: number,
-    items: Prisma.OrderItemCreateWithoutOrderInput[],
-  ): Promise<Order> {
-    const newOrder = await this.orderRepository.createOrderWithItems(
-      userId,
-      idempotencyKey,
-      storeId,
-      shippingAddress,
-      totalAmount,
-      items,
-    );
-
-    if (!newOrder) {
-      this.logger.err(
-        'service:order',
-        'Failed Create Order: Repository returned empty',
-        null,
-        { idempotency_key: idempotencyKey },
-      );
-      throw new AppException(
-        'Failed Create Order',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-
-    this.logger.info('service:order', 'Order successfully saved', {
-      order_id: newOrder.id,
-      store_id: storeId,
-    });
-    return newOrder;
-  }
-
-  async getValidProduct(params: CreateOrderDto): Promise<Product[]> {
+  async getValidProduct(params: StoreOrderDto): Promise<Product[]> {
     const items = params.items;
     const products: Product[] = [];
 
@@ -231,12 +194,39 @@ export class OrdersService {
     return orders;
   }
 
-  async isUniqueIdempotensi(idempotencyKey: string): Promise<boolean> {
-    this.logger.dbg('service:order', 'Checking idempotency key uniqueness', {
-      idempotency_key: idempotencyKey,
-    });
-    const exists =
-      await this.orderRepository.selectOrderByIdempotensi(idempotencyKey);
-    return !exists;
+  constructOrderItems(
+    validProducts: Product[],
+    params: StoreOrderDto,
+  ): {
+    orderItems: Prisma.OrderItemCreateWithoutOrderInput[];
+    totalAmount: number;
+  } {
+    let totalAmount = 0;
+    const orderItems: Prisma.OrderItemCreateWithoutOrderInput[] = [];
+
+    for (const cartItem of params.items) {
+      const realProduct = validProducts.find(
+        (p) => p.id === cartItem.product_id,
+      );
+
+      if (!realProduct) {
+        this.logger.warning(
+          'service:order',
+          'Item construction failed: Product ID mismatch',
+          { product_id: cartItem.product_id },
+        );
+        throw new AppException(`Product Invalid`, HttpStatus.BAD_REQUEST);
+      }
+
+      totalAmount += realProduct.price * cartItem.quantity;
+
+      orderItems.push({
+        product_id: cartItem.product_id,
+        quantity: cartItem.quantity,
+        price_at_purchase: realProduct.price, // Menyimpan harga saat ini (snapshot harga)
+      });
+    }
+
+    return { orderItems, totalAmount };
   }
 }

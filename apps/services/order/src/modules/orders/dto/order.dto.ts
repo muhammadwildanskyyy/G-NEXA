@@ -14,19 +14,30 @@ export const OrderItemSchema = z.object({
   quantity: z.number().int().positive('Kuantitas harus lebih dari 0'),
 });
 
-export const CreateOrderSchema = z.object({
+export const StoreOrderSchema = z.object({
   store_id: z.string().uuid('Store ID harus berupa format UUID'),
-  shipping_address: ShippingAddressSchema,
-  items: z.array(OrderItemSchema).min(1, 'Keranjang tidak boleh kosong'),
+  items: z.array(OrderItemSchema).min(1, 'Berisikan minimal 1 order item'),
+});
+
+export const CreateInvoiceDtoSchema = z.object({
   idempotensi_Key: z.string().uuid('idempotensi harus berformat uuid'),
+  shipping_address: ShippingAddressSchema,
+  orders: z.array(StoreOrderSchema).min(1, 'Minimal Checkout 1 toko'),
 });
 
 export const UpdateOrderSchema = z.object({
   shipping_address: ShippingAddressSchema,
 });
 
-export type CreateOrderDto = z.infer<typeof CreateOrderSchema>;
+export const UpdateInvoiceSchema = z.object({
+  shipping_address: ShippingAddressSchema.optional(),
+  status: z.enum(['PENDING', 'PAID', 'SHIPPED', 'CANCELLED']).optional(),
+});
+
+export type StoreOrderDto = z.infer<typeof StoreOrderSchema>;
+export type CreateInvoiceDto = z.infer<typeof CreateInvoiceDtoSchema>;
 export type UpdateOrderDto = z.infer<typeof UpdateOrderSchema>;
+export type UpdateInvoiceDto = z.infer<typeof UpdateInvoiceSchema>;
 export class GlobalOrderResponse<T> {
   meta: {
     message: string;
@@ -37,7 +48,17 @@ export class GlobalOrderResponse<T> {
 
 export const KAFKA_ORDER_TOPIC: string = 'order.events';
 export interface OrderEventPayload {
-  event: 'order.created' | 'order.update';
+  event: 'order.update';
   timestamp: string;
   data: any;
+}
+
+export interface InvoiceEventPayload {
+  event: 'invoice.created';
+  timestamp: string;
+  data: {
+    invoice_id: string;
+    total_amount: number;
+    order_ids: string[];
+  };
 }
