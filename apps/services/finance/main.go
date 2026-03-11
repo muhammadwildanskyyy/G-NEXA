@@ -10,6 +10,7 @@ import (
 
 	"finance/cmd/wallet/repositories"
 	"finance/cmd/wallet/resources"
+	"finance/cmd/wallet/scheduler"
 	"finance/cmd/wallet/services"
 	"finance/cmd/wallet/usecases"
 	"finance/config"
@@ -36,7 +37,7 @@ func main() {
 
 	db := resources.InitDB(cfg)
 	xendit := resources.InitXendit(cfg)
-	err := db.AutoMigrate(&model.Wallet{}, &model.Payment{})
+	err := db.AutoMigrate(&model.Wallet{}, &model.Payment{}, &model.PaymentAnomaly{})
 	if err != nil {
 		logger.Error(ctx, "infra:database", "Failed to run auto migration", err, nil)
 	} else {
@@ -46,14 +47,16 @@ func main() {
 	paymentRepository := repositories.NewPaymentRepository(db)
 	walletRepository := repositories.NewWalletRepository(db)
 	xenditRepository := repositories.NewXenditRepository(xendit)
+	anomalyRepository := repositories.NewAnomalyRepository(db)
 
 	paymentService := services.NewPaymentService(paymentRepository)
 	walletService := services.NewWalletService(walletRepository)
 	xenditService := services.NewXenditService(xenditRepository)
+	anomalyService := services.NewAnomalyService(anomalyRepository)
 
 	paymentUsecase := usecases.NewPaymentUsecase(paymentService)
-	walletUseCase := usecases.NewWalletUsecase(walletService, nil, paymentUsecase)
-	xenditUsecase := usecases.NewXenditUsecase(xenditService, paymentUsecase, walletUseCase)
+	walletUseCase := usecases.NewWalletUsecase(walletService, nil, paymentUsecase, anomalyService)
+	xenditUsecase := usecases.NewXenditUsecase(xenditService, paymentUsecase, walletUseCase, anomalyService)
 	walletUseCase.SetXenditUsecase(xenditUsecase)
 
 	xenditHandler := handlers.NewWebhookHandler(xenditUsecase, cfg.Xendit.WebhookSecret)
@@ -65,6 +68,9 @@ func main() {
 			return kafka.HandlerConsumer(c, msg, walletUseCase)
 		})
 	}()
+
+	paymentSyncScheduler := scheduler.NewSchedulerService(xenditUsecase, paymentUsecase, walletUseCase)
+	go paymentSyncScheduler.Start(ctx)
 
 	router := gin.New()
 

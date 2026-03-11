@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/shopspring/decimal"
 	"github.com/sirupsen/logrus"
 
 	"finance/cmd/wallet/services"
@@ -18,19 +19,22 @@ type WalletUsecase interface {
 	TopUpWallet(ctx context.Context, userID string, amount float64, bankCode string, customerName string) (*model.PaymentResponse, error)
 	AddBalance(ctx context.Context, userID string, amount float64, bankCode string) error
 	SetXenditUsecase(xu XenditUsecase)
+	ReconcileBalances(ctx context.Context) error
 }
 
 type walletUsecase struct {
 	WalletService  services.WalletService
 	XenditUsecase  XenditUsecase
 	PaymentUsecase PaymentUsecase
+	AnomalyService services.AnomalyService
 }
 
-func NewWalletUsecase(walletService services.WalletService, xenditUsecase XenditUsecase, paymentUsecase PaymentUsecase) WalletUsecase {
+func NewWalletUsecase(walletService services.WalletService, xenditUsecase XenditUsecase, paymentUsecase PaymentUsecase, anomalyService services.AnomalyService) WalletUsecase {
 	return &walletUsecase{
 		WalletService:  walletService,
 		XenditUsecase:  xenditUsecase,
 		PaymentUsecase: paymentUsecase,
+		AnomalyService: anomalyService,
 	}
 }
 
@@ -138,6 +142,100 @@ func (wu *walletUsecase) AddBalance(ctx context.Context, userID string, amount f
 			"target_user_id": userID,
 		})
 		return err
+	}
+
+	return nil
+}
+
+func (wu *walletUsecase) ReconcileBalances(ctx context.Context) error {
+	logger.Info(ctx, "usecase:reconciliation", "Starting Balance Reconciliation audit", nil)
+
+	// 1. Ambil semua wallet
+	wallets, err := wu.WalletService.GetAllWallets(ctx)
+	if err != nil {
+		logger.Error(ctx, "usecase:reconciliation", "Failed to fetch wallets for reconciliation", err, nil)
+		return err
+	}
+
+	if len(wallets) == 0 {
+		logger.Info(ctx, "usecase:reconciliation", "No wallets found, skipping reconciliation", nil)
+		return nil
+	}
+
+	// 2. Ambil total payment SUCCEEDED per user
+	paymentTotals, err := wu.PaymentUsecase.GetSucceededPaymentTotalsByUser(ctx)
+	if err != nil {
+		logger.Error(ctx, "usecase:reconciliation", "Failed to fetch payment totals for reconciliation", err, nil)
+		return err
+	}
+
+	// 3. Buat map user_id -> totals untuk lookup cepat
+	totalsMap := make(map[string]model.UserPaymentTotals)
+	for _, t := range paymentTotals {
+		totalsMap[t.UserID] = t
+	}
+
+	// 4. Bandingkan expected vs actual balance
+	mismatchCount := 0
+	for _, wallet := range wallets {
+		totals, exists := totalsMap[wallet.UserID]
+
+		var expectedBalance decimal.Decimal
+		if exists {
+			topUp := decimal.NewFromFloat(totals.TotalTopUp)
+			order := decimal.NewFromFloat(totals.TotalOrder)
+			expectedBalance = topUp.Sub(order)
+		} else {
+			// Tidak ada transaksi sukses, expected = 0
+			expectedBalance = decimal.NewFromFloat(0)
+		}
+
+		actualBalance := wallet.AvailableBalance
+		difference := actualBalance.Sub(expectedBalance)
+
+		if !difference.IsZero() {
+			mismatchCount++
+			logger.Error(ctx, "usecase:reconciliation",
+				"⚠️ BALANCE MISMATCH DETECTED — Requires manual investigation",
+				fmt.Errorf("balance mismatch for user %s: expected %s, actual %s, diff %s",
+					wallet.UserID, expectedBalance.String(), actualBalance.String(), difference.String()),
+				logrus.Fields{
+					"user_id":          wallet.UserID,
+					"expected_balance": expectedBalance.String(),
+					"actual_balance":   actualBalance.String(),
+					"difference":       difference.String(),
+					"total_topup":      totals.TotalTopUp,
+					"total_order":      totals.TotalOrder,
+				},
+			)
+
+			// Anomaly #5: BALANCE_MISMATCH
+			wu.AnomalyService.RecordAnomaly(ctx, model.ANOMALY_BALANCE_MISMATCH, model.SEVERITY_CRITICAL, "RECONCILIATION",
+				"", wallet.UserID, fmt.Sprintf("Balance mismatch: expected %s, actual %s, diff %s",
+					expectedBalance.String(), actualBalance.String(), difference.String()),
+				map[string]interface{}{
+					"expected_balance": expectedBalance.String(),
+					"actual_balance":   actualBalance.String(),
+					"difference":       difference.String(),
+					"total_topup":      totals.TotalTopUp,
+					"total_order":      totals.TotalOrder,
+				})
+		}
+	}
+
+	if mismatchCount == 0 {
+		logger.Info(ctx, "usecase:reconciliation", "✅ Balance Reconciliation completed — all balances match", logrus.Fields{
+			"wallets_checked": len(wallets),
+		})
+	} else {
+		logger.Error(ctx, "usecase:reconciliation",
+			"🚨 Balance Reconciliation completed with MISMATCHES",
+			fmt.Errorf("%d balance mismatches detected out of %d wallets", mismatchCount, len(wallets)),
+			logrus.Fields{
+				"wallets_checked": len(wallets),
+				"mismatch_count":  mismatchCount,
+			},
+		)
 	}
 
 	return nil

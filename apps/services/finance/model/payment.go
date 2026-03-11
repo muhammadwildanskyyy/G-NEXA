@@ -47,3 +47,10 @@ type Payment struct {
 func (Payment) TableName() string {
 	return "payments"
 }
+
+// UserPaymentTotals holds aggregated SUCCEEDED payment totals per user
+type UserPaymentTotals struct {
+	UserID     string  `json:"user_id"`
+	TotalTopUp float64 `json:"total_topup"`
+	TotalOrder float64 `json:"total_order"`
+}

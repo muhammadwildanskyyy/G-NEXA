@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -16,6 +17,9 @@ type PaymentService interface {
 	GetPaymentRecord(ctx context.Context, transactionID string) (*model.Payment, error)
 	RemovePaymentRecord(ctx context.Context, transactionID string) error
 	UpdatePaymentStatus(ctx context.Context, transactionID string, status string) error
+	GetStalePendingPayments(ctx context.Context) ([]model.Payment, error)
+	GetExpiredPendingPayments(ctx context.Context) ([]model.Payment, error)
+	GetSucceededPaymentTotalsByUser(ctx context.Context) ([]model.UserPaymentTotals, error)
 }
 
 type paymentService struct {
@@ -81,4 +85,44 @@ func (s *paymentService) UpdatePaymentStatus(ctx context.Context, transactionID 
 	}
 
 	return s.paymentRepository.UpdateStatus(ctx, transactionID, status)
+}
+
+func (s *paymentService) GetStalePendingPayments(ctx context.Context) ([]model.Payment, error) {
+	threshold := time.Now().Add(-15 * time.Minute)
+
+	logger.Debug(ctx, "service:payment", "Fetching stale pending payments", logrus.Fields{
+		"threshold": threshold.Format(time.RFC3339),
+	})
+
+	records, err := s.paymentRepository.GetStalePendingPayments(ctx, threshold)
+	if err != nil {
+		logger.Error(ctx, "service:payment", "Failed to fetch stale pending payments", err, nil)
+		return nil, err
+	}
+
+	return records, nil
+}
+
+func (s *paymentService) GetExpiredPendingPayments(ctx context.Context) ([]model.Payment, error) {
+	logger.Debug(ctx, "service:payment", "Fetching expired pending payments", nil)
+
+	records, err := s.paymentRepository.GetExpiredPendingPayments(ctx)
+	if err != nil {
+		logger.Error(ctx, "service:payment", "Failed to fetch expired pending payments", err, nil)
+		return nil, err
+	}
+
+	return records, nil
+}
+
+func (s *paymentService) GetSucceededPaymentTotalsByUser(ctx context.Context) ([]model.UserPaymentTotals, error) {
+	logger.Debug(ctx, "service:payment", "Fetching succeeded payment totals by user", nil)
+
+	totals, err := s.paymentRepository.GetSucceededPaymentTotalsByUser(ctx)
+	if err != nil {
+		logger.Error(ctx, "service:payment", "Failed to fetch payment totals", err, nil)
+		return nil, err
+	}
+
+	return totals, nil
 }

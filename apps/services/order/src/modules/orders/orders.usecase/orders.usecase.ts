@@ -1,9 +1,6 @@
 import { HttpStatus, Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { OrdersService } from '../orders.service/orders.service';
 import {
-  CreateOrderDto,
-  KAFKA_ORDER_TOPIC,
-  OrderEventPayload,
   UpdateOrderDto,
 } from '../dto/order.dto';
 import { Order, Prisma } from '@prisma/client';
@@ -36,100 +33,6 @@ export class OrdersUsecase implements OnModuleInit {
         error,
       );
     }
-  }
-
-  async checkoutOurder(userId: string, params: CreateOrderDto): Promise<Order> {
-    this.logger.info('usecase:order', 'Initiating order checkout process', {
-      user_id: userId,
-      idempotency_key: params.idempotensi_Key,
-      store_id: params.store_id,
-    });
-
-    // 1. Validasi Idempotency
-    const isUniqueIdempotensi = await this.orderService.isUniqueIdempotensi(
-      params.idempotensi_Key,
-    );
-    if (!isUniqueIdempotensi) {
-      this.logger.warning(
-        'usecase:order',
-        'Checkout failed: Idempotency Key already exists',
-        { idempotency_key: params.idempotensi_Key },
-      );
-      throw new AppException(
-        'Idempotensi Key Already Exist',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    // 2. Validasi Store
-    const IsValidStore = await this.orderService.getStoreById(params.store_id);
-    if (!IsValidStore) {
-      this.logger.warning('usecase:order', 'Checkout failed: Invalid store', {
-        store_id: params.store_id,
-      });
-      throw new AppException('Store Invalid', HttpStatus.BAD_REQUEST);
-    }
-
-    // 3. Validasi Product & Stock
-    const products = await this.orderService.getValidProduct(params);
-    if (!products) {
-      this.logger.warning(
-        'usecase:order',
-        'Checkout failed: Product validation returned empty',
-      );
-      throw new AppException(`Product Invalid`, HttpStatus.BAD_REQUEST);
-    }
-
-    // 4. Kalkulasi Harga
-    const { orderItems, totalAmount } = this.constructOrderItems(
-      products,
-      params,
-    );
-
-    this.logger.dbg('usecase:order', 'Order items constructed', {
-      total_amount: totalAmount,
-      item_count: orderItems.length,
-    });
-
-    // 5. Eksekusi Simpan
-    const savedOrder = await this.orderService.saveOrder(
-      userId,
-      params.idempotensi_Key,
-      params.store_id,
-      { ...params.shipping_address },
-      totalAmount,
-      orderItems,
-    );
-
-    const payloadEvent: OrderEventPayload = {
-      event: 'order.created',
-      timestamp: new Date().toISOString(),
-      data: {
-        order_items: orderItems,
-      },
-    };
-
-    for (const item of orderItems) {
-      await this.cartService.upsertCartItem(
-        userId,
-        item.product_id,
-        savedOrder.store_id,
-        -item.quantity,
-      );
-    }
-
-    this.kafkaClient.emit(KAFKA_ORDER_TOPIC, {
-      key: savedOrder.id,
-      value: payloadEvent,
-    });
-
-    this.logger.info(
-      'usecase:order',
-      'Order checkout orchestrated successfully',
-      { order_id: savedOrder.id },
-    );
-
-    return savedOrder;
   }
 
   async findOrderByUserId(userId: string): Promise<Order[]> {
@@ -240,39 +143,4 @@ export class OrdersUsecase implements OnModuleInit {
     return cancelledOrder;
   }
 
-  private constructOrderItems(
-    validProducts: Product[],
-    params: CreateOrderDto,
-  ): {
-    orderItems: Prisma.OrderItemCreateWithoutOrderInput[];
-    totalAmount: number;
-  } {
-    let totalAmount = 0;
-    const orderItems: Prisma.OrderItemCreateWithoutOrderInput[] = [];
-
-    for (const cartItem of params.items) {
-      const realProduct = validProducts.find(
-        (p) => p.id === cartItem.product_id,
-      );
-
-      if (!realProduct) {
-        this.logger.warning(
-          'usecase:order',
-          'Item construction failed: Product ID mismatch',
-          { product_id: cartItem.product_id },
-        );
-        throw new AppException(`Product Invalid`, HttpStatus.BAD_REQUEST);
-      }
-
-      totalAmount += realProduct.price * cartItem.quantity;
-
-      orderItems.push({
-        product_id: cartItem.product_id,
-        quantity: cartItem.quantity,
-        price_at_purchase: realProduct.price, // Menyimpan harga saat ini (snapshot harga)
-      });
-    }
-
-    return { orderItems, totalAmount };
-  }
 }

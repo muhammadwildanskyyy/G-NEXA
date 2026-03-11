@@ -59,5 +59,6 @@ const appLogger = new AppLogger();
   ],
   providers: [OrdersService, OrdersRepository, OrdersUsecase],
   controllers: [OrdersController],
+  exports: [OrdersService],
 })
 export class OrdersModule {}
