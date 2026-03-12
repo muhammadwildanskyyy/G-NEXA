@@ -6,6 +6,10 @@ import { Invoice, Order, PaymentMethod, Prisma } from '@prisma/client';
 export class InvoicesService {
   constructor(private readonly invoicesRepository: InvoicesRepository) {}
 
+  async checkPendingInvoiceExists(userId: string): Promise<boolean> {
+    return this.invoicesRepository.checkPendingInvoiceExists(userId);
+  }
+
   async checkIdempotency(idempotencyKey: string): Promise<boolean> {
     return this.invoicesRepository.checkIdempotency(idempotencyKey);
   }

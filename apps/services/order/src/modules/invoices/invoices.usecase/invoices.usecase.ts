@@ -84,6 +84,23 @@ export class InvoicesUsecase implements OnModuleInit {
       store_count: params.orders.length,
     });
 
+    // 0. Validasi Pending Payment (Invoice + Payment dari Finance Service)
+    const [hasPendingInvoice, hasPendingPayment] = await Promise.all([
+      this.invoicesService.checkPendingInvoiceExists(userId),
+      this.financeClient.hasPendingPayment(),
+    ]);
+    if (hasPendingInvoice || hasPendingPayment) {
+      this.logger.warning(
+        'usecase:invoice',
+        'Checkout failed: User already has a pending payment',
+        { user_id: userId, has_pending_invoice: hasPendingInvoice, has_pending_payment: hasPendingPayment },
+      );
+      throw new AppException(
+        'You have a pending payment. Please complete or cancel it before creating a new order.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     // 1. Validasi Idempotency
     const isIdempotencyExist = await this.invoicesService.checkIdempotency(
       params.idempotensi_Key,

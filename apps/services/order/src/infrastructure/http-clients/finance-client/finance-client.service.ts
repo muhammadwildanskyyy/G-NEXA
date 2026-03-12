@@ -27,6 +27,24 @@ export interface WalletResponse {
   updated_at: string;
 }
 
+export interface PaymentResponse {
+  id: string;
+  user_id: string;
+  transaction_id: string;
+  transaction_type: string;
+  xendit_payment_req_id: string;
+  amount: number;
+  currency: string;
+  method_type: string;
+  channel_code: string;
+  payment_action_info: string;
+  status: string;
+  expires_at: string;
+  paid_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 interface FinanceApiResponse<T> {
   meta: {
     message: string;
@@ -158,5 +176,35 @@ export class FinanceClientService implements OnModuleInit {
     
 
     return response.data.data;
+  }
+
+  async getMyPayments(): Promise<PaymentResponse[]> {
+    const token: string = this.cls.get('access_token');
+    const request$ = this.httpService
+      .get<FinanceApiResponse<PaymentResponse[]>>(`${this.baseUrl}/v1/api/payments`, {
+        headers: {
+          Authorization: token,
+        },
+      })
+      .pipe(
+        retry(2),
+        catchError((error: AxiosError<ErrFinanceResponse>) => {
+          if (error.response) {
+            throw new AppException(
+              error.response.data?.meta?.message || 'Finance Service error',
+              error.response.status,
+            );
+          }
+          throw new AppException('Finance Service is unavailable');
+        }),
+      );
+
+    const response = await firstValueFrom(request$);
+    return response.data.data;
+  }
+
+  async hasPendingPayment(): Promise<boolean> {
+    const payments = await this.getMyPayments();
+    return payments.some((payment) => payment.status === 'PENDING');
   }
 }

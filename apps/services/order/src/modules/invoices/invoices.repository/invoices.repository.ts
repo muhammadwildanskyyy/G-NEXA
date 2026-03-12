@@ -6,6 +6,16 @@ import { PrismaService } from '../../../database/prisma/prisma.service';
 export class InvoicesRepository {
   constructor(private readonly prisma: PrismaService) {}
 
+  async checkPendingInvoiceExists(userId: string): Promise<boolean> {
+    const pendingInvoice = await this.prisma.invoice.findFirst({
+      where: {
+        user_id: userId,
+        status: 'PENDING',
+      },
+    });
+    return !!pendingInvoice;
+  }
+
   async checkIdempotency(idempotencyKey: string): Promise<boolean> {
     const exist = await this.prisma.invoice.findUnique({
       where: { idempotency_key: idempotencyKey },
