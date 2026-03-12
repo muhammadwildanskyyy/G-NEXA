@@ -27,6 +27,7 @@ type ProductService interface {
 	GetProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error)
 	CreateProductBulk(ctx context.Context, products []*model.CreateProductRequest) ([]*model.Product, error)
 	ReduceQuantityProduct(ctx context.Context, product *model.Product, reduceStoct int) error
+	RestoreQuantityProduct(ctx context.Context, product *model.Product, quantity int) error
 }
 
 type productService struct {
@@ -275,5 +276,22 @@ func (ps *productService) ReduceQuantityProduct(ctx context.Context, product *mo
 		logger.Error(ctx, "service:product", "Failed Reduce Quantity of Product", err, logrus.Fields{"product_id": idString})
 		return err
 	}
+	return nil
+}
+
+func (ps *productService) RestoreQuantityProduct(ctx context.Context, product *model.Product, quantity int) error {
+	product.Stock = product.Stock + quantity
+	idString := product.ID.Hex()
+	_, err := ps.ProductRepository.UpdateProduct(ctx, product, idString)
+	if err != nil {
+		logger.Error(ctx, "service:product", "Failed to restore quantity of product", err, logrus.Fields{"product_id": idString})
+		return err
+	}
+
+	logger.Info(ctx, "service:product", "Product stock restored successfully", logrus.Fields{
+		"product_id":     idString,
+		"restored_qty":   quantity,
+		"new_stock":      product.Stock,
+	})
 	return nil
 }

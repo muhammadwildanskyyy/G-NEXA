@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { EnvConfig } from '../../config/env.validation';
 import { ProductClientService } from './product-client/product-client.service';
 import { UserClientService } from './user-client/user-client.service';
+import { FinanceClientService } from './finance-client/finance-client.service';
 import * as http from 'node:http';
 import { InfrastructureModule } from '../infrastructure.module';
 
@@ -21,7 +22,8 @@ import { InfrastructureModule } from '../infrastructure.module';
     }),
     InfrastructureModule,
   ],
-  providers: [ProductClientService, UserClientService],
-  exports: [ProductClientService, UserClientService],
+  providers: [ProductClientService, UserClientService, FinanceClientService],
+  exports: [ProductClientService, UserClientService, FinanceClientService],
 })
 export class HttpClientsModule {}
+

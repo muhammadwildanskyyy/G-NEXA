@@ -8,6 +8,7 @@ import (
 )
 
 type CreatePaymentInput struct {
+	UserID             string
 	TransactionID      string
 	TransactionType    string
 	XenditPaymentReqID string
@@ -20,6 +21,8 @@ type CreatePaymentInput struct {
 
 type Payment struct {
 	ID uuid.UUID `gorm:"type:uuid;default:gen_random_uuid();primaryKey" json:"id"`
+
+	UserID string `gorm:"type:varchar(100);not null;index" json:"user_id"`
 
 	TransactionID   string `gorm:"type:varchar(100);not null;index" json:"transaction_id"`
 	TransactionType string `gorm:"type:varchar(20);not null" json:"transaction_type"`

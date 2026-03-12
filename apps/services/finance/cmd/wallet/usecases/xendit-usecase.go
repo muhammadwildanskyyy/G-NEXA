@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 	"github.com/xendit/xendit-go/v7/payment_request"
@@ -20,18 +22,53 @@ type XenditUsecase interface {
 }
 
 type xenditUsecase struct {
-	XenditService  services.XenditService
-	PaymentUsecase PaymentUsecase
-	WalletUsecase  WalletUsecase
-	AnomalyService services.AnomalyService
+	XenditService    services.XenditService
+	PaymentUsecase   PaymentUsecase
+	WalletUsecase    WalletUsecase
+	AnomalyService   services.AnomalyService
+	PaymentPublisher model.EventPublisher
 }
 
-func NewXenditUsecase(xenditService services.XenditService, paymentUsecase PaymentUsecase, walletUsecase WalletUsecase, anomalyService services.AnomalyService) XenditUsecase {
+func NewXenditUsecase(xenditService services.XenditService, paymentUsecase PaymentUsecase, walletUsecase WalletUsecase, anomalyService services.AnomalyService, paymentPublisher model.EventPublisher) XenditUsecase {
 	return &xenditUsecase{
-		XenditService:  xenditService,
-		PaymentUsecase: paymentUsecase,
-		WalletUsecase:  walletUsecase,
-		AnomalyService: anomalyService,
+		XenditService:    xenditService,
+		PaymentUsecase:   paymentUsecase,
+		WalletUsecase:    walletUsecase,
+		AnomalyService:   anomalyService,
+		PaymentPublisher: paymentPublisher,
+	}
+}
+
+// publishPaymentEvent publishes a payment event to the payment.events topic
+func (xu *xenditUsecase) publishPaymentEvent(ctx context.Context, eventName string, payment model.Payment) {
+	// Extract invoice ID from transaction ID (format: ORDER-{invoice_id})
+	invoiceID := strings.TrimPrefix(payment.TransactionID, model.TRANSACTION_TYPE_ORDER+"-")
+
+	event := model.PaymentEvent{
+		Event:     eventName,
+		Timestamp: time.Now().UTC().Format(time.RFC3339),
+		Data: model.PaymentEventData{
+			TransactionID: payment.TransactionID,
+			InvoiceID:     invoiceID,
+			UserID:        payment.UserID,
+			Amount:        payment.Amount,
+			Status:        payment.Status,
+		},
+	}
+
+	err := xu.PaymentPublisher.Publish(ctx, invoiceID, event)
+	if err != nil {
+		logger.Error(ctx, "usecase:webhook", "Failed to publish payment event to Kafka", err, logrus.Fields{
+			"event":          eventName,
+			"transaction_id": payment.TransactionID,
+			"invoice_id":     invoiceID,
+		})
+	} else {
+		logger.Info(ctx, "usecase:webhook", "Successfully published payment event to Kafka", logrus.Fields{
+			"event":          eventName,
+			"transaction_id": payment.TransactionID,
+			"invoice_id":     invoiceID,
+		})
 	}
 }
 
@@ -145,9 +182,27 @@ func (xu *xenditUsecase) ProcessPaymentCallback(ctx context.Context, payload mod
 			})
 
 		case model.TRANSACTION_TYPE_ORDER:
-			logger.Info(ctx, "usecase:webhook", "ORDER payment successful, preparing to publish Kafka event", logrus.Fields{
+			logger.Info(ctx, "usecase:webhook", "ORDER payment successful, publishing payment.success event", logrus.Fields{
 				"transaction_id": transactionID,
 			})
+
+			// Re-fetch to get updated status
+			updatedPayment, _ := xu.PaymentUsecase.GetRecord(ctx, transactionID)
+			if updatedPayment != nil {
+				xu.publishPaymentEvent(ctx, "payment.success", *updatedPayment)
+			}
+		}
+	}
+
+	// Handle FAILED status for ORDER payments
+	if newStatus == string(payment_request.PAYMENTREQUESTSTATUS_FAILED) && paymentRecord.TransactionType == model.TRANSACTION_TYPE_ORDER {
+		logger.Info(ctx, "usecase:webhook", "ORDER payment failed, publishing payment.failed event", logrus.Fields{
+			"transaction_id": transactionID,
+		})
+
+		updatedPayment, _ := xu.PaymentUsecase.GetRecord(ctx, transactionID)
+		if updatedPayment != nil {
+			xu.publishPaymentEvent(ctx, "payment.failed", *updatedPayment)
 		}
 	}
 
@@ -251,10 +306,14 @@ func (xu *xenditUsecase) SyncPendingPayments(ctx context.Context) error {
 				})
 
 			case model.TRANSACTION_TYPE_ORDER:
-				// ORDER → Log saja, bisa dipublish ke Kafka di masa depan
-				logger.Info(ctx, "usecase:sync", "ORDER payment SUCCEEDED via sync, preparing for further processing", logrus.Fields{
+				logger.Info(ctx, "usecase:sync", "ORDER payment SUCCEEDED via sync, publishing payment.success event", logrus.Fields{
 					"transaction_id": payment.TransactionID,
 				})
+
+				updatedPayment, _ := xu.PaymentUsecase.GetRecord(ctx, payment.TransactionID)
+				if updatedPayment != nil {
+					xu.publishPaymentEvent(ctx, "payment.success", *updatedPayment)
+				}
 
 			default:
 				logger.Warn(ctx, "usecase:sync", "Unknown transaction type for SUCCEEDED payment", logrus.Fields{
@@ -282,6 +341,13 @@ func (xu *xenditUsecase) SyncPendingPayments(ctx context.Context) error {
 				"transaction_id": payment.TransactionID,
 			})
 
+			// Publish payment.expired event for ORDER type
+			if payment.TransactionType == model.TRANSACTION_TYPE_ORDER {
+				expiredPayment := payment
+				expiredPayment.Status = "EXPIRED"
+				xu.publishPaymentEvent(ctx, "payment.expired", expiredPayment)
+			}
+
 		case string(payment_request.PAYMENTREQUESTSTATUS_FAILED):
 			// 3c. FAILED → Update status di database
 			err = xu.PaymentUsecase.UpdateStatus(ctx, payment.TransactionID, "FAILED")
@@ -295,6 +361,13 @@ func (xu *xenditUsecase) SyncPendingPayments(ctx context.Context) error {
 			logger.Info(ctx, "usecase:sync", "Payment marked as FAILED after Xendit sync", logrus.Fields{
 				"transaction_id": payment.TransactionID,
 			})
+
+			// Publish payment.failed event for ORDER type
+			if payment.TransactionType == model.TRANSACTION_TYPE_ORDER {
+				failedPayment := payment
+				failedPayment.Status = "FAILED"
+				xu.publishPaymentEvent(ctx, "payment.failed", failedPayment)
+			}
 
 		default:
 			// PENDING, REQUIRING_ACTION → Skip, biarkan Xendit yang process

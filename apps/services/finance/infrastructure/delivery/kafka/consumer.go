@@ -130,6 +130,43 @@ func HandlerConsumer(ctx context.Context, msg []byte, walletUseCase usecases.Wal
 	}
 }
 
+func HandlerOrderConsumer(ctx context.Context, msg []byte, paymentUsecase usecases.PaymentUsecase) error {
+	var payload model.InvoiceCreatedEvent
+
+	if err := json.Unmarshal(msg, &payload); err != nil {
+		logger.Error(ctx, "handler:kafka:order", "Failed to parse order event message (Poison Pill ignored)", err, logrus.Fields{
+			"payload": string(msg),
+		})
+		return nil
+	}
+
+	ctx = context.WithValue(ctx, "user_id", payload.Data.UserID)
+
+	logFields := logrus.Fields{
+		"event":      payload.Event,
+		"invoice_id": payload.Data.InvoiceID,
+		"user_id":    payload.Data.UserID,
+	}
+
+	switch payload.Event {
+	case "invoice.created":
+		logger.Info(ctx, "handler:kafka:order", "Received invoice.created event, initiating payment creation...", logFields)
+
+		err := paymentUsecase.CreateOrderPayment(ctx, payload.Data)
+		if err != nil {
+			logger.Error(ctx, "handler:kafka:order", "Failed to create order payment from invoice event", err, logFields)
+			return err
+		}
+
+		logger.Info(ctx, "handler:kafka:order", "Order payment created successfully from invoice event", logFields)
+		return nil
+
+	default:
+		logger.Warn(ctx, "handler:kafka:order", "Received unknown order event", logFields)
+		return nil
+	}
+}
+
 func (c *Consumer) Close() error {
 	return c.reader.Close()
 }

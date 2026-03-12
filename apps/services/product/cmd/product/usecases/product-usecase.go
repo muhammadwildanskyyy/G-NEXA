@@ -18,6 +18,7 @@ type ProductUsecase interface {
 	SelectProductsByCategoryId(ctx context.Context, categoryId string) ([]*model.Product, error)
 	CreateProductBulk(ctx context.Context, products []*model.CreateProductRequest) ([]*model.Product, error)
 	ReduceQuantityProduct(ctx context.Context, params []*model.OrderItem) error
+	RestoreQuantityProduct(ctx context.Context, params []*model.OrderItem) error
 }
 
 type productUsecase struct {
@@ -113,7 +114,7 @@ func (pu *productUsecase) ReduceQuantityProduct(ctx context.Context, params []*m
 		product, err := pu.GetProductByID(ctx, item.ProductId)
 		if err != nil {
 			logger.Error(ctx, "usecase:product", "Failed Get Product By Id", err, logrus.Fields{
-				"product_id": item.Id,
+				"product_id": item.ProductId,
 			})
 			return err
 		}
@@ -121,11 +122,38 @@ func (pu *productUsecase) ReduceQuantityProduct(ctx context.Context, params []*m
 		err = pu.ProductService.ReduceQuantityProduct(ctx, product, item.Quantity)
 		if err != nil {
 			logger.Error(ctx, "usecase:product", "Failed reduce quantity product", err, logrus.Fields{
-				"product_id": item.Id,
+				"product_id": item.ProductId,
 			})
 			return err
 		}
 
+	}
+	return nil
+}
+
+func (pu *productUsecase) RestoreQuantityProduct(ctx context.Context, params []*model.OrderItem) error {
+	for _, item := range params {
+		product, err := pu.GetProductByID(ctx, item.ProductId)
+		if err != nil {
+			logger.Error(ctx, "usecase:product", "Failed to get product for stock restoration", err, logrus.Fields{
+				"product_id": item.ProductId,
+			})
+			return err
+		}
+
+		err = pu.ProductService.RestoreQuantityProduct(ctx, product, item.Quantity)
+		if err != nil {
+			logger.Error(ctx, "usecase:product", "Failed to restore product stock", err, logrus.Fields{
+				"product_id": item.ProductId,
+				"quantity":   item.Quantity,
+			})
+			return err
+		}
+
+		logger.Info(ctx, "usecase:product", "Product stock restored", logrus.Fields{
+			"product_id": item.ProductId,
+			"quantity":   item.Quantity,
+		})
 	}
 	return nil
 }

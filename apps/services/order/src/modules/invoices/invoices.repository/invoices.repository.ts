@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Invoice, Order, Prisma } from '@prisma/client';
+import { Invoice, Order, PaymentMethod, Prisma } from '@prisma/client';
 import { PrismaService } from '../../../database/prisma/prisma.service';
 
 @Injectable()
@@ -18,6 +18,8 @@ export class InvoicesRepository {
     idempotencyKey: string,
     totalPrice: number,
     shippingAddress: Prisma.InputJsonValue,
+    paymentMethod: PaymentMethod,
+    bankCode: string | undefined,
     storeOrders: {
       storeId: string;
       totalPrice: number;
@@ -31,6 +33,8 @@ export class InvoicesRepository {
           user_id: userId,
           idempotency_key: idempotencyKey,
           total_price: totalPrice,
+          payment_method: paymentMethod,
+          bank_code: bankCode ?? null,
           shipping_address: shippingAddress,
           status: 'PENDING',
         },
@@ -96,6 +100,51 @@ export class InvoicesRepository {
   async deleteInvoice(invoiceId: string): Promise<Invoice> {
     return this.prisma.invoice.delete({
       where: { id: invoiceId },
+    });
+  }
+
+  async markInvoiceAndOrdersPaid(invoiceId: string): Promise<Invoice> {
+    return this.prisma.$transaction(async (tx) => {
+      const invoice = await tx.invoice.update({
+        where: { id: invoiceId },
+        data: { status: 'PAID' },
+      });
+
+      await tx.order.updateMany({
+        where: { invoice_id: invoiceId },
+        data: { status: 'PAID' },
+      });
+
+      return invoice;
+    });
+  }
+
+  async markInvoiceAndOrdersCancelled(invoiceId: string): Promise<Invoice> {
+    return this.prisma.$transaction(async (tx) => {
+      const invoice = await tx.invoice.update({
+        where: { id: invoiceId },
+        data: { status: 'CANCELLED' },
+      });
+
+      await tx.order.updateMany({
+        where: { invoice_id: invoiceId },
+        data: { status: 'CANCELLED' },
+      });
+
+      return invoice;
+    });
+  }
+
+  async findInvoiceWithItems(invoiceId: string) {
+    return this.prisma.invoice.findUnique({
+      where: { id: invoiceId },
+      include: {
+        orders: {
+          include: {
+            items: true,
+          },
+        },
+      },
     });
   }
 }

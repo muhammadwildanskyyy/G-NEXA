@@ -16,6 +16,7 @@ import { AclGuard } from '../../../common/guards/acl/acl.guard';
 import { User } from '../../../common/decorators/user/user.decorator';
 import { HttpStatus } from '@nestjs/common';
 import { AppLogger } from '../../../infrastructure/logger/app.logger';
+import { AppException } from '../../../common/filters/global.exception/app.exception';
 import { Invoice } from '@prisma/client';
 
 @Controller('/v1/api/invoice')
@@ -47,6 +48,37 @@ export class InvoicesController {
       meta: {
         message: 'Success Create Invoice and Orders',
         code: HttpStatus.CREATED,
+      },
+      data: result,
+    };
+  }
+
+  @Post('/check-wallet-balance')
+  async checkWalletBalance(
+    @Body() body: { total_amount: number },
+    @User('user_id') user_id: string,
+  ) {
+    this.logger.info('controller:invoice', 'Received request to check wallet balance', {
+      user_id,
+      total_amount: body.total_amount,
+    });
+
+    if (!body.total_amount || body.total_amount <= 0) {
+      throw new AppException(
+        'total_amount harus lebih dari 0',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const result = await this.invoiceUsecase.checkWalletBalance(
+      user_id,
+      body.total_amount,
+    );
+
+    return {
+      meta: {
+        message: 'Wallet balance check completed',
+        code: HttpStatus.OK,
       },
       data: result,
     };

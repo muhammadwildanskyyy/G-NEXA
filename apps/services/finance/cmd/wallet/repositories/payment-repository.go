@@ -15,12 +15,14 @@ import (
 type PaymentRepository interface {
 	Save(ctx context.Context, record *model.Payment) error
 	GetByTransactionID(ctx context.Context, transactionID string) (*model.Payment, error)
+	GetByUserID(ctx context.Context, userID string) ([]model.Payment, error)
 	Delete(ctx context.Context, transactionID string) error
 	UpdateStatus(ctx context.Context, transactionID string, status string) error
 	Update(ctx context.Context, record *model.Payment) error
 	GetStalePendingPayments(ctx context.Context, threshold time.Time) ([]model.Payment, error)
 	GetExpiredPendingPayments(ctx context.Context) ([]model.Payment, error)
 	GetSucceededPaymentTotalsByUser(ctx context.Context) ([]model.UserPaymentTotals, error)
+	GetPaymentsByTransactionPrefix(ctx context.Context, prefix string) ([]model.Payment, error)
 }
 
 type paymentRepository struct {
@@ -82,10 +84,20 @@ func (pr *paymentRepository) Delete(ctx context.Context, transactionID string) e
 }
 
 func (pr *paymentRepository) UpdateStatus(ctx context.Context, transactionID string, status string) error {
+	updates := map[string]interface{}{
+		"status": status,
+	}
+
+	// Set paid_at timestamp when payment succeeds
+	if status == "SUCCEEDED" {
+		now := time.Now()
+		updates["paid_at"] = &now
+	}
+
 	err := pr.db.WithContext(ctx).
 		Model(&model.Payment{}).
 		Where("transaction_id = ?", transactionID).
-		Update("status", status).Error
+		Updates(updates).Error
 
 	if err != nil {
 		logger.Error(ctx, "repository:payment", "Failed to update payment status", err, logrus.Fields{
@@ -163,16 +175,14 @@ func (pr *paymentRepository) GetExpiredPendingPayments(ctx context.Context) ([]m
 func (pr *paymentRepository) GetSucceededPaymentTotalsByUser(ctx context.Context) ([]model.UserPaymentTotals, error) {
 	var results []model.UserPaymentTotals
 
-	// transaction_id format: {TYPE}-{userID}-{timestamp}
-	// Extract user_id by removing the first segment (TYPE-) and last segment (-timestamp)
 	query := `
 		SELECT 
-			SUBSTRING(transaction_id FROM '-(.+)-[^-]+$') AS user_id,
+			user_id,
 			COALESCE(SUM(CASE WHEN transaction_type = 'TOPUP' THEN amount ELSE 0 END), 0) AS total_topup,
 			COALESCE(SUM(CASE WHEN transaction_type = 'ORDER' THEN amount ELSE 0 END), 0) AS total_order
 		FROM payments
 		WHERE status = 'SUCCEEDED' AND deleted_at IS NULL
-		GROUP BY SUBSTRING(transaction_id FROM '-(.+)-[^-]+$')
+		GROUP BY user_id
 	`
 
 	err := pr.db.WithContext(ctx).Raw(query).Scan(&results).Error
@@ -186,4 +196,50 @@ func (pr *paymentRepository) GetSucceededPaymentTotalsByUser(ctx context.Context
 	})
 
 	return results, nil
+}
+
+func (pr *paymentRepository) GetByUserID(ctx context.Context, userID string) ([]model.Payment, error) {
+	var records []model.Payment
+
+	err := pr.db.WithContext(ctx).
+		Where("user_id = ?", userID).
+		Order("created_at DESC").
+		Find(&records).Error
+
+	if err != nil {
+		logger.Error(ctx, "repository:payment", "Failed to fetch payments by user ID", err, logrus.Fields{
+			"user_id": userID,
+		})
+		return nil, err
+	}
+
+	logger.Debug(ctx, "repository:payment", "Fetched payments by user ID", logrus.Fields{
+		"user_id": userID,
+		"count":   len(records),
+	})
+
+	return records, nil
+}
+
+func (pr *paymentRepository) GetPaymentsByTransactionPrefix(ctx context.Context, prefix string) ([]model.Payment, error) {
+	var records []model.Payment
+
+	err := pr.db.WithContext(ctx).
+		Where("transaction_id LIKE ?", prefix+"%").
+		Order("created_at DESC").
+		Find(&records).Error
+
+	if err != nil {
+		logger.Error(ctx, "repository:payment", "Failed to fetch payments by transaction prefix", err, logrus.Fields{
+			"prefix": prefix,
+		})
+		return nil, err
+	}
+
+	logger.Debug(ctx, "repository:payment", "Fetched payments by transaction prefix", logrus.Fields{
+		"prefix": prefix,
+		"count":  len(records),
+	})
+
+	return records, nil
 }

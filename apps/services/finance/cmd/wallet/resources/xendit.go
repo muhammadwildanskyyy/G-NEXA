@@ -2,7 +2,6 @@ package resources
 
 import (
 	"finance/config"
-	"fmt"
 
 	"github.com/xendit/xendit-go/v7"
 )

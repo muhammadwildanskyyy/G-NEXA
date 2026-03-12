@@ -17,6 +17,7 @@ type WalletService interface {
 	CreateWallet(ctx context.Context, userId string) (*model.Wallet, error)
 	FindWalletByUser(ctx context.Context, userId string) (*model.Wallet, error)
 	AddBalance(ctx context.Context, userID string, amount float64, bankCode string) error
+	DeductBalance(ctx context.Context, userID string, amount float64) error
 	GetAllWallets(ctx context.Context) ([]model.Wallet, error)
 }
 
@@ -113,5 +114,36 @@ func (ws *walletService) GetAllWallets(ctx context.Context) ([]model.Wallet, err
 	}
 
 	return wallets, nil
+}
+
+func (ws *walletService) DeductBalance(ctx context.Context, userID string, amount float64) error {
+	if userID == "" {
+		logger.Warn(ctx, "service:wallet", "Attempted to deduct balance with empty user ID", nil)
+		return errors.New("user ID cannot be empty")
+	}
+
+	if amount <= 0 {
+		logger.Warn(ctx, "service:wallet", "Invalid deduction amount", logrus.Fields{
+			"target_user_id": userID,
+			"amount":         amount,
+		})
+		return errors.New("deduction amount must be greater than zero")
+	}
+
+	err := ws.WalletRepository.DeductBalance(ctx, userID, amount)
+	if err != nil {
+		logger.Error(ctx, "service:wallet", "Failed to deduct balance via repository", err, logrus.Fields{
+			"target_user_id": userID,
+			"amount":         amount,
+		})
+		return err
+	}
+
+	logger.Info(ctx, "service:wallet", "Successfully deducted balance from wallet", logrus.Fields{
+		"target_user_id": userID,
+		"amount":         amount,
+	})
+
+	return nil
 }
 

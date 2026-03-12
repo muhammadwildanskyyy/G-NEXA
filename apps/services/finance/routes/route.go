@@ -8,7 +8,7 @@ import (
 	"finance/cmd/wallet/handlers"
 )
 
-func SetupRoutes(router *gin.Engine, authSecret string, walletHandler handlers.WalletHandler, xenditWebhook handlers.WebhookHandler) {
+func SetupRoutes(router *gin.Engine, authSecret string, walletHandler handlers.WalletHandler, xenditWebhook handlers.WebhookHandler, paymentHandler handlers.PaymentHandler) {
 
 	publicRoutes := router.Group("/v1/api")
 	{
@@ -23,5 +23,8 @@ func SetupRoutes(router *gin.Engine, authSecret string, walletHandler handlers.W
 
 		protectedRoutes.GET("/wallet", walletHandler.GetMyWallet)
 		protectedRoutes.POST("/wallet/topup", walletHandler.TopUpWallet)
+
+		protectedRoutes.GET("/payments", paymentHandler.GetMyPayments)
+		protectedRoutes.GET("/payments/:transaction_id", paymentHandler.GetPaymentDetail)
 	}
 }

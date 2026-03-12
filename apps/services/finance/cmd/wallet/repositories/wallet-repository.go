@@ -17,6 +17,7 @@ type WalletRepository interface {
 	InsertWallet(ctx context.Context, userId string) (*model.Wallet, error)
 	SelectWalletByUserID(ctx context.Context, userId string) (*model.Wallet, error)
 	AddBalance(ctx context.Context, userID string, amount float64) error
+	DeductBalance(ctx context.Context, userID string, amount float64) error
 	GetAllWallets(ctx context.Context) ([]model.Wallet, error)
 }
 
@@ -102,6 +103,58 @@ func (w *walletRepository) AddBalance(ctx context.Context, userID string, amount
 			"target_user_id": userID,
 			"added_amount":   amount,
 			"new_balance":    wallet.AvailableBalance.String(),
+		})
+
+		return nil
+	})
+}
+
+func (w *walletRepository) DeductBalance(ctx context.Context, userID string, amount float64) error {
+	return w.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var wallet model.Wallet
+
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("user_id = ?", userID).
+			First(&wallet).Error; err != nil {
+
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				logger.Warn(ctx, "repository:wallet", "Wallet not found during deduct balance operation", logrus.Fields{
+					"target_user_id": userID,
+				})
+				return errors.New("wallet not found for the specified user")
+			}
+
+			logger.Error(ctx, "repository:wallet", "Failed to lock wallet for deduction", err, logrus.Fields{
+				"target_user_id": userID,
+			})
+			return err
+		}
+
+		amountToDeduct := decimal.NewFromFloat(amount)
+
+		if wallet.AvailableBalance.LessThan(amountToDeduct) {
+			logger.Warn(ctx, "repository:wallet", "Insufficient wallet balance for deduction", logrus.Fields{
+				"target_user_id":    userID,
+				"available_balance": wallet.AvailableBalance.String(),
+				"deduct_amount":     amount,
+			})
+			return errors.New("insufficient wallet balance")
+		}
+
+		wallet.AvailableBalance = wallet.AvailableBalance.Sub(amountToDeduct)
+
+		if err := tx.Save(&wallet).Error; err != nil {
+			logger.Error(ctx, "repository:wallet", "Failed to save wallet after balance deduction", err, logrus.Fields{
+				"target_user_id": userID,
+				"deduct_amount":  amount,
+			})
+			return err
+		}
+
+		logger.Debug(ctx, "repository:wallet", "Successfully deducted balance from wallet", logrus.Fields{
+			"target_user_id": userID,
+			"deducted_amount": amount,
+			"new_balance":     wallet.AvailableBalance.String(),
 		})
 
 		return nil

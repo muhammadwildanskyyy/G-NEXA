@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { InvoicesController } from './invoices.controller/invoices.controller';
 import { InvoicesUsecase } from './invoices.usecase/invoices.usecase';
+import { PaymentEventsConsumer } from './payment-events.consumer/payment-events.consumer';
 import { InvoicesService } from './invoices.service/invoices.service';
 import { InvoicesRepository } from './invoices.repository/invoices.repository';
 import { HttpClientsModule } from '../../infrastructure/http-clients/http-clients.module';
@@ -58,7 +59,7 @@ const appLogger = new AppLogger();
     CartItemsModule,
     OrdersModule,
   ],
-  controllers: [InvoicesController],
+  controllers: [InvoicesController, PaymentEventsConsumer],
   providers: [InvoicesUsecase, InvoicesService, InvoicesRepository, AppLogger],
 })
 export class InvoicesModule {}

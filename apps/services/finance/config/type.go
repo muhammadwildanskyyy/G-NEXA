@@ -21,8 +21,10 @@ type ElasticsearchConfig struct {
 }
 
 type KafkaConfig struct {
-	Broker string `mapstructure:"BROKER"`
-	Topic  string `mapstructure:"TOPIC"`
+	Broker       string `mapstructure:"BROKER"`
+	UserTopic    string `mapstructure:"USER_TOPIC"`
+	OrderTopic   string `mapstructure:"ORDER_TOPIC"`
+	PaymentTopic string `mapstructure:"PAYMENT_TOPIC"`
 }
 
 type DatabaseConfig struct {

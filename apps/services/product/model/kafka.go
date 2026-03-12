@@ -6,15 +6,26 @@ type OrderEventMessage[T any] struct {
 	Data      T      `json:"data"`
 }
 
-type OrderCreatedEventData struct {
-	OrderItems []*OrderItem `json:"order_items"`
+type InvoiceCreatedEventData struct {
+	InvoiceID     string       `json:"invoice_id"`
+	UserID        string       `json:"user_id"`
+	CustomerName  string       `json:"customer_name"`
+	TotalAmount   float64      `json:"total_amount"`
+	OrderIDs      []string     `json:"order_ids"`
+	PaymentMethod string       `json:"payment_method"`
+	BankCode      string       `json:"bank_code,omitempty"`
+	OrderItems    []*OrderItem `json:"order_items"`
 }
 
 type OrderItem struct {
-	Id              string `json:"id,omitempty"`
 	ProductId       string `json:"product_id"`
 	Quantity        int    `json:"quantity"`
-	PriceAtPurchase int64  `json:"price_at_purchase"` // <-- Ubah ke int64 karena bentuknya angka di JSON
-	CreatedAt       string `json:"created_at,omitempty"`
-	UpdatedAt       string `json:"updated_at,omitempty"`
+	PriceAtPurchase int64  `json:"price_at_purchase"`
+}
+
+type OrderCancelledEventData struct {
+	InvoiceID  string       `json:"invoice_id"`
+	UserID     string       `json:"user_id"`
+	OrderIDs   []string     `json:"order_ids"`
+	OrderItems []*OrderItem `json:"order_items"`
 }

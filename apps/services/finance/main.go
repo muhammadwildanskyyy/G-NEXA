@@ -54,18 +54,29 @@ func main() {
 	xenditService := services.NewXenditService(xenditRepository)
 	anomalyService := services.NewAnomalyService(anomalyRepository)
 
-	paymentUsecase := usecases.NewPaymentUsecase(paymentService)
+	paymentPublisher := kafka.NewEventPublisher([]string{cfg.Kafka.Broker}, cfg.Kafka.PaymentTopic)
+
+	paymentUsecase := usecases.NewPaymentUsecase(paymentService, xenditService, anomalyService, paymentPublisher)
 	walletUseCase := usecases.NewWalletUsecase(walletService, nil, paymentUsecase, anomalyService)
-	xenditUsecase := usecases.NewXenditUsecase(xenditService, paymentUsecase, walletUseCase, anomalyService)
+	paymentUsecase.SetWalletUsecase(walletUseCase)
+	xenditUsecase := usecases.NewXenditUsecase(xenditService, paymentUsecase, walletUseCase, anomalyService, paymentPublisher)
 	walletUseCase.SetXenditUsecase(xenditUsecase)
 
 	xenditHandler := handlers.NewWebhookHandler(xenditUsecase, cfg.Xendit.WebhookSecret)
 	walletHandler := handlers.NewWalletHandler(walletUseCase)
+	paymentHandler := handlers.NewPaymentHandler(paymentUsecase)
 
-	consumer := kafka.NewConsumer([]string{cfg.Kafka.Broker}, cfg.Kafka.Topic, "finance-group")
+	consumer := kafka.NewConsumer([]string{cfg.Kafka.Broker}, cfg.Kafka.UserTopic, "finance-group")
 	go func() {
 		consumer.Start(ctx, func(c context.Context, msg []byte) error {
 			return kafka.HandlerConsumer(c, msg, walletUseCase)
+		})
+	}()
+
+	orderConsumer := kafka.NewConsumer([]string{cfg.Kafka.Broker}, cfg.Kafka.OrderTopic, "finance-order-group")
+	go func() {
+		orderConsumer.Start(ctx, func(c context.Context, msg []byte) error {
+			return kafka.HandlerOrderConsumer(c, msg, paymentUsecase)
 		})
 	}()
 
@@ -85,7 +96,7 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
-	routes.SetupRoutes(router, cfg.App.AuthSecret, walletHandler, xenditHandler)
+	routes.SetupRoutes(router, cfg.App.AuthSecret, walletHandler, xenditHandler, paymentHandler)
 
 	go func() {
 		logger.Info(ctx, "infra:bootstrap", "Server HTTP Gin is running", logrus.Fields{
@@ -108,6 +119,18 @@ func main() {
 		logger.Error(ctx, "infra:kafka", "Error while closing Kafka consumer", err, nil)
 	} else {
 		logger.Info(ctx, "infra:kafka", "Kafka consumer closed successfully", nil)
+	}
+
+	if err := orderConsumer.Close(); err != nil {
+		logger.Error(ctx, "infra:kafka", "Error while closing Kafka order consumer", err, nil)
+	} else {
+		logger.Info(ctx, "infra:kafka", "Kafka order consumer closed successfully", nil)
+	}
+
+	if err := paymentPublisher.Close(); err != nil {
+		logger.Error(ctx, "infra:kafka", "Error while closing Kafka payment publisher", err, nil)
+	} else {
+		logger.Info(ctx, "infra:kafka", "Kafka payment publisher closed successfully", nil)
 	}
 
 	logger.Info(ctx, "infra:bootstrap", "GNEXA Finance Service successfully stopped", nil)

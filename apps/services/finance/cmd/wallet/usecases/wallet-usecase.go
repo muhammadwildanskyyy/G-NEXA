@@ -18,6 +18,7 @@ type WalletUsecase interface {
 	GetWalletByUserID(ctx context.Context, userID string) (*model.Wallet, error)
 	TopUpWallet(ctx context.Context, userID string, amount float64, bankCode string, customerName string) (*model.PaymentResponse, error)
 	AddBalance(ctx context.Context, userID string, amount float64, bankCode string) error
+	DeductBalance(ctx context.Context, userID string, amount float64) error
 	SetXenditUsecase(xu XenditUsecase)
 	ReconcileBalances(ctx context.Context) error
 }
@@ -103,6 +104,7 @@ func (wu *walletUsecase) TopUpWallet(ctx context.Context, userID string, amount 
 	}
 
 	inputPayment := &model.CreatePaymentInput{
+		UserID:             userID,
 		TransactionID:      transactionID,
 		TransactionType:    model.TRANSACTION_TYPE_TOPUP,
 		XenditPaymentReqID: response.PaymentID,
@@ -139,6 +141,23 @@ func (wu *walletUsecase) AddBalance(ctx context.Context, userID string, amount f
 	err := wu.WalletService.AddBalance(ctx, userID, amount, bankCode)
 	if err != nil {
 		logger.Error(ctx, "usecase:wallet", "Failed to add balance via wallet service", err, logrus.Fields{
+			"target_user_id": userID,
+		})
+		return err
+	}
+
+	return nil
+}
+
+func (wu *walletUsecase) DeductBalance(ctx context.Context, userID string, amount float64) error {
+	logger.Debug(ctx, "usecase:wallet", "Delegating deduct balance operation to wallet service", logrus.Fields{
+		"target_user_id": userID,
+		"amount":         amount,
+	})
+
+	err := wu.WalletService.DeductBalance(ctx, userID, amount)
+	if err != nil {
+		logger.Error(ctx, "usecase:wallet", "Failed to deduct balance via wallet service", err, logrus.Fields{
 			"target_user_id": userID,
 		})
 		return err
