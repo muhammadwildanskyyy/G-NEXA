@@ -153,7 +153,29 @@ export class OrdersController {
     };
   }
 
+  @Put('/:id/complete')
+  async completeOrder(
+    @Param('id') orderId: string,
+    @User('user_id') userId: string,
+  ): Promise<GlobalOrderResponse<Order>> {
+    this.logger.info('controller:order', 'Received request to complete order', {
+      order_id: orderId,
+      user_id: userId,
+    });
+
+    const result = await this.orderUsecase.completeOrder(orderId, userId);
+
+    return {
+      meta: {
+        message: 'Success Complete Order',
+        code: HttpStatusCode.Ok,
+      },
+      data: result,
+    };
+  }
+
   @Put('/:id/cancel')
+  @UseGuards(new AclGuard([USER_ROLE.SELLER]))
   async cancelOrder(
     @Param('id') orderId: string,
   ): Promise<GlobalOrderResponse<Order>> {

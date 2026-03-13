@@ -182,9 +182,27 @@ func (xu *xenditUsecase) ProcessPaymentCallback(ctx context.Context, payload mod
 			})
 
 		case model.TRANSACTION_TYPE_ORDER:
-			logger.Info(ctx, "usecase:webhook", "ORDER payment successful, publishing payment.success event", logrus.Fields{
+			logger.Info(ctx, "usecase:webhook", "ORDER payment successful, adding to buyer pending balance and publishing payment.success event", logrus.Fields{
 				"transaction_id": transactionID,
+				"user_id":        paymentRecord.UserID,
+				"amount":         data.Amount,
 			})
+
+			// Add funds to buyer's PendingBalance (money has a destination — the order)
+			err = xu.WalletUsecase.AddPendingBalance(ctx, paymentRecord.UserID, data.Amount)
+			if err != nil {
+				logger.Error(ctx, "usecase:webhook", "CRITICAL: Failed to add pending balance for ORDER payment", err, logrus.Fields{
+					"transaction_id": transactionID,
+					"user_id":        paymentRecord.UserID,
+					"amount":         data.Amount,
+				})
+
+				xu.AnomalyService.RecordAnomaly(ctx, model.ANOMALY_BALANCE_ADD_FAILED, model.SEVERITY_CRITICAL, "WEBHOOK",
+					transactionID, paymentRecord.UserID, fmt.Sprintf("ORDER Payment SUCCEEDED but AddPendingBalance failed: %s", err.Error()),
+					map[string]interface{}{"amount": data.Amount})
+
+				return err
+			}
 
 			// Re-fetch to get updated status
 			updatedPayment, _ := xu.PaymentUsecase.GetRecord(ctx, transactionID)

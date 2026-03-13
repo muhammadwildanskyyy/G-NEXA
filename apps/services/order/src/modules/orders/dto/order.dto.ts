@@ -61,7 +61,7 @@ export const UpdateOrderSchema = z.object({
 
 export const UpdateInvoiceSchema = z.object({
   shipping_address: ShippingAddressSchema.optional(),
-  status: z.enum(['PENDING', 'PAID', 'SHIPPED', 'CANCELLED']).optional(),
+  status: z.enum(['PENDING', 'PAID', 'SHIPPED', 'COMPLETED', 'CANCELLED']).optional(),
 });
 
 export type StoreOrderDto = z.infer<typeof StoreOrderSchema>;
@@ -120,13 +120,29 @@ export interface OrderCancelledEventPayload {
   event: 'order.cancelled';
   timestamp: string;
   data: {
-    invoice_id: string;
-    user_id: string;
-    order_ids: string[];
+    order_id: string; // Finance
+    invoice_id: string; // Finance & Product
+    buyer_id: string; // Finance
+    user_id: string; // Product (Buyer ID)
+    seller_id: string; // Finance
+    amount: number; // Finance
+    order_ids: string[]; // Product
     order_items: {
       product_id: string;
       quantity: number;
-    }[];
+    }[]; // Product
+  };
+}
+
+export interface OrderCompletedEventPayload {
+  event: 'order.completed';
+  timestamp: string;
+  data: {
+    order_id: string;
+    invoice_id: string;
+    buyer_id: string;
+    seller_id: string;
+    amount: number;
   };
 }
 

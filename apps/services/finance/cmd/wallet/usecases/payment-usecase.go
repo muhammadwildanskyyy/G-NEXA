@@ -342,26 +342,26 @@ func (u *paymentUsecase) CreateWalletPayment(ctx context.Context, event model.In
 		"total_amount":   event.TotalAmount,
 	})
 
-	// 1. Deduct balance from wallet
-	err := u.walletUsecase.DeductBalance(ctx, event.UserID, event.TotalAmount)
+	// 1. Hold balance in escrow (Available → Pending)
+	err := u.walletUsecase.HoldBalance(ctx, event.UserID, event.TotalAmount)
 	if err != nil {
-		logger.Error(ctx, "usecase:payment", "Failed to deduct wallet balance for order payment", err, logrus.Fields{
+		logger.Error(ctx, "usecase:payment", "Failed to hold wallet balance for order payment", err, logrus.Fields{
 			"transaction_id": transactionID,
 			"invoice_id":     event.InvoiceID,
 			"user_id":        event.UserID,
 			"amount":         event.TotalAmount,
 		})
 
-		// Record anomaly for wallet deduction failure
+		// Record anomaly for wallet hold failure
 		u.anomalyService.RecordAnomaly(ctx, model.ANOMALY_WALLET_DEDUCT_FAILED, model.SEVERITY_CRITICAL, "WALLET_PAYMENT",
-			transactionID, event.UserID, fmt.Sprintf("Failed to deduct wallet balance: %s", err.Error()),
+			transactionID, event.UserID, fmt.Sprintf("Failed to hold wallet balance: %s", err.Error()),
 			map[string]interface{}{
 				"invoice_id": event.InvoiceID,
 				"amount":     event.TotalAmount,
 				"error":      err.Error(),
 			})
 
-		return fmt.Errorf("failed to deduct wallet balance for invoice %s: %w", event.InvoiceID, err)
+		return fmt.Errorf("failed to hold wallet balance for invoice %s: %w", event.InvoiceID, err)
 	}
 
 	// 2. Save payment record as SUCCEEDED (wallet payment is immediate)

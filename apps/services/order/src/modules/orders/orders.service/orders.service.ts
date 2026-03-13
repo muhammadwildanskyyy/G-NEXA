@@ -162,12 +162,57 @@ export class OrdersService {
     return this.userClient.getStoreById(storeId);
   }
 
-  async cancelOrder(orderId: string): Promise<Order> {
+  async completeOrder(orderId: string, userId: string) {
+    this.logger.dbg('service:order', 'Completing order', { order_id: orderId, user_id: userId });
+    const order = await this.orderRepository.findOrderWithInvoiceAndItems(orderId);
+    
+    if (!order) {
+      this.logger.warning('service:order', 'Complete failed: Order not found', { order_id: orderId });
+      throw new AppException('Order Not Found', HttpStatus.NOT_FOUND);
+    }
+    
+    if (order.user_id !== userId) {
+      this.logger.warning('service:order', 'Complete failed: Unauthorized', { order_id: orderId, user_id: userId });
+      throw new AppException('Unauthorized to complete this order', HttpStatus.FORBIDDEN);
+    }
+
+    if (order.status !== OrderStatus.SHIPPED && order.status !== OrderStatus.PAID) {
+      this.logger.warning('service:order', 'Complete failed: Invalid status', { order_id: orderId, status: order.status });
+      throw new AppException(`Order cannot be completed from status ${order.status}`, HttpStatus.BAD_REQUEST);
+    }
+
+    const completed = await this.orderRepository.updateOrder(
+      orderId,
+      { status: OrderStatus.COMPLETED },
+    );
+    this.logger.info('service:order', 'Order successfully completed', { order_id: orderId });
+
+    return { ...order, ...completed, items: order.items, invoice: order.invoice };
+  }
+
+  async cancelOrder(orderId: string, storeId: string) {
+    this.logger.dbg('service:order', 'Cancelling order', { order_id: orderId, store_id: storeId });
+    const order = await this.orderRepository.findOrderWithInvoiceAndItems(orderId);
+
+    if (!order) {
+      this.logger.warning('service:order', 'Cancel failed: Order not found', { order_id: orderId });
+      throw new AppException('Order Not Found', HttpStatus.NOT_FOUND);
+    }
+
+    if (order.store_id !== storeId) {
+       this.logger.warning('service:order', 'Cancel failed: Unauthorized store', { order_id: orderId, store_id: storeId, actual_store_id: order.store_id });
+       throw new AppException('Unauthorized to cancel this order', HttpStatus.FORBIDDEN);
+    }
+
+    if (order.status === OrderStatus.COMPLETED || order.status === OrderStatus.CANCELLED) {
+      this.logger.warning('service:order', 'Cancel failed: Invalid status', { order_id: orderId, status: order.status });
+      throw new AppException(`Order cannot be cancelled from status ${order.status}`, HttpStatus.BAD_REQUEST);
+    }
+
     const inputUpdate: Prisma.OrderUpdateInput = {
       status: OrderStatus.CANCELLED,
     };
 
-    // 🚀 Hapus console.log(inputUpdate) dan ganti dengan logger
     const cancelled = await this.orderRepository.updateOrder(
       orderId,
       inputUpdate,
@@ -176,7 +221,7 @@ export class OrdersService {
       order_id: orderId,
     });
 
-    return cancelled;
+    return { ...order, ...cancelled, items: order.items, invoice: order.invoice };
   }
 
   async getOrderByStoreId(storeId: string): Promise<Order[]> {

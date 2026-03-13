@@ -19,6 +19,10 @@ type WalletRepository interface {
 	AddBalance(ctx context.Context, userID string, amount float64) error
 	DeductBalance(ctx context.Context, userID string, amount float64) error
 	GetAllWallets(ctx context.Context) ([]model.Wallet, error)
+	HoldBalance(ctx context.Context, userID string, amount float64) error
+	AddPendingBalance(ctx context.Context, userID string, amount float64) error
+	ReleasePendingToSeller(ctx context.Context, buyerUserID string, sellerUserID string, amount float64) error
+	RefundPendingToAvailable(ctx context.Context, userID string, amount float64) error
 }
 
 type walletRepository struct {
@@ -175,4 +179,231 @@ func (w *walletRepository) GetAllWallets(ctx context.Context) ([]model.Wallet, e
 	})
 
 	return wallets, nil
+}
+
+// HoldBalance atomically moves funds from AvailableBalance to PendingBalance (buyer checkout with wallet)
+func (w *walletRepository) HoldBalance(ctx context.Context, userID string, amount float64) error {
+	return w.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var wallet model.Wallet
+
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("user_id = ?", userID).
+			First(&wallet).Error; err != nil {
+
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				logger.Warn(ctx, "repository:wallet", "Wallet not found during hold balance operation", logrus.Fields{
+					"target_user_id": userID,
+				})
+				return errors.New("wallet not found for the specified user")
+			}
+
+			logger.Error(ctx, "repository:wallet", "Failed to lock wallet for hold balance", err, logrus.Fields{
+				"target_user_id": userID,
+			})
+			return err
+		}
+
+		amountToHold := decimal.NewFromFloat(amount)
+
+		if wallet.AvailableBalance.LessThan(amountToHold) {
+			logger.Warn(ctx, "repository:wallet", "Insufficient available balance for hold", logrus.Fields{
+				"target_user_id":    userID,
+				"available_balance": wallet.AvailableBalance.String(),
+				"hold_amount":       amount,
+			})
+			return errors.New("insufficient wallet balance")
+		}
+
+		wallet.AvailableBalance = wallet.AvailableBalance.Sub(amountToHold)
+		wallet.PendingBalance = wallet.PendingBalance.Add(amountToHold)
+
+		if err := tx.Save(&wallet).Error; err != nil {
+			logger.Error(ctx, "repository:wallet", "Failed to save wallet after hold balance", err, logrus.Fields{
+				"target_user_id": userID,
+				"hold_amount":    amount,
+			})
+			return err
+		}
+
+		logger.Debug(ctx, "repository:wallet", "Successfully held balance (Available → Pending)", logrus.Fields{
+			"target_user_id":        userID,
+			"hold_amount":           amount,
+			"new_available_balance": wallet.AvailableBalance.String(),
+			"new_pending_balance":   wallet.PendingBalance.String(),
+		})
+
+		return nil
+	})
+}
+
+// AddPendingBalance adds funds directly to PendingBalance (VA ORDER payment received — money has a destination)
+func (w *walletRepository) AddPendingBalance(ctx context.Context, userID string, amount float64) error {
+	return w.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var wallet model.Wallet
+
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("user_id = ?", userID).
+			First(&wallet).Error; err != nil {
+
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				logger.Warn(ctx, "repository:wallet", "Wallet not found during add pending balance operation", logrus.Fields{
+					"target_user_id": userID,
+				})
+				return errors.New("wallet not found for the specified user")
+			}
+
+			logger.Error(ctx, "repository:wallet", "Failed to lock wallet for add pending balance", err, logrus.Fields{
+				"target_user_id": userID,
+			})
+			return err
+		}
+
+		amountToAdd := decimal.NewFromFloat(amount)
+		wallet.PendingBalance = wallet.PendingBalance.Add(amountToAdd)
+
+		if err := tx.Save(&wallet).Error; err != nil {
+			logger.Error(ctx, "repository:wallet", "Failed to save wallet after add pending balance", err, logrus.Fields{
+				"target_user_id": userID,
+				"amount":         amount,
+			})
+			return err
+		}
+
+		logger.Debug(ctx, "repository:wallet", "Successfully added pending balance", logrus.Fields{
+			"target_user_id":      userID,
+			"added_amount":        amount,
+			"new_pending_balance": wallet.PendingBalance.String(),
+		})
+
+		return nil
+	})
+}
+
+// ReleasePendingToSeller deducts from buyer's PendingBalance and adds to seller's AvailableBalance (order completed)
+func (w *walletRepository) ReleasePendingToSeller(ctx context.Context, buyerUserID string, sellerUserID string, amount float64) error {
+	return w.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// 1. Lock and deduct buyer's PendingBalance
+		var buyerWallet model.Wallet
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("user_id = ?", buyerUserID).
+			First(&buyerWallet).Error; err != nil {
+
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				logger.Warn(ctx, "repository:wallet", "Buyer wallet not found during release to seller", logrus.Fields{
+					"buyer_user_id": buyerUserID,
+				})
+				return errors.New("buyer wallet not found")
+			}
+			return err
+		}
+
+		amountToRelease := decimal.NewFromFloat(amount)
+
+		if buyerWallet.PendingBalance.LessThan(amountToRelease) {
+			logger.Warn(ctx, "repository:wallet", "Insufficient pending balance for release to seller", logrus.Fields{
+				"buyer_user_id":   buyerUserID,
+				"pending_balance": buyerWallet.PendingBalance.String(),
+				"release_amount":  amount,
+			})
+			return errors.New("insufficient pending balance for release")
+		}
+
+		buyerWallet.PendingBalance = buyerWallet.PendingBalance.Sub(amountToRelease)
+
+		if err := tx.Save(&buyerWallet).Error; err != nil {
+			logger.Error(ctx, "repository:wallet", "Failed to deduct buyer pending balance", err, logrus.Fields{
+				"buyer_user_id": buyerUserID,
+			})
+			return err
+		}
+
+		// 2. Lock and add to seller's AvailableBalance
+		var sellerWallet model.Wallet
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("user_id = ?", sellerUserID).
+			First(&sellerWallet).Error; err != nil {
+
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				logger.Warn(ctx, "repository:wallet", "Seller wallet not found during release to seller", logrus.Fields{
+					"seller_user_id": sellerUserID,
+				})
+				return errors.New("seller wallet not found")
+			}
+			return err
+		}
+
+		sellerWallet.AvailableBalance = sellerWallet.AvailableBalance.Add(amountToRelease)
+
+		if err := tx.Save(&sellerWallet).Error; err != nil {
+			logger.Error(ctx, "repository:wallet", "Failed to add seller available balance", err, logrus.Fields{
+				"seller_user_id": sellerUserID,
+			})
+			return err
+		}
+
+		logger.Debug(ctx, "repository:wallet", "Successfully released pending balance to seller", logrus.Fields{
+			"buyer_user_id":              buyerUserID,
+			"seller_user_id":             sellerUserID,
+			"release_amount":             amount,
+			"buyer_new_pending_balance":  buyerWallet.PendingBalance.String(),
+			"seller_new_available_balance": sellerWallet.AvailableBalance.String(),
+		})
+
+		return nil
+	})
+}
+
+// RefundPendingToAvailable moves funds from PendingBalance back to AvailableBalance (order cancelled/refund)
+func (w *walletRepository) RefundPendingToAvailable(ctx context.Context, userID string, amount float64) error {
+	return w.DB.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var wallet model.Wallet
+
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+			Where("user_id = ?", userID).
+			First(&wallet).Error; err != nil {
+
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				logger.Warn(ctx, "repository:wallet", "Wallet not found during refund pending to available", logrus.Fields{
+					"target_user_id": userID,
+				})
+				return errors.New("wallet not found for the specified user")
+			}
+
+			logger.Error(ctx, "repository:wallet", "Failed to lock wallet for refund", err, logrus.Fields{
+				"target_user_id": userID,
+			})
+			return err
+		}
+
+		amountToRefund := decimal.NewFromFloat(amount)
+
+		if wallet.PendingBalance.LessThan(amountToRefund) {
+			logger.Warn(ctx, "repository:wallet", "Insufficient pending balance for refund", logrus.Fields{
+				"target_user_id":  userID,
+				"pending_balance": wallet.PendingBalance.String(),
+				"refund_amount":   amount,
+			})
+			return errors.New("insufficient pending balance for refund")
+		}
+
+		wallet.PendingBalance = wallet.PendingBalance.Sub(amountToRefund)
+		wallet.AvailableBalance = wallet.AvailableBalance.Add(amountToRefund)
+
+		if err := tx.Save(&wallet).Error; err != nil {
+			logger.Error(ctx, "repository:wallet", "Failed to save wallet after refund", err, logrus.Fields{
+				"target_user_id": userID,
+				"refund_amount":  amount,
+			})
+			return err
+		}
+
+		logger.Debug(ctx, "repository:wallet", "Successfully refunded pending balance to available (Pending → Available)", logrus.Fields{
+			"target_user_id":        userID,
+			"refund_amount":         amount,
+			"new_available_balance": wallet.AvailableBalance.String(),
+			"new_pending_balance":   wallet.PendingBalance.String(),
+		})
+
+		return nil
+	})
 }

@@ -47,3 +47,18 @@ type PaymentEventData struct {
 	Amount        float64 `json:"amount"`
 	Status        string  `json:"status"`
 }
+
+// OrderEvent is consumed from order.events topic
+type OrderEvent struct {
+	Event     string         `json:"event"`
+	Timestamp string         `json:"timestamp"`
+	Data      OrderEventData `json:"data"`
+}
+
+type OrderEventData struct {
+	OrderID   string  `json:"order_id"`
+	InvoiceID string  `json:"invoice_id"`
+	BuyerID   string  `json:"buyer_id"`
+	SellerID  string  `json:"seller_id"`
+	Amount    float64 `json:"amount"`
+}

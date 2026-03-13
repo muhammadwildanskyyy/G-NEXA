@@ -306,34 +306,39 @@ export class InvoicesUsecase implements OnModuleInit {
       return;
     }
 
-    // 3. Publish order.cancelled event for Product Service to restore stock
-    const orderItems = invoiceWithItems.orders.flatMap((order) =>
-      order.items.map((item) => ({
+    // 3. Publish order.cancelled event for Product Service & Finance Service
+    for (const order of invoiceWithItems.orders) {
+      const orderItems = order.items.map((item) => ({
         product_id: item.product_id,
         quantity: item.quantity,
-      })),
-    );
+      }));
 
-    const cancelledEvent: OrderCancelledEventPayload = {
-      event: 'order.cancelled',
-      timestamp: new Date().toISOString(),
-      data: {
+      const cancelledEvent: OrderCancelledEventPayload = {
+        event: 'order.cancelled',
+        timestamp: new Date().toISOString(),
+        data: {
+          order_id: order.id,
+          invoice_id: invoiceId,
+          buyer_id: invoiceWithItems.user_id,
+          user_id: invoiceWithItems.user_id,
+          seller_id: order.store_id,
+          amount: Number(order.total_price),
+          order_ids: [order.id],
+          order_items: orderItems,
+        },
+      };
+
+      this.kafkaClient.emit(KAFKA_ORDER_TOPIC, {
+        key: invoiceId,
+        value: cancelledEvent,
+      });
+
+      this.logger.info('usecase:invoice', 'Published order.cancelled event', {
         invoice_id: invoiceId,
-        user_id: invoiceWithItems.user_id,
-        order_ids: invoiceWithItems.orders.map((o) => o.id),
-        order_items: orderItems,
-      },
-    };
-
-    this.kafkaClient.emit(KAFKA_ORDER_TOPIC, {
-      key: invoiceId,
-      value: cancelledEvent,
-    });
-
-    this.logger.info('usecase:invoice', 'Published order.cancelled event for stock restoration', {
-      invoice_id: invoiceId,
-      item_count: orderItems.length,
-    });
+        order_id: order.id,
+        item_count: orderItems.length,
+      });
+    }
   }
 
   async findInvoicesByUserId(userId: string): Promise<Invoice[]> {

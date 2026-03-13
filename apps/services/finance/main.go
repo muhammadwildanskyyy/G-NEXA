@@ -76,7 +76,7 @@ func main() {
 	orderConsumer := kafka.NewConsumer([]string{cfg.Kafka.Broker}, cfg.Kafka.OrderTopic, "finance-order-group")
 	go func() {
 		orderConsumer.Start(ctx, func(c context.Context, msg []byte) error {
-			return kafka.HandlerOrderConsumer(c, msg, paymentUsecase)
+			return kafka.HandlerOrderConsumer(c, msg, paymentUsecase, walletUseCase)
 		})
 	}()
 
