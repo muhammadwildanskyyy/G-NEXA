@@ -27,6 +27,16 @@ export class OrdersRepository {
     });
   }
 
+  async findOrderWithInvoiceAndItems(orderId: string) {
+    return await this.database.order.findUnique({
+      where: { id: orderId },
+      include: {
+        invoice: true,
+        items: true,
+      },
+    });
+  }
+
   async selecOrders(): Promise<Order[] | null> {
     return await this.database.order.findMany();
   }

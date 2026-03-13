@@ -10,7 +10,7 @@ import { AppException } from '../../filters/global.exception/app.exception';
 
 @Injectable()
 export class AclGuard implements CanActivate {
-  constructor(private readonly roleCanAccess: USER_ROLE[]) {}
+  constructor(private readonly roleCanAccess: USER_ROLE[]) { }
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {

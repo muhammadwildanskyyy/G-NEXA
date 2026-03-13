@@ -3,12 +3,13 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-	"github.com/google/uuid"
-	"github.com/segmentio/kafka-go"
-	"github.com/sirupsen/logrus"
 	"product-service/cmd/product/usecases"
 	"product-service/infrastructure/logger"
 	"product-service/model"
+
+	"github.com/google/uuid"
+	"github.com/segmentio/kafka-go"
+	"github.com/sirupsen/logrus"
 )
 
 type Consumer struct {
@@ -85,35 +86,68 @@ func (c *Consumer) Start(ctx context.Context, processFunc func(ctx context.Conte
 	}
 }
 
-func HandlerConsumer(ctx context.Context, msg []byte, orderUsecase usecases.ProductUsecase) error {
-	var payload model.OrderEventMessage[*model.OrderCreatedEventData]
+func HandlerConsumer(ctx context.Context, msg []byte, productUsecase usecases.ProductUsecase) error {
+	// First unmarshal just the event field to determine the type
+	var baseEvent struct {
+		Event string `json:"event"`
+	}
 
-	if err := json.Unmarshal(msg, &payload); err != nil {
-
-		logger.Error(ctx, "handler:kafka", "Gagal parsing pesan, format JSON salah (Poison Pill diabaikan)", err, logrus.Fields{
+	if err := json.Unmarshal(msg, &baseEvent); err != nil {
+		logger.Error(ctx, "handler:kafka", "Failed to parse event base message (Poison Pill ignored)", err, logrus.Fields{
 			"payload": string(msg),
 		})
 		return nil
 	}
 
 	logFields := logrus.Fields{
-		"event": payload.Event,
+		"event": baseEvent.Event,
 	}
 
-	switch payload.Event {
-	case "order.created":
-		logger.Info(ctx, "handler:kafka", "recieve event created order, reduce product", logFields)
+	switch baseEvent.Event {
+	case "invoice.created":
+		var payload model.OrderEventMessage[*model.InvoiceCreatedEventData]
+		if err := json.Unmarshal(msg, &payload); err != nil {
+			logger.Error(ctx, "handler:kafka", "Failed to parse invoice.created payload", err, logrus.Fields{
+				"payload": string(msg),
+			})
+			return nil
+		}
 
-		err := orderUsecase.ReduceQuantityProduct(ctx, payload.Data.OrderItems)
+		logFields["invoice_id"] = payload.Data.InvoiceID
+		logger.Info(ctx, "handler:kafka", "Received invoice.created event, reducing product stock", logFields)
+
+		err := productUsecase.ReduceQuantityProduct(ctx, payload.Data.OrderItems)
 		if err != nil {
-			logger.Error(ctx, "handler:kafka", "Failed reduce quantity Product", err, logFields)
+			logger.Error(ctx, "handler:kafka", "Failed to reduce quantity Product", err, logFields)
 			return err
 		}
 
-		logger.Info(ctx, "handler:kafka", "quantity product succes reduce", logFields)
+		logger.Info(ctx, "handler:kafka", "Product stock successfully reduced", logFields)
 		return nil
+
+	case "order.cancelled":
+		var payload model.OrderEventMessage[*model.OrderCancelledEventData]
+		if err := json.Unmarshal(msg, &payload); err != nil {
+			logger.Error(ctx, "handler:kafka", "Failed to parse order.cancelled payload", err, logrus.Fields{
+				"payload": string(msg),
+			})
+			return nil
+		}
+
+		logFields["invoice_id"] = payload.Data.InvoiceID
+		logger.Info(ctx, "handler:kafka", "Received order.cancelled event, restoring product stock", logFields)
+
+		err := productUsecase.RestoreQuantityProduct(ctx, payload.Data.OrderItems)
+		if err != nil {
+			logger.Error(ctx, "handler:kafka", "Failed to restore product stock", err, logFields)
+			return err
+		}
+
+		logger.Info(ctx, "handler:kafka", "Product stock successfully restored", logFields)
+		return nil
+
 	default:
-		logger.Warn(ctx, "handler:kafka", "Menerima event yang tidak dikenal", logFields)
+		logger.Warn(ctx, "handler:kafka", "Received unknown event", logFields)
 		return nil
 	}
 }

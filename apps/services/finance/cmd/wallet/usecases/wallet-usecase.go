@@ -18,6 +18,11 @@ type WalletUsecase interface {
 	GetWalletByUserID(ctx context.Context, userID string) (*model.Wallet, error)
 	TopUpWallet(ctx context.Context, userID string, amount float64, bankCode string, customerName string) (*model.PaymentResponse, error)
 	AddBalance(ctx context.Context, userID string, amount float64, bankCode string) error
+	DeductBalance(ctx context.Context, userID string, amount float64) error
+	HoldBalance(ctx context.Context, userID string, amount float64) error
+	AddPendingBalance(ctx context.Context, userID string, amount float64) error
+	ReleasePendingToSeller(ctx context.Context, buyerUserID string, sellerUserID string, amount float64) error
+	RefundPendingToAvailable(ctx context.Context, userID string, amount float64) error
 	SetXenditUsecase(xu XenditUsecase)
 	ReconcileBalances(ctx context.Context) error
 }
@@ -103,6 +108,7 @@ func (wu *walletUsecase) TopUpWallet(ctx context.Context, userID string, amount 
 	}
 
 	inputPayment := &model.CreatePaymentInput{
+		UserID:             userID,
 		TransactionID:      transactionID,
 		TransactionType:    model.TRANSACTION_TYPE_TOPUP,
 		XenditPaymentReqID: response.PaymentID,
@@ -143,6 +149,114 @@ func (wu *walletUsecase) AddBalance(ctx context.Context, userID string, amount f
 		})
 		return err
 	}
+
+	return nil
+}
+
+func (wu *walletUsecase) DeductBalance(ctx context.Context, userID string, amount float64) error {
+	logger.Debug(ctx, "usecase:wallet", "Delegating deduct balance operation to wallet service", logrus.Fields{
+		"target_user_id": userID,
+		"amount":         amount,
+	})
+
+	err := wu.WalletService.DeductBalance(ctx, userID, amount)
+	if err != nil {
+		logger.Error(ctx, "usecase:wallet", "Failed to deduct balance via wallet service", err, logrus.Fields{
+			"target_user_id": userID,
+		})
+		return err
+	}
+
+	return nil
+}
+
+func (wu *walletUsecase) HoldBalance(ctx context.Context, userID string, amount float64) error {
+	logger.Debug(ctx, "usecase:wallet", "Delegating hold balance operation to wallet service", logrus.Fields{
+		"target_user_id": userID,
+		"amount":         amount,
+	})
+
+	err := wu.WalletService.HoldBalance(ctx, userID, amount)
+	if err != nil {
+		logger.Error(ctx, "usecase:wallet", "Failed to hold balance via wallet service", err, logrus.Fields{
+			"target_user_id": userID,
+		})
+		return err
+	}
+
+	logger.Info(ctx, "usecase:wallet", "Successfully held balance (Available → Pending)", logrus.Fields{
+		"target_user_id": userID,
+		"amount":         amount,
+	})
+
+	return nil
+}
+
+func (wu *walletUsecase) AddPendingBalance(ctx context.Context, userID string, amount float64) error {
+	logger.Debug(ctx, "usecase:wallet", "Delegating add pending balance operation to wallet service", logrus.Fields{
+		"target_user_id": userID,
+		"amount":         amount,
+	})
+
+	err := wu.WalletService.AddPendingBalance(ctx, userID, amount)
+	if err != nil {
+		logger.Error(ctx, "usecase:wallet", "Failed to add pending balance via wallet service", err, logrus.Fields{
+			"target_user_id": userID,
+		})
+		return err
+	}
+
+	logger.Info(ctx, "usecase:wallet", "Successfully added pending balance", logrus.Fields{
+		"target_user_id": userID,
+		"amount":         amount,
+	})
+
+	return nil
+}
+
+func (wu *walletUsecase) ReleasePendingToSeller(ctx context.Context, buyerUserID string, sellerUserID string, amount float64) error {
+	logger.Debug(ctx, "usecase:wallet", "Delegating release pending to seller operation to wallet service", logrus.Fields{
+		"buyer_user_id":  buyerUserID,
+		"seller_user_id": sellerUserID,
+		"amount":         amount,
+	})
+
+	err := wu.WalletService.ReleasePendingToSeller(ctx, buyerUserID, sellerUserID, amount)
+	if err != nil {
+		logger.Error(ctx, "usecase:wallet", "Failed to release pending to seller via wallet service", err, logrus.Fields{
+			"buyer_user_id":  buyerUserID,
+			"seller_user_id": sellerUserID,
+		})
+		return err
+	}
+
+	logger.Info(ctx, "usecase:wallet", "Successfully released pending balance to seller", logrus.Fields{
+		"buyer_user_id":  buyerUserID,
+		"seller_user_id": sellerUserID,
+		"amount":         amount,
+	})
+
+	return nil
+}
+
+func (wu *walletUsecase) RefundPendingToAvailable(ctx context.Context, userID string, amount float64) error {
+	logger.Debug(ctx, "usecase:wallet", "Delegating refund pending to available operation to wallet service", logrus.Fields{
+		"target_user_id": userID,
+		"amount":         amount,
+	})
+
+	err := wu.WalletService.RefundPendingToAvailable(ctx, userID, amount)
+	if err != nil {
+		logger.Error(ctx, "usecase:wallet", "Failed to refund pending to available via wallet service", err, logrus.Fields{
+			"target_user_id": userID,
+		})
+		return err
+	}
+
+	logger.Info(ctx, "usecase:wallet", "Successfully refunded pending balance to available (Pending → Available)", logrus.Fields{
+		"target_user_id": userID,
+		"amount":         amount,
+	})
 
 	return nil
 }

@@ -17,7 +17,12 @@ type WalletService interface {
 	CreateWallet(ctx context.Context, userId string) (*model.Wallet, error)
 	FindWalletByUser(ctx context.Context, userId string) (*model.Wallet, error)
 	AddBalance(ctx context.Context, userID string, amount float64, bankCode string) error
+	DeductBalance(ctx context.Context, userID string, amount float64) error
 	GetAllWallets(ctx context.Context) ([]model.Wallet, error)
+	HoldBalance(ctx context.Context, userID string, amount float64) error
+	AddPendingBalance(ctx context.Context, userID string, amount float64) error
+	ReleasePendingToSeller(ctx context.Context, buyerUserID string, sellerUserID string, amount float64) error
+	RefundPendingToAvailable(ctx context.Context, userID string, amount float64) error
 }
 
 type walletService struct {
@@ -115,3 +120,162 @@ func (ws *walletService) GetAllWallets(ctx context.Context) ([]model.Wallet, err
 	return wallets, nil
 }
 
+func (ws *walletService) DeductBalance(ctx context.Context, userID string, amount float64) error {
+	if userID == "" {
+		logger.Warn(ctx, "service:wallet", "Attempted to deduct balance with empty user ID", nil)
+		return errors.New("user ID cannot be empty")
+	}
+
+	if amount <= 0 {
+		logger.Warn(ctx, "service:wallet", "Invalid deduction amount", logrus.Fields{
+			"target_user_id": userID,
+			"amount":         amount,
+		})
+		return errors.New("deduction amount must be greater than zero")
+	}
+
+	err := ws.WalletRepository.DeductBalance(ctx, userID, amount)
+	if err != nil {
+		logger.Error(ctx, "service:wallet", "Failed to deduct balance via repository", err, logrus.Fields{
+			"target_user_id": userID,
+			"amount":         amount,
+		})
+		return err
+	}
+
+	logger.Info(ctx, "service:wallet", "Successfully deducted balance from wallet", logrus.Fields{
+		"target_user_id": userID,
+		"amount":         amount,
+	})
+
+	return nil
+}
+
+func (ws *walletService) HoldBalance(ctx context.Context, userID string, amount float64) error {
+	if userID == "" {
+		logger.Warn(ctx, "service:wallet", "Attempted to hold balance with empty user ID", nil)
+		return errors.New("user ID cannot be empty")
+	}
+
+	if amount <= 0 {
+		logger.Warn(ctx, "service:wallet", "Invalid hold amount", logrus.Fields{
+			"target_user_id": userID,
+			"amount":         amount,
+		})
+		return errors.New("hold amount must be greater than zero")
+	}
+
+	err := ws.WalletRepository.HoldBalance(ctx, userID, amount)
+	if err != nil {
+		logger.Error(ctx, "service:wallet", "Failed to hold balance via repository", err, logrus.Fields{
+			"target_user_id": userID,
+			"amount":         amount,
+		})
+		return err
+	}
+
+	logger.Info(ctx, "service:wallet", "Successfully held balance (Available → Pending)", logrus.Fields{
+		"target_user_id": userID,
+		"amount":         amount,
+	})
+
+	return nil
+}
+
+func (ws *walletService) AddPendingBalance(ctx context.Context, userID string, amount float64) error {
+	if userID == "" {
+		logger.Warn(ctx, "service:wallet", "Attempted to add pending balance with empty user ID", nil)
+		return errors.New("user ID cannot be empty")
+	}
+
+	if amount <= 0 {
+		logger.Warn(ctx, "service:wallet", "Invalid pending balance amount", logrus.Fields{
+			"target_user_id": userID,
+			"amount":         amount,
+		})
+		return errors.New("pending balance amount must be greater than zero")
+	}
+
+	err := ws.WalletRepository.AddPendingBalance(ctx, userID, amount)
+	if err != nil {
+		logger.Error(ctx, "service:wallet", "Failed to add pending balance via repository", err, logrus.Fields{
+			"target_user_id": userID,
+			"amount":         amount,
+		})
+		return err
+	}
+
+	logger.Info(ctx, "service:wallet", "Successfully added pending balance", logrus.Fields{
+		"target_user_id": userID,
+		"amount":         amount,
+	})
+
+	return nil
+}
+
+func (ws *walletService) ReleasePendingToSeller(ctx context.Context, buyerUserID string, sellerUserID string, amount float64) error {
+	if buyerUserID == "" || sellerUserID == "" {
+		logger.Warn(ctx, "service:wallet", "Attempted to release pending with empty user ID", logrus.Fields{
+			"buyer_user_id":  buyerUserID,
+			"seller_user_id": sellerUserID,
+		})
+		return errors.New("buyer and seller user IDs cannot be empty")
+	}
+
+	if amount <= 0 {
+		logger.Warn(ctx, "service:wallet", "Invalid release amount", logrus.Fields{
+			"buyer_user_id": buyerUserID,
+			"amount":        amount,
+		})
+		return errors.New("release amount must be greater than zero")
+	}
+
+	err := ws.WalletRepository.ReleasePendingToSeller(ctx, buyerUserID, sellerUserID, amount)
+	if err != nil {
+		logger.Error(ctx, "service:wallet", "Failed to release pending to seller via repository", err, logrus.Fields{
+			"buyer_user_id":  buyerUserID,
+			"seller_user_id": sellerUserID,
+			"amount":         amount,
+		})
+		return err
+	}
+
+	logger.Info(ctx, "service:wallet", "Successfully released pending balance to seller", logrus.Fields{
+		"buyer_user_id":  buyerUserID,
+		"seller_user_id": sellerUserID,
+		"amount":         amount,
+	})
+
+	return nil
+}
+
+func (ws *walletService) RefundPendingToAvailable(ctx context.Context, userID string, amount float64) error {
+	if userID == "" {
+		logger.Warn(ctx, "service:wallet", "Attempted to refund pending with empty user ID", nil)
+		return errors.New("user ID cannot be empty")
+	}
+
+	if amount <= 0 {
+		logger.Warn(ctx, "service:wallet", "Invalid refund amount", logrus.Fields{
+			"target_user_id": userID,
+			"amount":         amount,
+		})
+		return errors.New("refund amount must be greater than zero")
+	}
+
+	err := ws.WalletRepository.RefundPendingToAvailable(ctx, userID, amount)
+	if err != nil {
+		logger.Error(ctx, "service:wallet", "Failed to refund pending to available via repository", err, logrus.Fields{
+			"target_user_id": userID,
+			"amount":         amount,
+		})
+		return err
+	}
+
+	logger.Info(ctx, "service:wallet", "Successfully refunded pending balance to available (Pending → Available)", logrus.Fields{
+		"target_user_id": userID,
+		"amount":         amount,
+	})
+
+	return nil
+}

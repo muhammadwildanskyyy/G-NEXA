@@ -5,10 +5,12 @@ import {
   storeRepository,
   type StoreRepository,
 } from "../repository/store.repository";
-import { log } from "../../lib/logger"; // Import the custom logger
+import { log } from "../../lib/logger";
+import {userRepository, type UserRepository} from "../repository/user.repository.ts";
+import type {UserUpdateInput} from "../../generated/prisma/models/User.ts"; // Import the custom logger
 
 export class StoreService {
-  constructor(private readonly storeRepository: StoreRepository) {}
+  constructor(private readonly storeRepository: StoreRepository, private readonly userRepository: UserRepository) {}
 
   createStore = async (
       userId: string,
@@ -18,7 +20,9 @@ export class StoreService {
 
     const store = await this.storeRepository.createStore(userId, storeInput);
 
-    log.info("service:store", "Store successfully created", { store_id: store.id, owner_id: userId });
+    const updateUserRole = await this.userRepository.updateUser(userId, {role:"SELLER"} as UserUpdateInput)
+
+    log.info("service:store", "Store successfully created", { store_id: store.id, owner_id: userId,owner_role:updateUserRole.role });
     return store;
   };
 
@@ -93,4 +97,4 @@ export class StoreService {
   };
 }
 
-export const storeService = new StoreService(storeRepository);
+export const storeService = new StoreService(storeRepository,userRepository);

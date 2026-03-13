@@ -1,6 +1,9 @@
 import { HttpStatus, Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { OrdersService } from '../orders.service/orders.service';
 import {
+  OrderCancelledEventPayload,
+  OrderCompletedEventPayload,
+  KAFKA_ORDER_TOPIC,
   UpdateOrderDto,
 } from '../dto/order.dto';
 import { Order, Prisma } from '@prisma/client';
@@ -9,6 +12,7 @@ import { Product } from '../../../infrastructure/http-clients/product-client/dto
 import { AppLogger } from '../../../infrastructure/logger/app.logger';
 import { ClientKafka } from '@nestjs/microservices';
 import { CartService } from '../../cart-items/cart.service/cart.service';
+import { UserClientService } from 'src/infrastructure/http-clients/user-client/user-client.service';
 
 @Injectable()
 export class OrdersUsecase implements OnModuleInit {
@@ -16,8 +20,9 @@ export class OrdersUsecase implements OnModuleInit {
     private readonly orderService: OrdersService,
     private readonly logger: AppLogger,
     private readonly cartService: CartService,
+    private readonly userService: UserClientService,
     @Inject('KAFKA_PRODUCER') private readonly kafkaClient: ClientKafka,
-  ) {}
+  ) { }
 
   async onModuleInit() {
     try {
@@ -118,29 +123,88 @@ export class OrdersUsecase implements OnModuleInit {
     return deletedOrder;
   }
 
+  async completeOrder(orderId: string, userId: string): Promise<Order> {
+    this.logger.dbg('usecase:order', 'Orchestrating order completion', {
+      order_id: orderId,
+      user_id: userId,
+    });
+
+    const completedOrderData = await this.orderService.completeOrder(orderId, userId);
+
+    const sellerStore = await this.userService.getStoreById(completedOrderData.store_id);
+
+    const completedEvent: OrderCompletedEventPayload = {
+      event: 'order.completed',
+      timestamp: new Date().toISOString(),
+      data: {
+        order_id: completedOrderData.id,
+        invoice_id: completedOrderData.invoice_id,
+        buyer_id: completedOrderData.user_id,
+        seller_id: sellerStore.user_id,
+        amount: Number(completedOrderData.total_price),
+      },
+    };
+
+    this.kafkaClient.emit(KAFKA_ORDER_TOPIC, {
+      key: completedOrderData.invoice_id,
+      value: completedEvent,
+    });
+
+    this.logger.info(
+      'usecase:order',
+      'Order completion orchestrated & event published successfully',
+      { order_id: orderId },
+    );
+
+    return completedOrderData as Order;
+  }
+
   async cancelOrder(orderId: string): Promise<Order> {
     this.logger.dbg('usecase:order', 'Orchestrating order cancellation', {
       order_id: orderId,
     });
 
-    const order = await this.orderService.getOrderById(orderId);
-    if (!order) {
+    const store = await this.orderService.getStoreByOwner();
+    if (!store) {
       this.logger.warning(
         'usecase:order',
-        'Cancellation failed: Order not found',
-        { order_id: orderId },
+        'Cancellation failed: Store not found for owner',
       );
-      throw new AppException('Order Not Found', HttpStatus.NOT_FOUND);
+      throw new AppException('Store Not Found', HttpStatus.NOT_FOUND);
     }
 
-    const cancelledOrder = await this.orderService.cancelOrder(orderId);
+    const cancelledOrderData = await this.orderService.cancelOrder(orderId, store.id);
+
+    const cancelledEvent: OrderCancelledEventPayload = {
+      event: 'order.cancelled',
+      timestamp: new Date().toISOString(),
+      data: {
+        order_id: cancelledOrderData.id,
+        invoice_id: cancelledOrderData.invoice_id,
+        buyer_id: cancelledOrderData.invoice.user_id, // invoice always has user_id
+        user_id: cancelledOrderData.invoice.user_id,
+        seller_id: cancelledOrderData.store_id,
+        amount: Number(cancelledOrderData.total_price),
+        order_ids: [cancelledOrderData.id],
+        order_items: cancelledOrderData.items.map((item) => ({
+          product_id: item.product_id,
+          quantity: item.quantity,
+        })),
+      },
+    };
+
+    this.kafkaClient.emit(KAFKA_ORDER_TOPIC, {
+      key: cancelledOrderData.invoice_id,
+      value: cancelledEvent,
+    });
+
     this.logger.info(
       'usecase:order',
-      'Order cancellation orchestrated successfully',
+      'Order cancellation orchestrated & event published successfully',
       { order_id: orderId },
     );
 
-    return cancelledOrder;
+    return cancelledOrderData as Order;
   }
 
 }

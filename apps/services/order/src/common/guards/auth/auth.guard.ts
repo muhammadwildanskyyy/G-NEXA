@@ -11,9 +11,9 @@ import { AppException } from '../../filters/global.exception/app.exception';
 import { ClsService } from 'nestjs-cls';
 
 export enum USER_ROLE {
-  BUYER,
-  SELLER,
-  ADMIN,
+  BUYER = 'BUYER',
+  SELLER = 'SELLER',
+  ADMIN = 'ADMIN',
 }
 
 export class UserJWT {
@@ -33,7 +33,7 @@ export class JwtAuthGuard implements CanActivate {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly cls: ClsService,
-  ) {}
+  ) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<RequestWithUser>();

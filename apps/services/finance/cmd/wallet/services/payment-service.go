@@ -15,11 +15,13 @@ import (
 type PaymentService interface {
 	SavePaymentRecord(ctx context.Context, record *model.Payment) error
 	GetPaymentRecord(ctx context.Context, transactionID string) (*model.Payment, error)
+	GetByUserID(ctx context.Context, userID string) ([]model.Payment, error)
 	RemovePaymentRecord(ctx context.Context, transactionID string) error
 	UpdatePaymentStatus(ctx context.Context, transactionID string, status string) error
 	GetStalePendingPayments(ctx context.Context) ([]model.Payment, error)
 	GetExpiredPendingPayments(ctx context.Context) ([]model.Payment, error)
 	GetSucceededPaymentTotalsByUser(ctx context.Context) ([]model.UserPaymentTotals, error)
+	GetPaymentsByTransactionPrefix(ctx context.Context, prefix string) ([]model.Payment, error)
 }
 
 type paymentService struct {
@@ -49,6 +51,15 @@ func (s *paymentService) GetPaymentRecord(ctx context.Context, transactionID str
 	}
 
 	return s.paymentRepository.GetByTransactionID(ctx, transactionID)
+}
+
+func (s *paymentService) GetByUserID(ctx context.Context, userID string) ([]model.Payment, error) {
+	if userID == "" {
+		logger.Warn(ctx, "service:payment", "Attempted to fetch payments with empty user ID", nil)
+		return nil, errors.New("user ID cannot be empty")
+	}
+
+	return s.paymentRepository.GetByUserID(ctx, userID)
 }
 
 func (s *paymentService) RemovePaymentRecord(ctx context.Context, transactionID string) error {
@@ -125,4 +136,13 @@ func (s *paymentService) GetSucceededPaymentTotalsByUser(ctx context.Context) ([
 	}
 
 	return totals, nil
+}
+
+func (s *paymentService) GetPaymentsByTransactionPrefix(ctx context.Context, prefix string) ([]model.Payment, error) {
+	if prefix == "" {
+		logger.Warn(ctx, "service:payment", "Attempted to fetch payments with empty prefix", nil)
+		return nil, errors.New("transaction prefix cannot be empty")
+	}
+
+	return s.paymentRepository.GetPaymentsByTransactionPrefix(ctx, prefix)
 }

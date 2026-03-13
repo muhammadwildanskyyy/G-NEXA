@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InvoicesRepository } from '../invoices.repository/invoices.repository';
-import { Invoice, Order, Prisma } from '@prisma/client';
+import { Invoice, Order, PaymentMethod, Prisma } from '@prisma/client';
 
 @Injectable()
 export class InvoicesService {
   constructor(private readonly invoicesRepository: InvoicesRepository) {}
+
+  async checkPendingInvoiceExists(userId: string): Promise<boolean> {
+    return this.invoicesRepository.checkPendingInvoiceExists(userId);
+  }
 
   async checkIdempotency(idempotencyKey: string): Promise<boolean> {
     return this.invoicesRepository.checkIdempotency(idempotencyKey);
@@ -15,6 +19,8 @@ export class InvoicesService {
     idempotencyKey: string,
     totalPrice: number,
     shippingAddress: Prisma.InputJsonValue,
+    paymentMethod: PaymentMethod,
+    bankCode: string | undefined,
     storeOrders: {
       storeId: string;
       totalPrice: number;
@@ -26,6 +32,8 @@ export class InvoicesService {
       idempotencyKey,
       totalPrice,
       shippingAddress,
+      paymentMethod,
+      bankCode,
       storeOrders,
     );
   }
@@ -51,5 +59,17 @@ export class InvoicesService {
 
   async deleteInvoice(invoiceId: string): Promise<Invoice> {
     return this.invoicesRepository.deleteInvoice(invoiceId);
+  }
+
+  async markInvoiceAndOrdersPaid(invoiceId: string): Promise<Invoice> {
+    return this.invoicesRepository.markInvoiceAndOrdersPaid(invoiceId);
+  }
+
+  async markInvoiceAndOrdersCancelled(invoiceId: string): Promise<Invoice> {
+    return this.invoicesRepository.markInvoiceAndOrdersCancelled(invoiceId);
+  }
+
+  async findInvoiceWithItems(invoiceId: string) {
+    return this.invoicesRepository.findInvoiceWithItems(invoiceId);
   }
 }

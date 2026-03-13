@@ -1,12 +1,13 @@
 import { HttpStatus, Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import { OrdersService } from '../../orders/orders.service/orders.service';
-import { CreateInvoiceDto, InvoiceEventPayload, KAFKA_ORDER_TOPIC, UpdateInvoiceDto } from '../../orders/dto/order.dto';
-import { Invoice, Order, Prisma, OrderStatus } from '@prisma/client';
+import { CreateInvoiceDto, InvoiceEventPayload, KAFKA_ORDER_TOPIC, OrderCancelledEventPayload, UpdateInvoiceDto } from '../../orders/dto/order.dto';
+import { Invoice, Order, PaymentMethod, Prisma, OrderStatus } from '@prisma/client';
 import { AppException } from '../../../common/filters/global.exception/app.exception';
 import { AppLogger } from '../../../infrastructure/logger/app.logger';
 import { ClientKafka } from '@nestjs/microservices';
 import { CartService } from '../../cart-items/cart.service/cart.service';
 import { InvoicesService } from '../invoices.service/invoices.service';
+import { FinanceClientService } from '../../../infrastructure/http-clients/finance-client/finance-client.service';
 
 @Injectable()
 export class InvoicesUsecase implements OnModuleInit {
@@ -14,6 +15,7 @@ export class InvoicesUsecase implements OnModuleInit {
     private readonly invoicesService: InvoicesService,
     private readonly ordersService: OrdersService,
     private readonly cartService: CartService,
+    private readonly financeClient: FinanceClientService,
     private readonly logger: AppLogger,
     @Inject('KAFKA_PRODUCER') private readonly kafkaClient: ClientKafka,
   ) { }
@@ -34,6 +36,44 @@ export class InvoicesUsecase implements OnModuleInit {
     }
   }
 
+  async checkWalletBalance(userId: string, totalAmount: number): Promise<{
+    sufficient: boolean;
+    available_balance: number;
+    required_amount: number;
+  }> {
+    this.logger.info('usecase:invoice', 'Checking wallet balance sufficiency', {
+      user_id: userId,
+      required_amount: totalAmount,
+    });
+
+    try {
+      const wallet = await this.financeClient.getMyWallet();
+      const availableBalance = Number(wallet.available_balance);
+      const sufficient = availableBalance >= totalAmount;
+
+      this.logger.info('usecase:invoice', 'Wallet balance check completed', {
+        user_id: userId,
+        available_balance: availableBalance,
+        required_amount: totalAmount,
+        sufficient,
+      });
+
+      return {
+        sufficient,
+        available_balance: availableBalance,
+        required_amount: totalAmount,
+      };
+    } catch (error) {
+      this.logger.err('usecase:invoice', 'Failed to fetch wallet balance from Finance Service', error, {
+        user_id: userId,
+      });
+      throw new AppException(
+        'Failed to check wallet balance',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
   async checkoutOrders(
     userId: string,
     params: CreateInvoiceDto,
@@ -43,6 +83,23 @@ export class InvoicesUsecase implements OnModuleInit {
       idempotency_key: params.idempotensi_Key,
       store_count: params.orders.length,
     });
+
+    // 0. Validasi Pending Payment (Invoice + Payment dari Finance Service)
+    const [hasPendingInvoice, hasPendingPayment] = await Promise.all([
+      this.invoicesService.checkPendingInvoiceExists(userId),
+      this.financeClient.hasPendingPayment(),
+    ]);
+    if (hasPendingInvoice || hasPendingPayment) {
+      this.logger.warning(
+        'usecase:invoice',
+        'Checkout failed: User already has a pending payment',
+        { user_id: userId, has_pending_invoice: hasPendingInvoice, has_pending_payment: hasPendingPayment },
+      );
+      throw new AppException(
+        'You have a pending payment. Please complete or cancel it before creating a new order.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     // 1. Validasi Idempotency
     const isIdempotencyExist = await this.invoicesService.checkIdempotency(
@@ -104,16 +161,39 @@ export class InvoicesUsecase implements OnModuleInit {
       });
     }
 
-    // 3. Eksekusi Simpan di Transaksi
+    // 3. Validasi Saldo Wallet (jika payment method WALLET)
+    if (params.payment_method === 'WALLET') {
+      this.logger.info('usecase:invoice', 'Payment method is WALLET, validating wallet balance', {
+        user_id: userId,
+        total_price: globalTotalPrice,
+      });
+
+      const balanceCheck = await this.checkWalletBalance(userId, globalTotalPrice);
+      if (!balanceCheck.sufficient) {
+        this.logger.warning('usecase:invoice', 'Checkout failed: Insufficient wallet balance', {
+          user_id: userId,
+          available_balance: balanceCheck.available_balance,
+          required_amount: balanceCheck.required_amount,
+        });
+        throw new AppException(
+          `Saldo wallet tidak cukup. Saldo tersedia: ${balanceCheck.available_balance}, Total belanja: ${balanceCheck.required_amount}`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+
+    // 4. Eksekusi Simpan di Transaksi
     const savedInvoice = await this.invoicesService.createInvoiceTransaction(
       userId,
       params.idempotensi_Key,
       globalTotalPrice,
       { ...params.shipping_address },
+      params.payment_method as PaymentMethod,
+      params.bank_code,
       storeOrdersData,
     );
 
-    // 4. Update Cart (Kurangi stok yang di checkout)
+    // 5. Update Cart (Kurangi stok yang di checkout)
     for (const storeOrder of storeOrdersData) {
       for (const item of storeOrder.items) {
         await this.cartService.upsertCartItem(
@@ -125,14 +205,25 @@ export class InvoicesUsecase implements OnModuleInit {
       }
     }
 
-    // 5. Emit Event Kafka
+    // 6. Emit Event Kafka
     const payloadEvent: InvoiceEventPayload = {
       event: 'invoice.created',
       timestamp: new Date().toISOString(),
       data: {
         invoice_id: savedInvoice.id,
+        user_id: userId,
+        customer_name: (savedInvoice.shipping_address as any).recipient_name,
         total_amount: Number(savedInvoice.total_price),
         order_ids: savedInvoice.orders.map((o) => o.id),
+        payment_method: savedInvoice.payment_method,
+        bank_code: savedInvoice.bank_code ?? undefined,
+        order_items: storeOrdersData.flatMap((store) =>
+          store.items.map((item) => ({
+            product_id: item.product_id,
+            quantity: item.quantity,
+            price_at_purchase: Number(item.price_at_purchase),
+          })),
+        ),
       },
     };
 
@@ -148,6 +239,106 @@ export class InvoicesUsecase implements OnModuleInit {
     );
 
     return savedInvoice;
+  }
+
+  async handlePaymentSuccess(invoiceId: string): Promise<void> {
+    this.logger.info('usecase:invoice', 'Handling payment.success event', {
+      invoice_id: invoiceId,
+    });
+
+    const invoice = await this.invoicesService.findInvoiceById(invoiceId);
+    if (!invoice) {
+      this.logger.warning('usecase:invoice', 'Invoice not found for payment.success', {
+        invoice_id: invoiceId,
+      });
+      return;
+    }
+
+    if (invoice.status !== 'PENDING') {
+      this.logger.warning('usecase:invoice', 'Invoice is not PENDING, skipping payment.success', {
+        invoice_id: invoiceId,
+        current_status: invoice.status,
+      });
+      return;
+    }
+
+    await this.invoicesService.markInvoiceAndOrdersPaid(invoiceId);
+
+    this.logger.info('usecase:invoice', 'Invoice and orders marked as PAID', {
+      invoice_id: invoiceId,
+    });
+  }
+
+  async handlePaymentFailed(invoiceId: string): Promise<void> {
+    this.logger.info('usecase:invoice', 'Handling payment expired/failed event', {
+      invoice_id: invoiceId,
+    });
+
+    const invoice = await this.invoicesService.findInvoiceById(invoiceId);
+    if (!invoice) {
+      this.logger.warning('usecase:invoice', 'Invoice not found for payment failure', {
+        invoice_id: invoiceId,
+      });
+      return;
+    }
+
+    if (invoice.status !== 'PENDING') {
+      this.logger.warning('usecase:invoice', 'Invoice is not PENDING, skipping payment failure', {
+        invoice_id: invoiceId,
+        current_status: invoice.status,
+      });
+      return;
+    }
+
+    // 1. Mark invoice and orders as CANCELLED
+    await this.invoicesService.markInvoiceAndOrdersCancelled(invoiceId);
+
+    this.logger.info('usecase:invoice', 'Invoice and orders marked as CANCELLED', {
+      invoice_id: invoiceId,
+    });
+
+    // 2. Fetch invoice with order items to build the event payload
+    const invoiceWithItems = await this.invoicesService.findInvoiceWithItems(invoiceId);
+    if (!invoiceWithItems) {
+      this.logger.warning('usecase:invoice', 'Could not fetch invoice with items for stock restoration event', {
+        invoice_id: invoiceId,
+      });
+      return;
+    }
+
+    // 3. Publish order.cancelled event for Product Service & Finance Service
+    for (const order of invoiceWithItems.orders) {
+      const orderItems = order.items.map((item) => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+      }));
+
+      const cancelledEvent: OrderCancelledEventPayload = {
+        event: 'order.cancelled',
+        timestamp: new Date().toISOString(),
+        data: {
+          order_id: order.id,
+          invoice_id: invoiceId,
+          buyer_id: invoiceWithItems.user_id,
+          user_id: invoiceWithItems.user_id,
+          seller_id: order.store_id,
+          amount: Number(order.total_price),
+          order_ids: [order.id],
+          order_items: orderItems,
+        },
+      };
+
+      this.kafkaClient.emit(KAFKA_ORDER_TOPIC, {
+        key: invoiceId,
+        value: cancelledEvent,
+      });
+
+      this.logger.info('usecase:invoice', 'Published order.cancelled event', {
+        invoice_id: invoiceId,
+        order_id: order.id,
+        item_count: orderItems.length,
+      });
+    }
   }
 
   async findInvoicesByUserId(userId: string): Promise<Invoice[]> {
@@ -244,3 +435,4 @@ export class InvoicesUsecase implements OnModuleInit {
     return deletedInvoice;
   }
 }
+

@@ -130,6 +130,98 @@ func HandlerConsumer(ctx context.Context, msg []byte, walletUseCase usecases.Wal
 	}
 }
 
+func HandlerOrderConsumer(ctx context.Context, msg []byte, paymentUsecase usecases.PaymentUsecase, walletUsecase usecases.WalletUsecase) error {
+	// First, detect event type from raw JSON
+	var baseEvent struct {
+		Event string `json:"event"`
+	}
+	if err := json.Unmarshal(msg, &baseEvent); err != nil {
+		logger.Error(ctx, "handler:kafka:order", "Failed to parse order event message (Poison Pill ignored)", err, logrus.Fields{
+			"payload": string(msg),
+		})
+		return nil
+	}
+
+	switch baseEvent.Event {
+	case "invoice.created":
+		var payload model.InvoiceCreatedEvent
+		if err := json.Unmarshal(msg, &payload); err != nil {
+			logger.Error(ctx, "handler:kafka:order", "Failed to parse invoice.created event", err, logrus.Fields{
+				"payload": string(msg),
+			})
+			return nil
+		}
+
+		ctx = context.WithValue(ctx, "user_id", payload.Data.UserID)
+
+		logFields := logrus.Fields{
+			"event":      payload.Event,
+			"invoice_id": payload.Data.InvoiceID,
+			"user_id":    payload.Data.UserID,
+		}
+
+		logger.Info(ctx, "handler:kafka:order", "Received invoice.created event, initiating payment creation...", logFields)
+
+		err := paymentUsecase.CreateOrderPayment(ctx, payload.Data)
+		if err != nil {
+			logger.Error(ctx, "handler:kafka:order", "Failed to create order payment from invoice event", err, logFields)
+			return err
+		}
+
+		logger.Info(ctx, "handler:kafka:order", "Order payment created successfully from invoice event", logFields)
+		return nil
+
+	case "order.completed", "order.cancelled":
+		var payload model.OrderEvent
+		if err := json.Unmarshal(msg, &payload); err != nil {
+			logger.Error(ctx, "handler:kafka:order", "Failed to parse order event message", err, logrus.Fields{
+				"payload": string(msg),
+			})
+			return nil
+		}
+
+		ctx = context.WithValue(ctx, "user_id", payload.Data.BuyerID)
+
+		logFields := logrus.Fields{
+			"event":      payload.Event,
+			"order_id":   payload.Data.OrderID,
+			"invoice_id": payload.Data.InvoiceID,
+			"buyer_id":   payload.Data.BuyerID,
+			"seller_id":  payload.Data.SellerID,
+			"amount":     payload.Data.Amount,
+		}
+
+		if baseEvent.Event == "order.completed" {
+			logger.Info(ctx, "handler:kafka:order", "Received order.completed event, releasing pending balance to seller...", logFields)
+
+			err := walletUsecase.ReleasePendingToSeller(ctx, payload.Data.BuyerID, payload.Data.SellerID, payload.Data.Amount)
+			if err != nil {
+				logger.Error(ctx, "handler:kafka:order", "Failed to release pending balance to seller", err, logFields)
+				return err
+			}
+
+			logger.Info(ctx, "handler:kafka:order", "Successfully released pending balance to seller", logFields)
+		} else {
+			logger.Info(ctx, "handler:kafka:order", "Received order.cancelled event, refunding pending balance to buyer...", logFields)
+
+			err := walletUsecase.RefundPendingToAvailable(ctx, payload.Data.BuyerID, payload.Data.Amount)
+			if err != nil {
+				logger.Error(ctx, "handler:kafka:order", "Failed to refund pending balance to buyer", err, logFields)
+				return err
+			}
+
+			logger.Info(ctx, "handler:kafka:order", "Successfully refunded pending balance to buyer", logFields)
+		}
+		return nil
+
+	default:
+		logger.Warn(ctx, "handler:kafka:order", "Received unknown order event", logrus.Fields{
+			"event": baseEvent.Event,
+		})
+		return nil
+	}
+}
+
 func (c *Consumer) Close() error {
 	return c.reader.Close()
 }
