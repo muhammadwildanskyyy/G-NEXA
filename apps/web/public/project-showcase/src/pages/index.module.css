@@ -17,14 +17,15 @@
 }
 
 .heroTitle {
-  font-size: 3rem;
-  font-weight: 900;
-  letter-spacing: 0.5em;
-  margin-bottom: 4rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.8em;
+  margin-bottom: 2rem;
   line-height: 1;
-  color: var(--ifm-color-primary);
-  opacity: 0.3;
+  color: var(--gnexa-teal);
+  opacity: 0.6;
   text-transform: uppercase;
+  margin-left: 0.8em; /* Offset for large letter spacing to keep it centered */
 }
 
 .minimalAcronym {
@@ -60,6 +61,27 @@
   opacity: 0.6;
 }
 
+@media screen and (max-width: 768px) {
+  .initial {
+    font-size: 6rem;
+  }
+  .minimalAcronym {
+    gap: 1.5rem;
+  }
+  .heroTitle {
+    font-size: 1.5rem;
+    letter-spacing: 0.3em;
+  }
+  .buttons {
+    flex-direction: column;
+    width: 100%;
+    padding: 0 2rem;
+  }
+  .buttons :global(.button) {
+    width: 100%;
+  }
+}
+
 .buttons {
   display: flex;
   align-items: center;
@@ -89,6 +111,13 @@
   font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--ifm-color-content);
+}
+
+@media screen and (max-width: 768px) {
+  .abstractContent {
+    font-size: 1.1rem;
+    text-align: left;
+  }
 }
 
 .features {
@@ -163,6 +192,23 @@
   min-width: max-content;
   animation: scroll-left 120s linear infinite;
   will-change: transform;
+}
+
+@media screen and (max-width: 768px) {
+  .marqueeTrack {
+    gap: 4rem;
+    animation-duration: 60s;
+  }
+  .techLogo {
+    width: 60px;
+    height: 60px;
+  }
+  .techLogoWrapper {
+    min-width: 120px;
+  }
+  .techName {
+    font-size: 0.7rem;
+  }
 }
 
 /* Layer with original colors - visible only in center via mask */
@@ -346,6 +392,21 @@
   cursor: default;
 }
 
+@media screen and (max-width: 576px) {
+  .microserviceBox {
+    width: 280px;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  .visualContainer {
+    padding: 1.5rem;
+  }
+  .internalNode {
+    width: 40px;
+    height: 40px;
+  }
+}
+
 .microserviceBox:hover {
   transform: translateX(12px) scale(1.02);
   border-color: var(--gnexa-teal);
@@ -431,6 +492,22 @@
   }
 }
 
+@media screen and (max-width: 768px) {
+  .visualContainer {
+    padding: 2rem 1rem;
+  }
+  .microserviceBox {
+    width: 100%;
+    max-width: 340px;
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  .serviceInfo {
+    width: 100%;
+  }
+}
+
 .entrySection {
   padding: 8rem 0;
   border-top: 1px solid var(--ifm-border-color);
@@ -451,7 +528,9 @@
 
 @media screen and (max-width: 996px) {
   .heroTitle {
-    font-size: 3.5rem;
+    font-size: 1.2rem;
+    letter-spacing: 0.6em;
+    margin-left: 0.6em;
   }
 
   .heroBanner {
