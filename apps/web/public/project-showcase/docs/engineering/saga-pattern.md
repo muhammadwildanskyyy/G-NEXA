@@ -3,7 +3,7 @@ title: Konsistensi Data (Saga Pattern)
 sidebar_position: 1
 ---
 
-# 1. Konsistensi Data Lintas Layanan (Saga Pattern)
+#  Konsistensi Data Lintas Layanan (Saga Pattern)
 
 Dalam arsitektur *microservices*, kita kehilangan kemewahan *single database transaction* (ACID) yang biasanya mengikat seluruh domain dalam satu aplikasi *monolith*. 
 

@@ -1,5 +1,5 @@
 ---
-title: 5. Komunikasi Polyglot (Orkestrasi)
+title: Komunikasi Polyglot (Orkestrasi)
 sidebar_position: 5
 ---
 
