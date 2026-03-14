@@ -122,7 +122,7 @@ export class ProductClientService implements OnModuleInit {
   async getProductById(productId: string): Promise<Product> {
     const token: string = this.cls.get('access_token');
     const request$ = this.httpService
-      .get<GetProductInfoResponse>(`${this.baseUrl}/v1/product/${productId}`, {
+      .get<GetProductInfoResponse>(`${this.baseUrl}/v1/api/products/${productId}`, {
         headers: {
           Authorization: token,
         },
@@ -147,7 +147,7 @@ export class ProductClientService implements OnModuleInit {
   async getProductsByStoreId(storeId: string): Promise<Product[]> {
     const token: string = this.cls.get('access_token');
     const request$ = this.httpService
-      .get<GetProductsByStoreResponse>(`${this.baseUrl}/v1/products`, {
+      .get<GetProductsByStoreResponse>(`${this.baseUrl}/v1/api/products`, {
         params: {
           store_id: storeId,
         },

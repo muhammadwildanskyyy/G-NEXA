@@ -3,7 +3,7 @@ title: Resiliensi Webhook (Idempotency)
 sidebar_position: 3
 ---
 
-# 3. Resiliensi Integrasi Sistem Eksternal (Idempotency)
+#  Resiliensi Integrasi Sistem Eksternal (Idempotency)
 
 Dalam ekosistem *microservices* modern, kita tidak hidup sendirian. GNEXA harus berkomunikasi dengan sistem pihak ketiga, seperti *Payment Gateway* (Xendit) untuk memproses pembayaran Virtual Account. Namun, berkomunikasi melintasi internet publik membawa satu risiko mutlak: **Jaringan tidak pernah 100% stabil**.
 

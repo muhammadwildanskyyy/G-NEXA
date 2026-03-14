@@ -3,7 +3,7 @@ title: Komunikasi Polyglot (Orkestrasi)
 sidebar_position: 5
 ---
 
-# 5. Interoperabilitas Komunikasi Polyglot (Cross-Service Orchestration)
+# Interoperabilitas Komunikasi Polyglot (Cross-Service Orchestration)
 
 Sebagai sebuah *project portfolio* yang eksperimental, GNEXA sengaja dirancang menggunakan **Arsitektur Polyglot**. Sistem ini menyatukan ekosistem bahasa pemrograman dan *framework* yang sepenuhnya berbeda untuk menangani domain spesifiknya masing-masing:
 * **Golang** (Finance Service): Menangani komputasi finansial yang membutuhkan performa dan konkurensi tinggi.

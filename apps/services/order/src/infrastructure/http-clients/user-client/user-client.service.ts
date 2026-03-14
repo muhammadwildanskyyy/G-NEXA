@@ -114,7 +114,7 @@ export class UserClientService implements OnModuleInit {
   async getUserInfo(): Promise<User> {
     const token: string = this.cls.get('access_token');
     const request$ = this.httpService
-      .get<GlobalUserResponse<User>>(`${this.baseUrl}/v1/api/me`, {
+      .get<GlobalUserResponse<User>>(`${this.baseUrl}/v1/api/users/me`, {
         headers: {
           Authorization: token,
         },
@@ -140,7 +140,7 @@ export class UserClientService implements OnModuleInit {
   async getStoreByOwner(): Promise<Store> {
     const token: string = this.cls.get('access_token');
     const request$ = this.httpService
-      .get<GlobalUserResponse<Store>>(`${this.baseUrl}/v1/api/store/owner`, {
+      .get<GlobalUserResponse<Store>>(`${this.baseUrl}/v1/api/users/store/owner`, {
         headers: {
           Authorization: token,
         },

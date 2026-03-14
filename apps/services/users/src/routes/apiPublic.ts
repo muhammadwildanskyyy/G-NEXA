@@ -22,5 +22,6 @@ routerPublic.post(
 );
 routerPublic.get("/auth/send-activation", authController.getVerificationCode);
 routerPublic.get("/auth/activation", authController.activationUser);
+routerPublic.get("/activation", authController.activationUser);
 
 export default routerPublic;

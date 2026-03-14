@@ -25,7 +25,7 @@ import { HttpStatusCode } from 'axios';
 import { AclGuard } from '../../../common/guards/acl/acl.guard';
 import { AppLogger } from '../../../infrastructure/logger/app.logger';
 
-@Controller('/v1/api/order')
+@Controller('/v1/api/orders')
 @UseGuards(JwtAuthGuard)
 export class OrdersController {
   constructor(

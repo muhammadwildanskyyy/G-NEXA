@@ -23,7 +23,7 @@ import { JwtAuthGuard } from '../../../common/guards/auth/auth.guard';
 import { User } from '../../../common/decorators/user/user.decorator';
 import { AppLogger } from '../../../infrastructure/logger/app.logger';
 
-@Controller('/v1/api/shipping-address')
+@Controller('/v1/api/orders/shipping-address')
 @UseGuards(JwtAuthGuard)
 export class ShippingAddressesController {
   constructor(
