@@ -1,6 +1,6 @@
 import type { Request } from "express";
 import type { User } from "../generated/prisma/client";
-import type { EnumType } from "typescript";
+
 
 export type UserPayload = Omit<User, "password" | "createdAt" | "updatedAt">;
 

@@ -1,0 +1,227 @@
+package kafka
+
+import (
+	"context"
+	"encoding/json"
+
+	"finance/cmd/wallet/usecases"
+	"finance/infrastructure/logger"
+	"finance/model"
+
+	"github.com/google/uuid"
+	"github.com/segmentio/kafka-go"
+	"github.com/sirupsen/logrus"
+)
+
+type Consumer struct {
+	reader *kafka.Reader
+}
+
+func NewConsumer(brokers []string, topic, groupID string) *Consumer {
+	r := kafka.NewReader(kafka.ReaderConfig{
+		Brokers:        brokers,
+		GroupID:        groupID,
+		Topic:          topic,
+		MinBytes:       10e3,
+		MaxBytes:       10e6,
+		CommitInterval: 0,
+	})
+
+	return &Consumer{reader: r}
+}
+
+func (c *Consumer) Start(ctx context.Context, processFunc func(ctx context.Context, msg []byte) error) {
+	logger.Info(ctx, "infra:kafka", "Memulai Kafka Consumer...", nil)
+
+	for {
+
+		m, err := c.reader.FetchMessage(ctx)
+		if err != nil {
+			if ctx.Err() != nil {
+				logger.Warn(ctx, "infra:kafka", "Consumer dihentikan secara graceful", nil)
+				break
+			}
+			logger.Error(ctx, "infra:kafka", "Error fetching message", err, nil)
+			continue
+		}
+
+		var traceID string
+		for _, header := range m.Headers {
+			if header.Key == "X-Correlation-ID" {
+				traceID = string(header.Value)
+				break
+			}
+		}
+
+		if traceID == "" {
+			traceID = uuid.New().String()
+		}
+
+		msgCtx := context.WithValue(ctx, "trace_id", traceID)
+
+		logger.Debug(msgCtx, "infra:kafka", "Menerima pesan baru", logrus.Fields{
+			"topic":     m.Topic,
+			"partition": m.Partition,
+			"offset":    m.Offset,
+		})
+
+		err = processFunc(msgCtx, m.Value)
+
+		if err != nil {
+
+			logger.Error(msgCtx, "infra:kafka", "Gagal memproses pesan (offset tidak di-commit)", err, logrus.Fields{
+				"offset": m.Offset,
+			})
+			continue
+		}
+
+		if err := c.reader.CommitMessages(ctx, m); err != nil {
+			logger.Error(msgCtx, "infra:kafka", "Gagal melakukan commit offset ke broker", err, logrus.Fields{
+				"offset": m.Offset,
+			})
+		} else {
+			logger.Info(msgCtx, "infra:kafka", "Sukses memproses & commit pesan", logrus.Fields{
+				"offset": m.Offset,
+			})
+		}
+	}
+}
+
+func HandlerConsumer(ctx context.Context, msg []byte, walletUseCase usecases.WalletUsecase) error {
+	var payload model.UserEventMessage
+
+	if err := json.Unmarshal(msg, &payload); err != nil {
+
+		logger.Error(ctx, "handler:kafka", "Gagal parsing pesan, format JSON salah (Poison Pill diabaikan)", err, logrus.Fields{
+			"payload": string(msg),
+		})
+		return nil
+	}
+
+	ctx = context.WithValue(ctx, "user_id", payload.Data.UserID)
+
+	logFields := logrus.Fields{
+		"event":   payload.Event,
+		"user_id": payload.Data.UserID,
+	}
+
+	switch payload.Event {
+	case "user.created":
+		logger.Info(ctx, "handler:kafka", "Menerima event pembuatan user, memproses wallet...", logFields)
+
+		wallet, err := walletUseCase.CreateWallet(ctx, payload.Data.UserID)
+		if err != nil {
+			logger.Error(ctx, "handler:kafka", "Gagal membuat wallet untuk user", err, logFields)
+			return err
+		}
+
+		logger.Info(ctx, "handler:kafka", "Wallet berhasil dibuat", logrus.Fields{
+			"wallet_id": wallet.ID,
+		})
+		return nil
+
+	case "user.deleted":
+		logger.Debug(ctx, "handler:kafka", "Mengabaikan event user.deleted", logFields)
+		return nil
+
+	default:
+		logger.Warn(ctx, "handler:kafka", "Menerima event yang tidak dikenal", logFields)
+		return nil
+	}
+}
+
+func HandlerOrderConsumer(ctx context.Context, msg []byte, paymentUsecase usecases.PaymentUsecase, walletUsecase usecases.WalletUsecase) error {
+	// First, detect event type from raw JSON
+	var baseEvent struct {
+		Event string `json:"event"`
+	}
+	if err := json.Unmarshal(msg, &baseEvent); err != nil {
+		logger.Error(ctx, "handler:kafka:order", "Failed to parse order event message (Poison Pill ignored)", err, logrus.Fields{
+			"payload": string(msg),
+		})
+		return nil
+	}
+
+	switch baseEvent.Event {
+	case "invoice.created":
+		var payload model.InvoiceCreatedEvent
+		if err := json.Unmarshal(msg, &payload); err != nil {
+			logger.Error(ctx, "handler:kafka:order", "Failed to parse invoice.created event", err, logrus.Fields{
+				"payload": string(msg),
+			})
+			return nil
+		}
+
+		ctx = context.WithValue(ctx, "user_id", payload.Data.UserID)
+
+		logFields := logrus.Fields{
+			"event":      payload.Event,
+			"invoice_id": payload.Data.InvoiceID,
+			"user_id":    payload.Data.UserID,
+		}
+
+		logger.Info(ctx, "handler:kafka:order", "Received invoice.created event, initiating payment creation...", logFields)
+
+		err := paymentUsecase.CreateOrderPayment(ctx, payload.Data)
+		if err != nil {
+			logger.Error(ctx, "handler:kafka:order", "Failed to create order payment from invoice event", err, logFields)
+			return err
+		}
+
+		logger.Info(ctx, "handler:kafka:order", "Order payment created successfully from invoice event", logFields)
+		return nil
+
+	case "order.completed", "order.cancelled":
+		var payload model.OrderEvent
+		if err := json.Unmarshal(msg, &payload); err != nil {
+			logger.Error(ctx, "handler:kafka:order", "Failed to parse order event message", err, logrus.Fields{
+				"payload": string(msg),
+			})
+			return nil
+		}
+
+		ctx = context.WithValue(ctx, "user_id", payload.Data.BuyerID)
+
+		logFields := logrus.Fields{
+			"event":      payload.Event,
+			"order_id":   payload.Data.OrderID,
+			"invoice_id": payload.Data.InvoiceID,
+			"buyer_id":   payload.Data.BuyerID,
+			"seller_id":  payload.Data.SellerID,
+			"amount":     payload.Data.Amount,
+		}
+
+		if baseEvent.Event == "order.completed" {
+			logger.Info(ctx, "handler:kafka:order", "Received order.completed event, releasing pending balance to seller...", logFields)
+
+			err := walletUsecase.ReleasePendingToSeller(ctx, payload.Data.BuyerID, payload.Data.SellerID, payload.Data.Amount)
+			if err != nil {
+				logger.Error(ctx, "handler:kafka:order", "Failed to release pending balance to seller", err, logFields)
+				return err
+			}
+
+			logger.Info(ctx, "handler:kafka:order", "Successfully released pending balance to seller", logFields)
+		} else {
+			logger.Info(ctx, "handler:kafka:order", "Received order.cancelled event, refunding pending balance to buyer...", logFields)
+
+			err := walletUsecase.RefundPendingToAvailable(ctx, payload.Data.BuyerID, payload.Data.Amount)
+			if err != nil {
+				logger.Error(ctx, "handler:kafka:order", "Failed to refund pending balance to buyer", err, logFields)
+				return err
+			}
+
+			logger.Info(ctx, "handler:kafka:order", "Successfully refunded pending balance to buyer", logFields)
+		}
+		return nil
+
+	default:
+		logger.Warn(ctx, "handler:kafka:order", "Received unknown order event", logrus.Fields{
+			"event": baseEvent.Event,
+		})
+		return nil
+	}
+}
+
+func (c *Consumer) Close() error {
+	return c.reader.Close()
+}

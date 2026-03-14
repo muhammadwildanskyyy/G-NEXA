@@ -1,70 +1,84 @@
 import type { Request, Response, NextFunction } from "express";
-import response from "../utils/response";
-import { logger } from "../lib/logger";
-import { HTTP_STATUS } from "../model/web.model";
 import { ZodError } from "zod";
 import { Prisma } from "../generated/prisma/client";
+import { HttpStatus } from "../constants/httpStatus";
+import { log } from "../lib/logger.ts";
 
 export const globalErrorHandler = (
-  err: any,
-  req: Request,
-  res: Response,
-  next: NextFunction,
+    err: any,
+    req: Request,
+    res: Response,
+    _next: NextFunction,
 ) => {
-  // Set default status code
-  let statusCode = err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR;
+  let statusCode = err.statusCode || HttpStatus.INTERNAL_SERVER_ERROR;
   let message = err.message || "Internal Server Error";
   let isOperational = err.isOperational || false;
+  let details = null;
 
+  const isProduction = process.env.NODE_ENV === "production";
+
+  // 1. Handling Zod Validation Error (Validation errors are WARN, not ERROR)
   if (err instanceof ZodError) {
-    statusCode = HTTP_STATUS.BAD_REQUEST;
+    statusCode = HttpStatus.BAD_REQUEST;
+    message = "Validation failed";
     isOperational = true;
+    details = err.issues.map((issue) => ({
+      field: issue.path.join("."),
+      message: issue.message,
+    }));
+
+    log.warn("delivery:http", "Validation Error", { details });
   }
 
-  // 2. Handling Prisma Known Request Errors
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+  // 2. Handling Prisma Errors
+  else if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    isOperational = true;
     switch (err.code) {
-      case "P2002": // Unique constraint failed (Duplicate)
-        statusCode = HTTP_STATUS.CONFLICT;
-        message = "Data sudah terdaftar di sistem";
-        isOperational = true;
+      case "P2002":
+        statusCode = HttpStatus.CONFLICT;
+        message = "Data already exists in the system";
         break;
-      case "P2025": // Record not found
-        statusCode = HTTP_STATUS.NOT_FOUND;
-        message = "Data tidak ditemukan";
-        isOperational = true;
+      case "P2025":
+        statusCode = HttpStatus.NOT_FOUND;
+        message = "Resource not found";
         break;
-      case "P2003": // Foreign key constraint failed
-        statusCode = HTTP_STATUS.BAD_REQUEST;
-        message = "Data relasi tidak valid";
-        isOperational = true;
+      case "P2003":
+        statusCode = HttpStatus.BAD_REQUEST;
+        message = "Invalid relation data";
         break;
       default:
-        statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR;
+        statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+        message = "Database operation failed";
+        isOperational = false;
         break;
+    }
+
+    // If it's a known operational error, we log as warn, otherwise error
+    if (isOperational) {
+      log.warn("repository:prisma", message, { code: err.code, meta: err.meta });
+    } else {
+      log.error("repository:prisma", message, err);
     }
   }
 
-  logger.error({
-    url: req.originalUrl,
-    method: req.method,
-    statusCode: statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR,
-    stack: err.stack,
-  });
+  // 3. Handling System/Unexpected Errors
+  else {
+    // Log unexpected errors with full stack trace
+    log.error("delivery:http", `Unexpected Error: ${message}`, err, {
+      url: req.originalUrl,
+      method: req.method,
+    });
+  }
 
-  //prtoduction and operational error
-if (process.env.NODE_ENV === "production") {
+  // 4. Response Logic
   return res.status(statusCode).json({
     meta: {
       status: statusCode,
-      message: isOperational
-        ? message
-        : "Terjadi kesalahan internal pada server",
+      message: isProduction && !isOperational ? "Internal Server Error" : message,
     },
-    data: null,
+    data: details || (!isProduction ? {
+      error_name: err.name,
+      stack: err.stack
+    } : null),
   });
-}
-
-  // development error
-  return response.error(res, err, err.message);
 };

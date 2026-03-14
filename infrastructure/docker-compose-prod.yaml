@@ -33,6 +33,50 @@ services:
     networks:
       - g-nexa-network
 
+  kafka:
+    image: apache/kafka:3.7.0
+    container_name: g-nexa-kafka
+    user: root
+    ports:
+      - "9092:9092" # Port untuk akses dari laptop (Host / Luar Docker)
+      - "29092:29092" # Port untuk akses antar container di dalam Docker
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      # Konfigurasi Listener (Sangat penting agar bisa diakses dari Host & Container)
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      # Pengaturan Wajib KRaft untuk 1 Node
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      # UUID unik untuk inisialisasi cluster otomatis
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+    volumes:
+      - kafka_data:/tmp/kafka-logs
+    networks:
+      - g-nexa-network
+
+  # ------------------------------------
+  # 2.Kafka UI
+  # ------------------------------------
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: gnexa_kafka_ui
+    ports:
+      - "8088:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=GNEXA-Local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
+    depends_on:
+      - kafka
+    networks:
+      - g-nexa-network
+
   # ------------------------------------
   # 3. USER SERVICE (Bun Production)
   # ------------------------------------
@@ -81,6 +125,84 @@ services:
     networks:
       - g-nexa-network
 
+  # ------------------------------------
+  # 4. PRODUCT media (Go + Hot Reload)
+  # ------------------------------------
+  media-service:
+    build:
+      context: ../apps/services/media
+      target: production
+    container_name: g-nexa-media-service
+    restart: always
+    ports:
+      - "8083:8083"
+
+    env_file:
+      - ../apps/services/media/files/config/.env
+    environment:
+      - PORT=8083
+
+    depends_on:
+      - postgres
+    networks:
+      - g-nexa-network
+
+  # ------------------------------------
+  # 6. ORDER SERVICE
+  # ------------------------------------
+  order-service:
+    build:
+      context: ../apps/services/order
+      target: production
+    container_name: gnexa-order-service
+    restart: always
+    ports:
+      - "8084:8084"
+    env_file:
+      - ../apps/services/order/.env
+    depends_on:
+      - postgres
+    networks:
+      - g-nexa-network
+
+  # ------------------------------------
+  # 6. FINANCE SERVICE
+  # ------------------------------------
+  finance-service:
+    build:
+      context: ../apps/services/finance
+      target: production
+    container_name: g-nexa-finance-service
+    ports:
+      - "8085:8085"
+    environment:
+      - KAFKA_BROKER=kafka:29092
+    env_file:
+      - ../apps/services/finance/files/config/.env
+    depends_on:
+      - postgres
+      - kafka
+    networks:
+      - g-nexa-network
+
+  web-market-place:
+    build:
+      context: ../apps/web/public/market-place
+      target: production
+
+    container_name: g-nexa-web-market-place
+    restart: always
+    ports:
+      - "3000:3000"
+
+    # Environment Runtime (Hanya untuk Server-Side)
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+
+    networks:
+      - g-nexa-network
+
 # ---------------------------------------
 # NETWORK & VOLUMES
 # ---------------------------------------
@@ -91,3 +213,5 @@ networks:
 volumes:
   postgres_data:
   mongo_data:
+  kafka_data:
+    driver: local

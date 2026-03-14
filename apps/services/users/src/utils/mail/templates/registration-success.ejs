@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACARA - Aktivasi Akun</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        background-color: #f3f4f6;
+        margin: 0;
+        padding: 0;
+        color: #1f2937;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 40px auto;
+        background-color: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      }
+
+      .header {
+        background: linear-gradient(135deg, #3b82f6, #06b6d4);
+        color: #ffffff;
+        padding: 32px 24px;
+        text-align: center;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 24px;
+      }
+
+      .content {
+        padding: 24px;
+        font-size: 16px;
+        line-height: 1.6;
+      }
+
+      .content ul {
+        padding-left: 20px;
+        margin-top: 12px;
+      }
+
+      .button {
+        display: inline-block;
+        margin: 24px 0;
+        padding: 12px 24px;
+        background-color: #3b82f6;
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+      }
+
+      .button:hover {
+        background-color: #2563eb;
+      }
+
+      .footer {
+        background-color: #f9fafb;
+        color: #6b7280;
+        padding: 16px;
+        text-align: center;
+        font-size: 13px;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          border-radius: 0;
+          margin: 0;
+        }
+
+        .content {
+          padding: 16px;
+        }
+
+        .header {
+          padding: 24px 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Aktivasi Akun Anda</h1>
+      </div>
+      <div class="content">
+        <p>Halo <strong><%= fullName %></strong>,</p>
+        <p>
+          Terima kasih telah mendaftar di <strong>G-NEXA</strong>. Berikut adalah
+          informasi akun Anda:
+        </p>
+        <ul>
+          <li><strong>Nama:</strong> <%= fullName %></li>
+          <li><strong>Email:</strong> <%= email %></li>
+          <li><strong>Tanggal Pendaftaran:</strong> <%= createdAt %></li>
+        </ul>
+        <p>Untuk mengaktifkan akun Anda, silakan klik tombol berikut:</p>
+        <a href="<%= activationLink %>" class="button">Aktifkan Akun</a>
+        <p>Jika Anda mengalami kendala, jangan ragu menghubungi tim kami.</p>
+        <p>Salam hangat,<br />Tim G-NEXA</p>
+      </div>
+      <div class="footer">
+        &copy; 2025 G-NEXA Event Management System. Seluruh hak cipta dilindungi.
+      </div>
+    </div>
+  </body>
+</html>

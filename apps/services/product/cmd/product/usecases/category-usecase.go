@@ -16,6 +16,7 @@ type CategoryUsecase interface {
 	GetCategoryById(ctx context.Context, categoryId string) (*model.Category, error)
 	GetAllCategory(ctx context.Context) ([]*model.Category, error)
 }
+
 type categoryUsecase struct {
 	CategoryServices services.CategoryService
 }
@@ -27,73 +28,58 @@ func NewCategoryUsecase(categoryServices services.CategoryService) CategoryUseca
 }
 
 func (c categoryUsecase) CreateCategory(ctx context.Context, category *model.CreateCategoryRequest) (*model.Category, error) {
-	logFields := logrus.Fields{
-		"layer":         "usecases",
-		"fun":           "CreateCategory()",
-		"category_name": category.Name,
-	}
-
 	result, err := c.CategoryServices.CreateCategory(ctx, category)
 	if err != nil {
-		logger.LogError(logFields, "Failed Create Catregory", "CreateCategory()", err)
+		// We don't log Info/Warn here as the Service layer already handles it
 		return nil, err
 	}
+
+	logger.Info(ctx, "usecase:category", "Category creation orchestrated successfully", logrus.Fields{
+		"category_name": category.Name,
+	})
 	return result, nil
 }
 
 func (c categoryUsecase) UpdateCategory(ctx context.Context, category *model.CreateCategoryRequest, categoryId string) (*model.Category, error) {
-	logFields := logrus.Fields{
-		"layer":         "usecases",
-		"fun":           "UpdateCategory()",
-		"category_name": category.Name,
-		"category_id":   categoryId,
-	}
-
 	result, err := c.CategoryServices.UpdateCategory(ctx, category, categoryId)
 	if err != nil {
-		logger.LogError(logFields, "Failed Update Catregory", "UpdateCategory()", err)
 		return nil, err
 	}
+
+	logger.Info(ctx, "usecase:category", "Category update orchestrated successfully", logrus.Fields{
+		"category_id": categoryId,
+	})
 	return result, nil
 }
 
 func (c categoryUsecase) DeleteCategory(ctx context.Context, categoryId string) error {
-	logFields := logrus.Fields{
-		"layer":         "usecases",
-		"fun":           "DeleteCategory()",
-		"category_name": categoryId,
-	}
 	err := c.CategoryServices.DeleteCategory(ctx, categoryId)
 	if err != nil {
-		logger.LogError(logFields, "Failed Delete Catregory", "DeleteCategory()", err)
 		return err
 	}
+
+	logger.Info(ctx, "usecase:category", "Category deletion orchestrated successfully", logrus.Fields{
+		"category_id": categoryId,
+	})
 	return nil
 }
 
 func (c categoryUsecase) GetCategoryById(ctx context.Context, categoryId string) (*model.Category, error) {
-	logFields := logrus.Fields{
-		"layer":         "usecases",
-		"fun":           "GetCategoryById()",
-		"category_name": categoryId,
-	}
 	result, err := c.CategoryServices.GetCategoryById(ctx, categoryId)
 	if err != nil {
-		logger.LogError(logFields, "Failed Get CategoryById", "GetCategoryById()", err)
 		return nil, err
 	}
+
+	// Silent success for read operations
 	return result, nil
 }
 
 func (c categoryUsecase) GetAllCategory(ctx context.Context) ([]*model.Category, error) {
-	logFields := logrus.Fields{
-		"layer": "usecases",
-		"fun":   "GetAllCategory()",
-	}
 	result, err := c.CategoryServices.GetAllCategory(ctx)
 	if err != nil {
-		logger.LogError(logFields, "Failed GetAllCategory", "GetAllCategory()", err)
 		return nil, err
 	}
+
+	// Silent success for read operations
 	return result, nil
 }

@@ -1,42 +1,61 @@
 import { PrismaClient } from "../generated/prisma/client";
+import { log } from "./logger.ts";
 
 /**
- * Mendefinisikan tipe global untuk menyimpan instance Prisma.
- * Ini mencegah pembuatan instance baru setiap kali file di-reload oleh Bun.
+ * Singleton pattern for Prisma Client with Custom Logging
  */
 const prismaClientSingleton = () => {
-  return new PrismaClient({
-    // Konfigurasi Logging:
-    // Menampilkan query di console saat development untuk memudahkan debugging
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["query", "info", "warn", "error"]
-        : ["error"],
+  // 1. Beritahu Prisma untuk memancarkan event (emit) daripada console.log
+  const client = new PrismaClient({
+    log: [
+      { emit: "event", level: "query" },
+      { emit: "event", level: "info" },
+      { emit: "event", level: "warn" },
+      { emit: "event", level: "error" },
+    ],
   });
+
+  // 2. Hubungkan Event Prisma ke Logger Kita
+  // Kita gunakan .debug untuk query agar tidak "berisik" di Production
+  client.$on("query" as any, (e: any) => {
+    log.debug("repository:prisma", `Query Executed`, {
+      query: e.query,
+      params: e.params,
+      duration: `${e.duration}ms`,
+    });
+  });
+
+  client.$on("error" as any, (e: any) => {
+    log.error("repository:prisma", "Prisma Operation Failed", e);
+  });
+
+  client.$on("warn" as any, (e: any) => {
+    log.warn("repository:prisma", e.message);
+  });
+
+  return client;
 };
 
 declare const globalThis: {
   prismaGlobal: ReturnType<typeof prismaClientSingleton> | undefined;
 } & typeof global;
 
-// Mengambil instance dari global jika sudah ada, atau buat baru jika belum
-export const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
+export const database = globalThis.prismaGlobal ?? prismaClientSingleton();
 
-// Simpan ke global scope jika tidak di environment production
 if (process.env.NODE_ENV !== "production") {
-  globalThis.prismaGlobal = prisma;
+  globalThis.prismaGlobal = database;
 }
 
 /**
- * Helper function untuk mengecek koneksi database saat startup
+ * Database connection helper
  */
 export const connectDB = async () => {
   try {
-    await prisma.$connect();
-    console.info("🐘 Database connected successfully to PostgreSQL");
+    await database.$connect();
+    // Gunakan standar layer 'infra:database' atau 'APP'
+    log.info("APP", "Database connected successfully to PostgreSQL");
   } catch (error) {
-    console.error("❌ Database connection failed:");
-    console.error(error);
-    process.exit(1); // Hentikan service jika DB tidak terkoneksi
+    log.error("APP", "Database connection failed", error);
+    process.exit(1);
   }
 };

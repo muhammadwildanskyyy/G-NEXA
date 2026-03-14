@@ -1,12 +1,12 @@
 export class AppError extends Error {
   public readonly statusCode: number;
-  public readonly isOperational: boolean; // Tambahkan ini
+  public readonly isOperational: boolean;
 
   constructor(message: string, statusCode: number) {
     super(message);
     this.statusCode = statusCode;
-    this.isOperational = true; // Set default ke true untuk error yang kita buat sengaja
-
+    this.isOperational = true;
+    Object.setPrototypeOf(this, AppError.prototype);
     Error.captureStackTrace(this, this.constructor);
   }
 }

@@ -1,40 +1,38 @@
-import express from "express";
-
-import bodyParser from "body-parser";
-import cors from "cors";
-import type { Request, Response } from "express";
+import app from "./app";
 import { connectDB } from "./lib/database";
-import { globalErrorHandler } from "./middlewares/error.middleware";
-import { httpLogger } from "./middlewares/logger.middleware";
-import routerPrivate from "./routes/apiPrivate";
-import routerPublic from "./routes/apiPublic";
+import {log} from "./lib/logger";
+import {connectConsumer, disconnectConsumer} from "./infrastructure/kafka/consumer.ts";
+import {connectProducer, disconnectProducer} from "./infrastructure/kafka/producer.ts"; // Opsional: gunakan logger kamu daripada console.log
 
-async function init() {
+async function bootstrap() {
   try {
-    const app = express();
-    const PORT = process.env.PORT;
-    connectDB();
-    app.use(bodyParser.json());
-    app.use(cors());
-    app.use(httpLogger);
-    app.use("/api", routerPrivate);
-    app.use(routerPublic);
-    app.use(globalErrorHandler);
+    const PORT = process.env.PORT ;
 
-    app.get("/", (req: Request, res: Response) => {
-      res.status(200).json({
-        message: "Server is running",
-        data: null,
-      });
-      return;
-    });
+    await connectProducer();
+    await connectConsumer();
 
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
-    });
+    // 1. Hubungkan Database
+    await connectDB();
+
+
+    // 2. Jalankan Server
+    const server = app.listen(PORT, () => log.info("APP",`Server Running on localhost:${PORT}`,));
+
+    const shutdown = async () => {
+      log.info("APP","APP SHUTDOWN");
+      server.close();
+      await disconnectProducer();
+      await disconnectConsumer();
+      process.exit(0);
+    };
+
+    process.on("SIGTERM", shutdown); // Trigger dari Docker/K8s
+    process.on("SIGINT", shutdown);
   } catch (error) {
-    console.log(error);
+
+    log.error("APP","Critical error during server startup",error);
+    process.exit(1);
   }
 }
 
-init();
+bootstrap();

@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -22,19 +22,59 @@ enum Role {
 }
 
 model User {
-  id              String    @id @default(uuid())
-  fullName       String    @db.VarChar(100)
-  email           String    @unique @db.VarChar(150)
-  password        String    @db.VarChar(255)
-  role            Role      @default(BUYER)
-  
-  // --- Atribut Opsional  ---
-  phoneNumber    String?   @unique @db.VarChar(20)
-  profilePicture String?   @db.Text            
-  bio             String?   @db.VarChar(255)
+  id              String  @id @default(uuid())
+  full_name       String  @db.VarChar(100)
+  email           String  @unique @db.VarChar(150)
+  password        String  @db.VarChar(255)
+  role            Role    @default(BUYER)
+  activation_code String? @db.VarChar(255)
+  is_Active       Boolean @default(false)
 
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  // --- Atribut Opsional  ---
+  phone_number    String  @unique @db.VarChar(20)
+  profile_picture String? @db.Text
+  bio             String? @db.VarChar(255)
+
+  store Store?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   @@map("users")
+}
+
+enum StoreStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+  MAINTENANCE
+}
+
+model Store {
+  id          String      @id @default(uuid())
+  name        String      @unique
+  description String?     @db.Text
+  status      StoreStatus @default(ACTIVE)
+  is_verified Boolean     @default(false)
+
+  // --- ASSETS & VISUALS (Untuk mempercantik) ---
+  logo_url  String?
+  cover_url String? // Header image toko
+
+  // --- LOCATION & LOGISTICS ---
+  address     String? @db.Text
+  city        String?
+  province    String?
+  postal_code String?
+  latitude    Float?
+  longitude   Float?
+
+  // --- RELATIONSHIPS ---
+  user_id String @unique // Foreign Key ke User
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([name])
 }

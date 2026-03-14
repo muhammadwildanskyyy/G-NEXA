@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"product-service/cmd/product/usecases"
 	"product-service/infrastructure/logger"
@@ -20,6 +22,7 @@ type ProductHandler interface {
 	GetProductByID(c *gin.Context)
 	GetProductInfo(c *gin.Context)
 	GetAllProductsByCategoryId(c *gin.Context)
+	CreateProductBulk(c *gin.Context)
 }
 
 type producthandler struct {
@@ -31,167 +34,172 @@ func NewProductHandler(productUseCase usecases.ProductUsecase) ProductHandler {
 }
 
 func (p *producthandler) CreateProduct(c *gin.Context) {
-	logFields := logrus.Fields{
-		"layer":  "product-handler",
-		"func":   "CreateProduct",
-		"method": c.Request.Method,
-	}
+	ctx := c.Request.Context()
 	var param *model.CreateProductRequest
-	err := c.ShouldBindJSON(&param)
-	if err != nil {
-		logger.LogError(logFields, "Failed Validate Request", "c.ShouldBindJSON()", err)
+
+	if err := c.ShouldBindJSON(&param); err != nil {
+		logger.Warn(ctx, "delivery:http", "Product creation denied: Invalid request body", nil)
 		utils.ResponseError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	result, err := p.ProductUseCase.CreateProduct(c.Request.Context(), param)
+	token, _ := c.Get("access_token")
+	ctx = context.WithValue(ctx, "access_token", token)
+
+	result, err := p.ProductUseCase.CreateProduct(ctx, param)
 	if err != nil {
-		logger.LogError(logFields, "Failed CreateProduct", "p.ProductUseCase.CreateProduct()", err)
 		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	utils.ResponseSuccess(c, result, "Success Create Poduct", http.StatusCreated)
-
+	logger.Info(ctx, "delivery:http", "Product created successfully response sent", logrus.Fields{"product_id": result.ID})
+	utils.ResponseSuccess(c, result, "Success Create Product", http.StatusCreated)
 }
 
 func (p *producthandler) UpdateProduct(c *gin.Context) {
-	logFields := logrus.Fields{
-		"layer":  "product-handler",
-		"func":   "UpdateProduct()",
-		"method": c.Request.Method,
+	ctx := c.Request.Context()
+	productId := c.Param("product_id")
+
+	if productId == "" {
+		logger.Warn(ctx, "delivery:http", "Product update denied: Missing product_id parameter", nil)
+		utils.ResponseError(c, http.StatusBadRequest, "Product Id is required")
+		return
 	}
 
 	var param *model.UpdateProductRequest
-	err := c.ShouldBindJSON(&param)
-	if err != nil {
-		logger.LogError(logFields, "Failed Validate Request", "c.ShouldBindJSON()", err)
+	if err := c.ShouldBindJSON(&param); err != nil {
+		logger.Warn(ctx, "delivery:http", "Product update denied: Invalid request body", nil)
 		utils.ResponseError(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	productId := c.Param("product_id")
-	if productId == "" {
-		logger.LogError(logFields, "Product Id empty", "c.ShouldBindJSON()", errors.New("Product Id empty"))
-		utils.ResponseError(c, http.StatusBadRequest, "Product Id is required")
-		return
-	}
-
-	result, err := p.ProductUseCase.UpodateProduct(c.Request.Context(), param, productId)
+	result, err := p.ProductUseCase.UpodateProduct(ctx, param, productId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			logger.Log.WithFields(logFields).Warn("Product not found")
+			logger.Warn(ctx, "delivery:http", "Product update failed: Product not found", logrus.Fields{"product_id": productId})
 			utils.ResponseError(c, http.StatusNotFound, "Product not found")
 			return
 		}
-		logger.LogError(logFields, "Failed UpdateProduct", "p.ProductUseCase.UpdateProduct()", err)
 		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	utils.ResponseSuccess(c, result, "Success Update Poduct", http.StatusOK)
+
+	logger.Info(ctx, "delivery:http", "Product update response sent", logrus.Fields{"product_id": productId})
+	utils.ResponseSuccess(c, result, "Success Update Product", http.StatusOK)
 }
 
 func (p *producthandler) DeleteProduct(c *gin.Context) {
-	logFields := logrus.Fields{
-		"layer":      "product-handler",
-		"func":       "DeleteProduct()",
-		"method":     c.Request.Method,
-		"product_id": c.Param("product_id"),
-	}
+	ctx := c.Request.Context()
 	productId := c.Param("product_id")
+
 	if productId == "" {
-		logger.LogError(logFields, "Product id is empty", "c.Param()", errors.New("Product Id is empty"))
+		logger.Warn(ctx, "delivery:http", "Product deletion denied: Missing product_id", nil)
 		utils.ResponseError(c, http.StatusBadRequest, "Product Id is required")
 		return
 	}
 
-	err := p.ProductUseCase.DeleteProduct(c.Request.Context(), productId)
+	err := p.ProductUseCase.DeleteProduct(ctx, productId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			logger.Log.WithFields(logFields).Warn("Product not found")
+			logger.Warn(ctx, "delivery:http", "Product deletion failed: Product not found", logrus.Fields{"product_id": productId})
 			utils.ResponseError(c, http.StatusNotFound, "Product not found")
 			return
 		}
-		logger.LogError(logFields, "Failed DeleteProduct", "p.ProductUseCase.DeleteProduct()", err)
 		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
+		return
 	}
-	utils.ResponseSuccess(c, nil, "Success Delete Poduct", http.StatusOK)
 
+	logger.Info(ctx, "delivery:http", "Product deletion response sent", logrus.Fields{"product_id": productId})
+	utils.ResponseSuccess(c, nil, "Success Delete Product", http.StatusOK)
 }
 
 func (p *producthandler) GetProductByID(c *gin.Context) {
-	logFields := logrus.Fields{
-		"layer":      "product-handler",
-		"func":       "GetProductByID()",
-		"method":     c.Request.Method,
-		"product_id": c.Param("product_id"),
-	}
+	ctx := c.Request.Context()
 	productId := c.Param("product_id")
-	if productId == "" {
-		logger.LogError(logFields, "Product Id is empty", "c.Param()", errors.New("Product Id is empty"))
-		utils.ResponseError(c, http.StatusBadRequest, "Product Id is required")
-		return
-	}
-	result, err := p.ProductUseCase.GetProductByID(c.Request.Context(), productId)
+
+	result, err := p.ProductUseCase.GetProductByID(ctx, productId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			logger.Log.WithFields(logFields).Warn("Product not found")
+			logger.Warn(ctx, "delivery:http", "Product retrieval: Product not found", logrus.Fields{"product_id": productId})
 			utils.ResponseError(c, http.StatusNotFound, "Product not found")
 			return
 		}
-		logger.LogError(logFields, "Failed GetProductByID", "productId", err)
 		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	utils.ResponseSuccess(c, result, "Success Get Poduct", http.StatusOK)
+
+	// Silent success for read operations
+	utils.ResponseSuccess(c, result, "Success Get Product", http.StatusOK)
 }
 
 func (p *producthandler) GetProductInfo(c *gin.Context) {
+	ctx := c.Request.Context()
+	var params model.ProductQueryParam
 
-	logFields := logrus.Fields{
-		"layer":  "product-handler",
-		"func":   "GetProductInfo()",
-		"method": c.Request.Method,
+	if err := c.ShouldBindQuery(&params); err != nil {
+		logger.Warn(ctx, "delivery:http", "Products retrieval: Invalid query parameters", nil)
+		utils.ResponseError(c, http.StatusBadRequest, "Invalid query parameters")
+		return
 	}
 
-	result, err := p.ProductUseCase.GetProducts(c.Request.Context())
+	result, err := p.ProductUseCase.GetProducts(ctx, &params)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			logger.Log.WithFields(logFields).Warn("Product not found")
+			logger.Warn(ctx, "delivery:http", "Products retrieval: No products found", nil)
 			utils.ResponseError(c, http.StatusNotFound, "Product not found")
 			return
 		}
-		logger.LogError(logFields, "Failed GetProductInfo", "p.ProductUseCase.GetProducts()", err)
 		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
+		return
 	}
-	utils.ResponseSuccess(c, result, "Success Get Products", http.StatusOK)
 
+	utils.ResponseSuccess(c, result, "Success Get Products", http.StatusOK)
 }
 
 func (p *producthandler) GetAllProductsByCategoryId(c *gin.Context) {
-	logFields := logrus.Fields{
-		"layer":  "product-handler",
-		"func":   "GetAllProductsByCategoryId()",
-		"method": c.Request.Method,
-	}
-
+	ctx := c.Request.Context()
 	categoryId := c.Param("category_id")
+
 	if categoryId == "" {
-		logger.LogError(logFields, "CategoryId is empty", "c.Param()", errors.New("CategoryId is empty"))
+		logger.Warn(ctx, "delivery:http", "Products by category retrieval denied: Missing category_id", nil)
 		utils.ResponseError(c, http.StatusBadRequest, "CategoryId is required")
 		return
 	}
 
-	result, err := p.ProductUseCase.SelectProductsByCategoryId(c.Request.Context(), categoryId)
+	result, err := p.ProductUseCase.SelectProductsByCategoryId(ctx, categoryId)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			logger.Log.WithFields(logFields).Warn("Product not found")
+			logger.Warn(ctx, "delivery:http", "Products by category retrieval: No documents found", logrus.Fields{"category_id": categoryId})
 			utils.ResponseError(c, http.StatusNotFound, "Product not found")
 			return
 		}
-		logger.LogError(logFields, "Failed Select Products By Category Id", "p.ProductUseCase.SelectProductsByCategoryId()", err)
 		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
 	utils.ResponseSuccess(c, result, "Success Get Products", http.StatusOK)
+}
+
+func (h *producthandler) CreateProductBulk(c *gin.Context) {
+	ctx := c.Request.Context()
+	var input []*model.CreateProductRequest
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		logger.Warn(ctx, "delivery:http", "Bulk product creation denied: Invalid JSON array format", nil)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"status":  "error",
+			"message": "Invalid JSON format. Ensure you send an Array [].",
+		})
+		return
+	}
+
+	result, err := h.ProductUseCase.CreateProductBulk(ctx, input)
+	if err != nil {
+		utils.ResponseError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	logger.Info(ctx, "delivery:http", "Bulk product creation response sent", logrus.Fields{"count": len(result)})
+	msg := fmt.Sprintf("Bulk process successful. Saved: %d", len(result))
+	utils.ResponseSuccess(c, result, msg, http.StatusCreated)
 }

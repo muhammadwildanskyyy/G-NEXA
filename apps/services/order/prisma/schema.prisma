@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../src/common/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  VA
+  QRIS
+  WALLET
+}
+
+model Invoice {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  user_id String @db.Uuid
+
+  status          OrderStatus @default(PENDING)
+  idempotency_key String      @unique @db.VarChar(255)
+
+  total_price Decimal @db.Decimal(12, 2)
+
+  payment_method PaymentMethod
+  bank_code      String?       @db.VarChar(50)
+
+  shipping_address Json
+
+  orders Order[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([user_id])
+  @@index([status])
+  @@map("invoices")
+}
+
+model Order {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  invoice_id String @db.Uuid
+  user_id    String @db.Uuid
+  store_id   String @db.Uuid
+
+  status OrderStatus @default(PENDING)
+
+  total_price Decimal @db.Decimal(12, 2)
+
+  shipping_address Json
+
+  invoice Invoice     @relation(fields: [invoice_id], references: [id], onDelete: Cascade)
+  items   OrderItem[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([user_id])
+  @@index([store_id])
+  @@index([invoice_id])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  order_id String @db.Uuid
+  order    Order  @relation(fields: [order_id], references: [id], onDelete: Cascade)
+
+  product_id String
+
+  quantity Int
+
+  price_at_purchase Decimal @db.Decimal(12, 2)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([order_id])
+  @@index([product_id])
+  @@map("order_items")
+}
+
+model CartItem {
+  id          String   @id @default(uuid())
+  user_id     String
+  store_id    String
+  product_id  String
+  quantity    Int      @default(1)
+  is_selected Boolean  @default(true)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@unique([user_id, product_id])
+  @@map("chart_items")
+}
+
+model ShippingAddress {
+  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id        String  @db.Uuid
+  recipient_name String  @db.VarChar(100)
+  phone_number   String  @db.VarChar(20)
+  full_address   String  @db.Text
+  city           String  @db.VarChar(100)
+  province       String  @db.VarChar(100)
+  postal_code    String  @db.VarChar(20)
+  is_primary     Boolean @default(false)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@index([user_id])
+  @@map("shipping_addresses")
+}
