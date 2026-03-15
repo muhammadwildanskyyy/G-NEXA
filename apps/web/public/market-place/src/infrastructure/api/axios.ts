@@ -1,25 +1,29 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { AuthError, NetworkError, NotFoundError } from '@/domain/errors/AppErrors';
-import { getSession } from 'next-auth/react';
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import {
+    AuthError,
+    NetworkError,
+    NotFoundError,
+} from "@/domain/errors/AppErrors";
+import { getSession } from "next-auth/react";
 
 // Helper to create instances for different services
 const createApiClient = (baseURL: string) => {
     const api = axios.create({
         baseURL,
         headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
         },
     });
 
     // Request Interceptor (Add Token)
     api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
             // Client-side: Get session from NextAuth
             const session = await getSession();
             const token = (session as any)?.accessToken;
 
             if (token && config.headers) {
-                config.headers.set('Authorization', `Bearer ${token}`);
+                config.headers.set("Authorization", `Bearer ${token}`);
             }
         }
         return config;
@@ -48,15 +52,15 @@ const createApiClient = (baseURL: string) => {
             }
 
             if (status === 404) {
-                return Promise.reject(new NotFoundError('Resource'));
+                return Promise.reject(new NotFoundError("Resource"));
             }
 
             return Promise.reject(error);
-        }
+        },
     );
 
     return api;
 };
 
-export const userServiceApi = createApiClient('http://user-service:8081');
-export const productServiceApi = createApiClient('http://localhost:8082');
+export const userServiceApi = createApiClient("http://user-service:8081");
+export const productServiceApi = createApiClient("http://localhost:8082");

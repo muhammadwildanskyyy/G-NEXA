@@ -1,10 +1,10 @@
 export interface User {
     id: string;
-    fullName: string;
+    full_name: string;
     email: string;
     password?: string; // Usually not returned in profile but good to have type def just in case
-    role: 'uSER' | 'ADMIN' | 'BUYER' | 'SELLER'; // Adjusting case based on example "BUYER", "ADMIN"
-    phoneNumber: string;
+    role: "USER" | "ADMIN" | "BUYER" | "SELLER"; // Adjusting case based on example "BUYER", "ADMIN"
+    phone_number: string;
     profilePicture?: string | null;
     bio?: string | null;
     createdAt: string;
