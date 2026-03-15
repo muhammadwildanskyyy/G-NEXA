@@ -19,25 +19,25 @@ export interface LoginResponseData {
 }
 
 export interface RegisterRequest {
-    fullName: string;
+    full_name: string;
     email: string;
     password: string;
-    phoneNumber: string;
+    phone_number: string;
 }
 
 export interface RegisterResponseData {
     id: string;
-    fullName: string;
+    full_name: string;
     email: string;
     role: string;
-    phoneNumber: string;
-    createdAt: string;
-    updatedAt: string;
+    phone_number: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface UpdateProfileRequest {
-    fullName?: string;
-    phoneNumber?: string;
-    profilePicture?: string;
+    full_name?: string;
+    phone_number?: string;
+    profile_picture?: string;
     bio?: string;
 }

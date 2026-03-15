@@ -14,7 +14,7 @@ services:
       - "5532:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./pg-init/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./pg-init:/docker-entrypoint-initdb.d
     networks:
       - g-nexa-network
 
