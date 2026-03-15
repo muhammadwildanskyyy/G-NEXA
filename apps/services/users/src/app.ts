@@ -16,8 +16,8 @@ app.use(tracingMiddleware);
 
 // 2. Routes
 const routerV1 = express.Router();
-routerV1.use("/api", routerPrivate);
-routerV1.use(routerPublic);
+routerV1.use("/api/users", routerPublic);
+routerV1.use("/api/users", routerPrivate);
 app.use("/v1", routerV1);
 
 // Health Check

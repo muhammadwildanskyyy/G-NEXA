@@ -9,7 +9,7 @@ import (
 
 func SetupRouter(app fiber.Router, mediahandler handlers.MediaHandler, authSecret string) {
 	// Grouping Routes
-	api := app.Group("/api/v1/media")
+	api := app.Group("/v1/api/media")
 
 	api.Use(middleware.AuthMiddleware(authSecret))
 	api.Post("/upload", mediahandler.Upload)

@@ -1,0 +1,50 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  # 1. User Service (Express.js) - Port Internal 8081
+  - name: user-service
+    url: http://user-service:8081
+    routes:
+      - name: user-routes
+        paths:
+          - /v1/api/users
+        strip_path: false
+
+  # 2. Product Service (Go) - Port Internal 8082
+  - name: product-service
+    url: http://product-service:8082
+    routes:
+      - name: product-routes
+        paths:
+          - /v1/api/products
+        strip_path: false
+
+  # 3. Media Service (Go) - Port Internal 8083
+  - name: media-service
+    url: http://media-service:8083
+    routes:
+      - name: media-routes
+        paths:
+          - /v1/api/media
+        strip_path: false
+
+  # 4. Order Service (NestJS) - Port Internal 8084
+  - name: order-service
+    url: http://order-service:8084
+    routes:
+      - name: order-routes
+        paths:
+          - /v1/api/orders
+          - /v1/api/checkouts
+        strip_path: false
+
+  # 5. Finance Service (Go) - Port Internal 8085
+  - name: finance-service
+    url: http://finance-service:8085
+    routes:
+      - name: finance-routes
+        paths:
+          - /v1/api/wallets
+          - /v1/api/payments
+        strip_path: false

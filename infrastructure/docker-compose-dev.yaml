@@ -88,8 +88,8 @@ services:
       target: development
     container_name: g-nexa-user-service
     restart: always
-    ports:
-      - "8081:8081"
+    # ports:
+    # - "8081:8081"
 
     env_file:
       - ../apps/services/users/.env
@@ -104,6 +104,7 @@ services:
 
     depends_on:
       - postgres
+      - kafka
     networks:
       - g-nexa-network
 
@@ -116,8 +117,8 @@ services:
       target: development # Pastikan ini development
     container_name: g-nexa-product-service
     restart: always
-    ports:
-      - "8082:8082"
+    # ports:
+    # - "8082:8082"
 
     env_file:
       - ../apps/services/product/files/config/.env
@@ -130,6 +131,7 @@ services:
 
     depends_on:
       - mongo
+      - kafka
     networks:
       - g-nexa-network
 
@@ -142,8 +144,8 @@ services:
       target: development # Pastikan ini development
     container_name: g-nexa-media-service
     restart: always
-    ports:
-      - "8083:8083"
+    # ports:
+    # - "8083:8083"
 
     env_file:
       - ../apps/services/media/files/config/.env
@@ -156,6 +158,7 @@ services:
 
     depends_on:
       - postgres
+      - kafka
     networks:
       - g-nexa-network
 
@@ -168,8 +171,8 @@ services:
       target: development
     container_name: g-nexa-order-service
     restart: always
-    ports:
-      - "8084:8084"
+    # ports:
+    # - "8084:8084"
     env_file:
       - ../apps/services/order/.env
     volumes:
@@ -178,6 +181,7 @@ services:
     command: /bin/sh -c "npx prisma migrate dev --name auto_dev && npm run start:dev"
     depends_on:
       - postgres
+      - kafka
     networks:
       - g-nexa-network
 
@@ -189,8 +193,8 @@ services:
       context: ../apps/services/finance
       target: development
     container_name: g-nexa-finance-service
-    ports:
-      - "8085:8085"
+    # ports:
+    # - "8085:8085"
     env_file:
       - ../apps/services/finance/files/config/.env
     volumes:
@@ -210,8 +214,8 @@ services:
       target: development
     container_name: g-nexa-web-market-place
     restart: always
-    ports:
-      - "3000:3000"
+    # ports:
+    # - "3000:3000"
 
     env_file:
       - ../apps/web/public/market-place/.env
@@ -226,6 +230,25 @@ services:
       - user-service
       - product-service
 
+    networks:
+      - g-nexa-network
+
+  kong:
+    image: kong:latest
+    container_name: g-nexa-kong-gateway
+    restart: always
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: "/usr/local/kong/declarative/kong.yaml"
+      KONG_PROXY_ACCESS_LOG: "/dev/stdout"
+      KONG_ADMIN_ACCESS_LOG: "/dev/stdout"
+      KONG_PROXY_ERROR_LOG: "/dev/stderr"
+      KONG_ADMIN_ERROR_LOG: "/dev/stderr"
+    ports:
+      - "8000:8000"
+      # - "8001:8001" # PORT ADMIN (Opsional)
+    volumes:
+      - ../kong.yaml:/usr/local/kong/declarative/kong.yaml
     networks:
       - g-nexa-network
 

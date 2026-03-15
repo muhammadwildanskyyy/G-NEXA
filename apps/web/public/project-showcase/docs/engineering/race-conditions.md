@@ -3,7 +3,7 @@ title: Mitigasi Race Condition (Locking)
 sidebar_position: 2
 ---
 
-# 2. Mitigasi Race Condition pada Mutasi Finansial
+#  Mitigasi Race Condition pada Mutasi Finansial
 
 Fitur dompet digital (GNEXA Wallet) adalah jantung finansial dari platform ini. Berurusan dengan uang digital berarti kita harus siap menghadapi anomali konkurensi (benturan data) yang sangat berbahaya, salah satunya adalah ancaman *Double-Spending*.
 
