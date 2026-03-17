@@ -12,6 +12,11 @@ export const envSchema = z.object({
   KAFKA_BROKER: z.string(),
 
   SECRET: z.string(),
+
+  REDIS_HOST: z.string().default('redis'),
+  REDIS_PORT: z.coerce.number().default(6379),
+  REDIS_PASSWORD: z.string().optional(),
+  REDIS_DB: z.coerce.number().default(0),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

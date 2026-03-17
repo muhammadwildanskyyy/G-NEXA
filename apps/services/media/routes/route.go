@@ -15,5 +15,6 @@ func SetupRouter(app fiber.Router, mediahandler handlers.MediaHandler, authSecre
 	api.Post("/upload", mediahandler.Upload)
 	api.Post("/uploads", mediahandler.Uploads)
 	api.Delete("/batch-delete", mediahandler.BatchDeletes)
+	api.Get("/:id", mediahandler.GetByID)
 	api.Delete("/:id", mediahandler.Delete)
 }

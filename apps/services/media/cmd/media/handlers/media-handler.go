@@ -12,12 +12,12 @@ import (
 	"media-service/utils"
 )
 
-// MediaHandler interface sesuai standar abstraksi GNEXA
 type MediaHandler interface {
 	Upload(c fiber.Ctx) error
 	Uploads(c fiber.Ctx) error
 	Delete(c fiber.Ctx) error
 	BatchDeletes(c fiber.Ctx) error
+	GetByID(c fiber.Ctx) error
 }
 
 type mediaHandler struct {
@@ -132,4 +132,20 @@ func (h *mediaHandler) BatchDeletes(c fiber.Ctx) error {
 	}
 
 	return utils.ResponseSuccess(c, nil, "Multiple media deleted successfully", fiber.StatusOK)
+}
+
+func (h *mediaHandler) GetByID(c fiber.Ctx) error {
+	ctx := buildGNEXAContext(c)
+	id := c.Params("id")
+
+	if id == "" {
+		return utils.ResponseError(c, fiber.StatusBadRequest, "Media ID is required")
+	}
+
+	res, err := h.svc.GetMediaByID(ctx, id)
+	if err != nil {
+		return utils.ResponseError(c, fiber.StatusNotFound, "Media not found")
+	}
+
+	return utils.ResponseSuccess(c, res, "Media retrieved successfully", fiber.StatusOK)
 }

@@ -24,6 +24,7 @@ func main() {
 	ctx := context.Background()
 
 	db := resources.InitDB(cfg)
+	redis := resources.InitRedis(cfg)
 
 	err := db.AutoMigrate(&model.Media{}) // Pastikan menggunakan pointer &model.Media{}
 	if err != nil {
@@ -33,7 +34,7 @@ func main() {
 	}
 
 	mediaRepositories := repositories.NewMediaRepository(db)
-	mediaServices := services.NewMediaService(mediaRepositories, cfg.Cloudinary.CLOUDINARY_URL, cfg.Cloudinary.CLOUDINARY_FOLDER)
+	mediaServices := services.NewMediaService(mediaRepositories, cfg.Cloudinary.CLOUDINARY_URL, cfg.Cloudinary.CLOUDINARY_FOLDER, redis)
 	mediaHandler := handlers.NewMediaHandler(mediaServices)
 
 	app := fiber.New(fiber.Config{

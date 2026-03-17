@@ -6,6 +6,13 @@ type AppConfig struct {
 	Database      DatabaseConfig      `mapstructure:"DATABASE"`
 	Kafka         KafkaConfig         `mapstructure:"KAFKA"`
 	Cloudinary    Cloudinary          `mapstructure:"CLOUDINARY"`
+	Redis         RedisConfig         `mapstructure:"REDIS"`
+}
+
+type RedisConfig struct {
+	Addr     string `mapstructure:"ADDR"`
+	Password string `mapstructure:"PASSWORD"`
+	DB       int    `mapstructure:"DB"`
 }
 
 type APP struct {

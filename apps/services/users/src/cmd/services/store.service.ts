@@ -7,7 +7,8 @@ import {
 } from "../repository/store.repository";
 import { log } from "../../lib/logger";
 import {userRepository, type UserRepository} from "../repository/user.repository.ts";
-import type {UserUpdateInput} from "../../generated/prisma/models/User.ts"; // Import the custom logger
+import type {UserUpdateInput} from "../../generated/prisma/models/User.ts";
+import { redis } from "../../infrastructure/redis";
 
 export class StoreService {
   constructor(private readonly storeRepository: StoreRepository, private readonly userRepository: UserRepository) {}
@@ -21,6 +22,9 @@ export class StoreService {
     const store = await this.storeRepository.createStore(userId, storeInput);
 
     const updateUserRole = await this.userRepository.updateUser(userId, {role:"SELLER"} as UserUpdateInput)
+
+    // Invalidate caches
+    await redis.del("stores:all");
 
     log.info("service:store", "Store successfully created", { store_id: store.id, owner_id: userId,owner_role:updateUserRole.role });
     return store;
@@ -45,21 +49,56 @@ export class StoreService {
       );
     }
 
+    // Invalidate caches
+    await redis.del(`store:id:${storeId}`);
+    await redis.del(`store:owner:${store.user_id}`);
+    await redis.del("stores:all");
+
     log.info("service:store", "Store successfully updated", { store_id: store.id });
     return store;
   };
 
   // No need to log frequently called read operations
   findStores = async (): Promise<Store[] | null> => {
-    return await this.storeRepository.selectStores();
+    const cacheKey = "stores:all";
+    const cachedStores = await redis.get(cacheKey);
+    if (cachedStores) {
+      return JSON.parse(cachedStores);
+    }
+
+    const stores = await this.storeRepository.selectStores();
+    if (stores) {
+      await redis.setex(cacheKey, 300, JSON.stringify(stores));
+    }
+    return stores;
   };
 
   findStoresById = async (storeId: string): Promise<Store | null> => {
-    return await this.storeRepository.selectStoreById(storeId);
+    const cacheKey = `store:id:${storeId}`;
+    const cachedStore = await redis.get(cacheKey);
+    if (cachedStore) {
+      return JSON.parse(cachedStore);
+    }
+
+    const store = await this.storeRepository.selectStoreById(storeId);
+    if (store) {
+      await redis.setex(cacheKey, 300, JSON.stringify(store));
+    }
+    return store;
   };
 
   findStoresByOwnerId = async (ownerId: string): Promise<Store | null> => {
-    return await this.storeRepository.selectStoreByOwnerId(ownerId);
+    const cacheKey = `store:owner:${ownerId}`;
+    const cachedStore = await redis.get(cacheKey);
+    if (cachedStore) {
+      return JSON.parse(cachedStore);
+    }
+
+    const store = await this.storeRepository.selectStoreByOwnerId(ownerId);
+    if (store) {
+      await redis.setex(cacheKey, 300, JSON.stringify(store));
+    }
+    return store;
   };
 
   deleteStore = async (storeId: string): Promise<Store> => {
@@ -70,6 +109,12 @@ export class StoreService {
     }
 
     const deletedStore = await this.storeRepository.deleteStore(storeId);
+
+    // Invalidate caches
+    await redis.del(`store:id:${storeId}`);
+    await redis.del(`store:owner:${deletedStore.user_id}`);
+    await redis.del("stores:all");
+
     log.info("service:store", "Store successfully deleted", { store_id: storeId });
 
     return deletedStore;

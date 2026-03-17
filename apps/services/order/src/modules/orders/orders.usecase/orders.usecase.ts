@@ -1,4 +1,6 @@
 import { HttpStatus, Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { OrdersService } from '../orders.service/orders.service';
 import {
   OrderCancelledEventPayload,
@@ -22,6 +24,7 @@ export class OrdersUsecase implements OnModuleInit {
     private readonly cartService: CartService,
     private readonly userService: UserClientService,
     @Inject('KAFKA_PRODUCER') private readonly kafkaClient: ClientKafka,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
 
   async onModuleInit() {
@@ -41,17 +44,35 @@ export class OrdersUsecase implements OnModuleInit {
   }
 
   async findOrderByUserId(userId: string): Promise<Order[]> {
+    const cacheKey = `orders:user:${userId}`;
+    const cachedOrders = await this.cacheManager.get<Order[]>(cacheKey);
+    if (cachedOrders) {
+      return cachedOrders;
+    }
+
     this.logger.dbg('usecase:order', 'Orchestrating find orders by user ID', {
       user_id: userId,
     });
-    return this.orderService.getOrdersByUserId(userId);
+    const orders = await this.orderService.getOrdersByUserId(userId);
+    await this.cacheManager.set(cacheKey, orders, 300000); // 5 minutes
+    return orders;
   }
 
   async findOrderById(orderId: string): Promise<Order> {
+    const cacheKey = `order:id:${orderId}`;
+    const cachedOrder = await this.cacheManager.get<Order>(cacheKey);
+    if (cachedOrder) {
+      return cachedOrder;
+    }
+
     this.logger.dbg('usecase:order', 'Orchestrating find order by ID', {
       order_id: orderId,
     });
-    return this.orderService.getOrderById(orderId);
+    const order = await this.orderService.getOrderById(orderId);
+    if (order) {
+      await this.cacheManager.set(cacheKey, order, 300000); // 5 minutes
+    }
+    return order;
   }
 
   async findOrders(): Promise<Order[]> {
@@ -91,6 +112,11 @@ export class OrdersUsecase implements OnModuleInit {
     }
 
     const updatedOrder = await this.orderService.updateOrder(orderId, params);
+
+    // Invalidate cache
+    await this.cacheManager.del(`order:id:${orderId}`);
+    await this.cacheManager.del(`orders:user:${updatedOrder.user_id}`);
+
     this.logger.info(
       'usecase:order',
       'Order update orchestrated successfully',
@@ -114,6 +140,11 @@ export class OrdersUsecase implements OnModuleInit {
     }
 
     const deletedOrder = await this.orderService.deleteOrder(orderId);
+
+    // Invalidate cache
+    await this.cacheManager.del(`order:id:${orderId}`);
+    await this.cacheManager.del(`orders:user:${deletedOrder.user_id}`);
+
     this.logger.info(
       'usecase:order',
       'Order deletion orchestrated successfully',

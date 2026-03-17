@@ -6,6 +6,7 @@ type AppConfig struct {
 	Databasee     DatabaseConfig      `mapstructure:"DATABASE"`
 	Kafka         KafkaConfig         `mapstructure:"KAFKA"`
 	HostService   HostServices        `mapstructure:"HOST_SERVICES"`
+	Redis         RedisConfig         `mapstructure:"REDIS"`
 }
 
 type APP struct {
@@ -31,4 +32,10 @@ type DatabaseConfig struct {
 
 type HostServices struct {
 	UserService string `mapstructure:"USER_SERVICE"`
+}
+
+type RedisConfig struct {
+	Addr     string `mapstructure:"ADDR"`
+	Password string `mapstructure:"PASSWORD"`
+	DB       int    `mapstructure:"DB"`
 }

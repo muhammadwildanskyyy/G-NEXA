@@ -8,9 +8,12 @@ import (
 	"github.com/shopspring/decimal"
 	"github.com/sirupsen/logrus"
 
+	"encoding/json"
 	"finance/cmd/wallet/services"
 	"finance/infrastructure/logger"
 	"finance/model"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type WalletUsecase interface {
@@ -32,14 +35,16 @@ type walletUsecase struct {
 	XenditUsecase  XenditUsecase
 	PaymentUsecase PaymentUsecase
 	AnomalyService services.AnomalyService
+	Redis          *redis.Client
 }
 
-func NewWalletUsecase(walletService services.WalletService, xenditUsecase XenditUsecase, paymentUsecase PaymentUsecase, anomalyService services.AnomalyService) WalletUsecase {
+func NewWalletUsecase(walletService services.WalletService, xenditUsecase XenditUsecase, paymentUsecase PaymentUsecase, anomalyService services.AnomalyService, redis *redis.Client) WalletUsecase {
 	return &walletUsecase{
 		WalletService:  walletService,
 		XenditUsecase:  xenditUsecase,
 		PaymentUsecase: paymentUsecase,
 		AnomalyService: anomalyService,
+		Redis:          redis,
 	}
 }
 
@@ -64,6 +69,11 @@ func (wu *walletUsecase) CreateWallet(ctx context.Context, userID string) (*mode
 		return nil, err
 	}
 
+	// Invalidate cache
+	if wu.Redis != nil {
+		wu.Redis.Del(ctx, "wallet:"+userID)
+	}
+
 	logger.Info(ctx, "usecase:wallet", "Successfully completed wallet creation flow", logrus.Fields{
 		"target_user_id": userID,
 	})
@@ -72,9 +82,16 @@ func (wu *walletUsecase) CreateWallet(ctx context.Context, userID string) (*mode
 }
 
 func (wu *walletUsecase) GetWalletByUserID(ctx context.Context, userID string) (*model.Wallet, error) {
-	logger.Debug(ctx, "usecase:wallet", "Processing wallet data retrieval request", logrus.Fields{
-		"target_user_id": userID,
-	})
+	cacheKey := "wallet:" + userID
+	if wu.Redis != nil {
+		var cachedWallet model.Wallet
+		val, err := wu.Redis.Get(ctx, cacheKey).Result()
+		if err == nil {
+			if err := json.Unmarshal([]byte(val), &cachedWallet); err == nil {
+				return &cachedWallet, nil
+			}
+		}
+	}
 
 	wallet, err := wu.WalletService.FindWalletByUser(ctx, userID)
 	if err != nil {
@@ -84,7 +101,12 @@ func (wu *walletUsecase) GetWalletByUserID(ctx context.Context, userID string) (
 		return nil, err
 	}
 
-	logger.Info(ctx, "usecase:wallet", "Successfully retrieved user wallet data", nil)
+	// Cache result
+	if wu.Redis != nil {
+		data, _ := json.Marshal(wallet)
+		wu.Redis.Set(ctx, cacheKey, data, 5*time.Minute)
+	}
+
 	return wallet, nil
 }
 
@@ -150,6 +172,11 @@ func (wu *walletUsecase) AddBalance(ctx context.Context, userID string, amount f
 		return err
 	}
 
+	// Invalidate cache
+	if wu.Redis != nil {
+		wu.Redis.Del(ctx, "wallet:"+userID)
+	}
+
 	return nil
 }
 
@@ -167,6 +194,11 @@ func (wu *walletUsecase) DeductBalance(ctx context.Context, userID string, amoun
 		return err
 	}
 
+	// Invalidate cache
+	if wu.Redis != nil {
+		wu.Redis.Del(ctx, "wallet:"+userID)
+	}
+
 	return nil
 }
 
@@ -182,6 +214,11 @@ func (wu *walletUsecase) HoldBalance(ctx context.Context, userID string, amount 
 			"target_user_id": userID,
 		})
 		return err
+	}
+
+	// Invalidate cache
+	if wu.Redis != nil {
+		wu.Redis.Del(ctx, "wallet:"+userID)
 	}
 
 	logger.Info(ctx, "usecase:wallet", "Successfully held balance (Available → Pending)", logrus.Fields{
@@ -204,6 +241,11 @@ func (wu *walletUsecase) AddPendingBalance(ctx context.Context, userID string, a
 			"target_user_id": userID,
 		})
 		return err
+	}
+
+	// Invalidate cache
+	if wu.Redis != nil {
+		wu.Redis.Del(ctx, "wallet:"+userID)
 	}
 
 	logger.Info(ctx, "usecase:wallet", "Successfully added pending balance", logrus.Fields{
@@ -230,6 +272,11 @@ func (wu *walletUsecase) ReleasePendingToSeller(ctx context.Context, buyerUserID
 		return err
 	}
 
+	// Invalidate cache
+	if wu.Redis != nil {
+		wu.Redis.Del(ctx, "wallet:"+buyerUserID, "wallet:"+sellerUserID)
+	}
+
 	logger.Info(ctx, "usecase:wallet", "Successfully released pending balance to seller", logrus.Fields{
 		"buyer_user_id":  buyerUserID,
 		"seller_user_id": sellerUserID,
@@ -251,6 +298,11 @@ func (wu *walletUsecase) RefundPendingToAvailable(ctx context.Context, userID st
 			"target_user_id": userID,
 		})
 		return err
+	}
+
+	// Invalidate cache
+	if wu.Redis != nil {
+		wu.Redis.Del(ctx, "wallet:"+userID)
 	}
 
 	logger.Info(ctx, "usecase:wallet", "Successfully refunded pending balance to available (Pending → Available)", logrus.Fields{

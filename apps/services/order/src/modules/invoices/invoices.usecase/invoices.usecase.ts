@@ -1,4 +1,6 @@
 import { HttpStatus, Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { OrdersService } from '../../orders/orders.service/orders.service';
 import { CreateInvoiceDto, InvoiceEventPayload, KAFKA_ORDER_TOPIC, OrderCancelledEventPayload, UpdateInvoiceDto } from '../../orders/dto/order.dto';
 import { Invoice, Order, PaymentMethod, Prisma, OrderStatus } from '@prisma/client';
@@ -18,6 +20,7 @@ export class InvoicesUsecase implements OnModuleInit {
     private readonly financeClient: FinanceClientService,
     private readonly logger: AppLogger,
     @Inject('KAFKA_PRODUCER') private readonly kafkaClient: ClientKafka,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
 
   async onModuleInit() {
@@ -238,6 +241,9 @@ export class InvoicesUsecase implements OnModuleInit {
       { invoice_id: savedInvoice.id, order_count: savedInvoice.orders.length },
     );
 
+    this.cacheManager.del(`invoices:user:${userId}`);
+    this.cacheManager.del(`invoices:all`);
+
     return savedInvoice;
   }
 
@@ -342,6 +348,12 @@ export class InvoicesUsecase implements OnModuleInit {
   }
 
   async findInvoicesByUserId(userId: string): Promise<Invoice[]> {
+    const cacheKey = `invoices:user:${userId}`;
+    const cachedInvoices = await this.cacheManager.get<Invoice[]>(cacheKey);
+    if (cachedInvoices) {
+      return cachedInvoices;
+    }
+
     this.logger.dbg('usecase:invoice', 'Fetching invoices for user', {
       user_id: userId,
     });
@@ -352,20 +364,36 @@ export class InvoicesUsecase implements OnModuleInit {
       });
       throw new AppException('Invoice Not Found', HttpStatus.NOT_FOUND);
     }
+
+    await this.cacheManager.set(cacheKey, invoices, 300000); // 5 minutes
     return invoices;
   }
 
   async findAllInvoices(): Promise<Invoice[]> {
+    const cacheKey = `invoices:all`;
+    const cachedInvoices = await this.cacheManager.get<Invoice[]>(cacheKey);
+    if (cachedInvoices) {
+      return cachedInvoices;
+    }
+
     this.logger.dbg('usecase:invoice', 'Fetching all invoices');
     const invoices = await this.invoicesService.findAllInvoices();
     if (!invoices || invoices.length === 0) {
       this.logger.warning('usecase:invoice', 'No invoices found in database');
       throw new AppException('Invoice Not Found', HttpStatus.NOT_FOUND);
     }
+
+    await this.cacheManager.set(cacheKey, invoices, 300000); // 5 minutes
     return invoices;
   }
 
   async findInvoiceById(invoiceId: string): Promise<Invoice> {
+    const cacheKey = `invoice:id:${invoiceId}`;
+    const cachedInvoice = await this.cacheManager.get<Invoice>(cacheKey);
+    if (cachedInvoice) {
+      return cachedInvoice;
+    }
+
     this.logger.dbg('usecase:invoice', 'Fetching invoice by ID', {
       invoice_id: invoiceId,
     });
@@ -376,6 +404,8 @@ export class InvoicesUsecase implements OnModuleInit {
       });
       throw new AppException('Invoice Not Found', HttpStatus.NOT_FOUND);
     }
+
+    await this.cacheManager.set(cacheKey, invoice, 300000); // 5 minutes
     return invoice;
   }
 
@@ -401,6 +431,12 @@ export class InvoicesUsecase implements OnModuleInit {
       // @ts-ignore
       params,
     );
+
+    // Invalidate cache
+    await this.cacheManager.del(`invoice:id:${invoiceId}`);
+    await this.cacheManager.del(`invoices:user:${updatedInvoice.user_id}`);
+    await this.cacheManager.del(`invoices:all`);
+
     this.logger.info(
       'usecase:invoice',
       'Invoice update orchestrated successfully',
@@ -426,6 +462,12 @@ export class InvoicesUsecase implements OnModuleInit {
     const deletedInvoice = await this.invoicesService.deleteInvoice(
       invoiceId,
     );
+
+    // Invalidate cache
+    await this.cacheManager.del(`invoice:id:${invoiceId}`);
+    await this.cacheManager.del(`invoices:user:${deletedInvoice.user_id}`);
+    await this.cacheManager.del(`invoices:all`);
+
     this.logger.info(
       'usecase:invoice',
       'Invoice deletion orchestrated successfully',

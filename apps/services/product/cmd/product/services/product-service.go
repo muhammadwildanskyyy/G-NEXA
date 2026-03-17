@@ -47,7 +47,7 @@ func NewProductService(productRepository repositories.ProductRepository, categor
 func (ps *productService) CreateProduct(ctx context.Context, product *model.CreateProductRequest) (*model.Product, error) {
 	// 1. External Service Call (User-Service to verify Store)
 	httpClient := &http.Client{Timeout: time.Second * 10}
-	targetURL := fmt.Sprintf("http://user-service:8081/v1/api/store/%v", product.StoreID)
+	targetURL := fmt.Sprintf("http://user-service:8081/v1/api/users/store/%v", product.StoreID)
 
 	logger.Info(ctx, "infra:user-service", "Fetching store data from upstream", logrus.Fields{"store_id": product.StoreID})
 
@@ -289,9 +289,9 @@ func (ps *productService) RestoreQuantityProduct(ctx context.Context, product *m
 	}
 
 	logger.Info(ctx, "service:product", "Product stock restored successfully", logrus.Fields{
-		"product_id":     idString,
-		"restored_qty":   quantity,
-		"new_stock":      product.Stock,
+		"product_id":   idString,
+		"restored_qty": quantity,
+		"new_stock":    product.Stock,
 	})
 	return nil
 }
