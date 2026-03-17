@@ -37,6 +37,8 @@ func main() {
 
 	db := resources.InitDB(cfg)
 	xendit := resources.InitXendit(cfg)
+	redis := resources.InitRedis(cfg)
+
 	err := db.AutoMigrate(&model.Wallet{}, &model.Payment{}, &model.PaymentAnomaly{})
 	if err != nil {
 		logger.Error(ctx, "infra:database", "Failed to run auto migration", err, nil)
@@ -56,8 +58,8 @@ func main() {
 
 	paymentPublisher := kafka.NewEventPublisher([]string{cfg.Kafka.Broker}, cfg.Kafka.PaymentTopic)
 
-	paymentUsecase := usecases.NewPaymentUsecase(paymentService, xenditService, anomalyService, paymentPublisher)
-	walletUseCase := usecases.NewWalletUsecase(walletService, nil, paymentUsecase, anomalyService)
+	paymentUsecase := usecases.NewPaymentUsecase(paymentService, xenditService, anomalyService, paymentPublisher, redis)
+	walletUseCase := usecases.NewWalletUsecase(walletService, nil, paymentUsecase, anomalyService, redis)
 	paymentUsecase.SetWalletUsecase(walletUseCase)
 	xenditUsecase := usecases.NewXenditUsecase(xenditService, paymentUsecase, walletUseCase, anomalyService, paymentPublisher)
 	walletUseCase.SetXenditUsecase(xenditUsecase)

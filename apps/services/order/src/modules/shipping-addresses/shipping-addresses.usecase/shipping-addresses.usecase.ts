@@ -1,4 +1,6 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { ShippingAddressesService } from '../shipping-addresses.service/shipping-addresses.service';
 import { CreateShippingAddressDto, UpdateShippingAddressDto } from '../dto/shipping-address.dto';
 import { ShippingAddress } from '@prisma/client';
@@ -10,6 +12,7 @@ export class ShippingAddressesUsecase {
   constructor(
     private readonly service: ShippingAddressesService,
     private readonly logger: AppLogger,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async create(userId: string, params: CreateShippingAddressDto): Promise<ShippingAddress> {
@@ -37,16 +40,33 @@ export class ShippingAddressesUsecase {
       is_primary: isPrimary || false,
     });
 
+    // Invalidate cache
+    await this.cacheManager.del(`shipping_addresses:user:${userId}`);
+
     this.logger.info('usecase:shipping-address', 'Shipping address creation orchestrated successfully', { address_id: createdAddress.id });
     return createdAddress;
   }
 
   async findByUserId(userId: string): Promise<ShippingAddress[]> {
+    const cacheKey = `shipping_addresses:user:${userId}`;
+    const cachedAddresses = await this.cacheManager.get<ShippingAddress[]>(cacheKey);
+    if (cachedAddresses) {
+      return cachedAddresses;
+    }
+
     this.logger.dbg('usecase:shipping-address', 'Orchestrating fetch shipping addresses for user', { user_id: userId });
-    return this.service.findByUserId(userId);
+    const addresses = await this.service.findByUserId(userId);
+    await this.cacheManager.set(cacheKey, addresses, 300000); // 5 minutes
+    return addresses;
   }
 
   async findById(addressId: string, userId: string): Promise<ShippingAddress> {
+    const cacheKey = `shipping_address:id:${addressId}`;
+    const cachedAddress = await this.cacheManager.get<ShippingAddress>(cacheKey);
+    if (cachedAddress) {
+      return cachedAddress;
+    }
+
     this.logger.dbg('usecase:shipping-address', 'Orchestrating fetch shipping address by ID', { address_id: addressId, user_id: userId });
     
     const address = await this.service.findById(addressId, userId);
@@ -55,6 +75,7 @@ export class ShippingAddressesUsecase {
       throw new AppException('Shipping Address Not Found', HttpStatus.NOT_FOUND);
     }
 
+    await this.cacheManager.set(cacheKey, address, 300000); // 5 minutes
     return address;
   }
 
@@ -69,6 +90,10 @@ export class ShippingAddressesUsecase {
 
     const updated = await this.service.update(addressId, userId, params);
 
+    // Invalidate cache
+    await this.cacheManager.del(`shipping_address:id:${addressId}`);
+    await this.cacheManager.del(`shipping_addresses:user:${userId}`);
+
     this.logger.info('usecase:shipping-address', 'Shipping address update orchestrated successfully', { address_id: addressId });
     return updated;
   }
@@ -79,6 +104,10 @@ export class ShippingAddressesUsecase {
     const address = await this.findById(addressId, userId); // Ensure it exists
     
     const deleted = await this.service.delete(addressId, userId);
+
+    // Invalidate cache
+    await this.cacheManager.del(`shipping_address:id:${addressId}`);
+    await this.cacheManager.del(`shipping_addresses:user:${userId}`);
 
     // If we deleted the primary address, make the latest one primary if any remain
     if (address.is_primary) {

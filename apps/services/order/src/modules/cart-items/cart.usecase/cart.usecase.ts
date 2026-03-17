@@ -1,4 +1,6 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { CartService } from '../cart.service/cart.service';
 import { CartItem } from '@prisma/client';
 import { AppException } from '../../../common/filters/global.exception/app.exception';
@@ -9,6 +11,7 @@ export class CartUsecase {
   constructor(
     private readonly cartService: CartService,
     private readonly logger: AppLogger,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async upsertCartItems(
@@ -22,21 +25,34 @@ export class CartUsecase {
       'CartUsecase',
     );
 
-    return this.cartService.upsertCartItem(
+    const result = await this.cartService.upsertCartItem(
       userId,
       productId,
       storeId,
       quantityToAdd,
     );
+
+    // Invalidate cache
+    await this.cacheManager.del(`cart:user:${userId}`);
+
+    return result;
   }
 
   async getAllMyListCartItems(userId: string): Promise<CartItem[]> {
+    const cacheKey = `cart:user:${userId}`;
+    const cachedItems = await this.cacheManager.get<CartItem[]>(cacheKey);
+    if (cachedItems) {
+      return cachedItems;
+    }
+
     this.logger.log(
       `Fetching all cart items for user: ${userId}`,
       'CartUsecase',
     );
 
-    return this.cartService.findAllCartItemsByUserIdAndThrow(userId);
+    const cartItems = await this.cartService.findAllCartItemsByUserIdAndThrow(userId);
+    await this.cacheManager.set(cacheKey, cartItems, 300000); // 5 minutes
+    return cartItems;
   }
 
   async deleteMyCartItem(userId: string, productId: string): Promise<CartItem> {
@@ -45,7 +61,12 @@ export class CartUsecase {
       'CartUsecase',
     );
 
-    return this.cartService.deleteMyCartItemByProductId(userId, productId);
+    const result = await this.cartService.deleteMyCartItemByProductId(userId, productId);
+
+    // Invalidate cache
+    await this.cacheManager.del(`cart:user:${userId}`);
+
+    return result;
   }
 
   async getTotalPriceFromSelectedCartItems(userId: string): Promise<number> {

@@ -33,17 +33,18 @@ func main() {
 
 	// 2. Initialize Resources (Database)
 	db := resources.ConnectMongoDB(config.Databasee)
+	rdb := resources.ConnectRedis(config.Redis)
 
 	// 3. Dependency Injection: Category Module
 	categoryRepository := repositories.NewCategoryRepository(db)
 	categoryService := services.NewCategoryService(categoryRepository)
-	categoryUsecase := usecases.NewCategoryUsecase(categoryService)
+	categoryUsecase := usecases.NewCategoryUsecase(categoryService, rdb)
 	categoryHandler := handlers.NewCategoryHandler(categoryUsecase)
 
 	// 4. Dependency Injection: Product Module
 	productRepository := repositories.NewProductRepository(db)
 	productService := services.NewProductService(productRepository, categoryRepository, config.HostService)
-	productUseCase := usecases.NewProductUsecase(productService)
+	productUseCase := usecases.NewProductUsecase(productService, rdb)
 	productHandler := handlers.NewProductHandler(productUseCase)
 	fmt.Println(config.Kafka.TopicOrder)
 	consumer := kafka.NewConsumer([]string{config.Kafka.Broker}, config.Kafka.TopicOrder, "product-group")

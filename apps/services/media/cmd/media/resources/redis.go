@@ -2,7 +2,7 @@ package resources
 
 import (
 	"context"
-	"finance/config"
+	"media-service/config"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
