@@ -102,8 +102,9 @@ services:
       target: development
     container_name: g-nexa-user-service
     restart: always
-    # ports:
-    # - "8081:8081"
+    ports:
+      # - "8081:8081"
+      - "50052:50052"
 
     env_file:
       - ../apps/services/users/.env
@@ -132,7 +133,8 @@ services:
       target: development # Pastikan ini development
     container_name: g-nexa-product-service
     restart: always
-    # ports:
+    ports:
+      - "50051:50051"
     # - "8082:8082"
 
     env_file:
@@ -210,8 +212,8 @@ services:
       context: ../apps/services/finance
       target: development
     container_name: g-nexa-finance-service
-    # ports:
-    # - "8085:8085"
+    ports:
+      - "50053:50053"
     env_file:
       - ../apps/services/finance/files/config/.env
     volumes:

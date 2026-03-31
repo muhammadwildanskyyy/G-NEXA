@@ -11,6 +11,7 @@ type AppConfig struct {
 
 type APP struct {
 	Port       string `mapstructure:"PORT"`
+	GrpcPort   string `mapstructure:"GRPC_PORT"`
 	AuthSecret string `mapstructure:"AUTH_SECRET"`
 	Env        string `mapstructure:"ENV"`
 }
@@ -32,6 +33,7 @@ type DatabaseConfig struct {
 
 type HostServices struct {
 	UserService string `mapstructure:"USER_SERVICE"`
+	UserGrpcUrl string `mapstructure:"USER_GRPC_URL"`
 }
 
 type RedisConfig struct {

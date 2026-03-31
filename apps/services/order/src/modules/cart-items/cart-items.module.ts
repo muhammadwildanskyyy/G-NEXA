@@ -7,7 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EnvConfig } from '../../config/env.validation';
 import { PrismaModule } from '../../database/prisma/prisma.module';
-import { HttpClientsModule } from '../../infrastructure/http-clients/http-clients.module';
+import { ProductGrpcClientModule } from '../../infrastructure/grpc-clients/product-grpc/product-grpc-client.module';
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { HttpClientsModule } from '../../infrastructure/http-clients/http-client
       signOptions: { expiresIn: '60s' },
     }),
     PrismaModule,
-    HttpClientsModule,
+    ProductGrpcClientModule,
   ],
   controllers: [CartController],
   providers: [CartRepository, CartUsecase, CartService],

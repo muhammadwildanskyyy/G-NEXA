@@ -4,7 +4,7 @@ import { InvoicesUsecase } from './invoices.usecase/invoices.usecase';
 import { PaymentEventsConsumer } from './payment-events.consumer/payment-events.consumer';
 import { InvoicesService } from './invoices.service/invoices.service';
 import { InvoicesRepository } from './invoices.repository/invoices.repository';
-import { HttpClientsModule } from '../../infrastructure/http-clients/http-clients.module';
+import { FinanceGrpcClientModule } from '../../infrastructure/grpc-clients/finance-grpc/finance-grpc-client.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EnvConfig } from '../../config/env.validation';
@@ -19,7 +19,7 @@ const appLogger = new AppLogger();
 
 @Module({
   imports: [
-    HttpClientsModule,
+    FinanceGrpcClientModule,
     JwtModule.register({
       global: true,
       secret: new ConfigService<EnvConfig>().get('SECRET'),

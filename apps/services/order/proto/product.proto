@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package products;
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "proto/productPb";
+
+service ProductService {
+  rpc GetProduct (ProductRequest) returns (ProductResponse) {}
+}
+
+message ProductRequest {
+  string id = 1;
+}
+
+message Dimensions {
+  int32 length = 1;
+  int32 width = 2;
+  int32 height = 3;
+}
+
+message ProductResponse {
+  string id = 1;
+  string store_id = 2;
+  string category_id = 3;
+
+  // --- Basic Info ---
+  string name = 4;
+  string slug = 5;
+  string description = 6;
+  string condition = 7;
+
+  // --- Pricing & Inventory ---
+  int64 price = 8;
+  int32 stock = 9;
+  bool is_active = 10;
+
+  // --- Shipping Info ---
+  int32 weight = 11;
+  Dimensions dimensions = 12;
+
+  // --- Visuals ---
+  repeated string images = 13;
+  string thumbnail = 14;
+
+  // --- THE DYNAMIC PART 🚀 ---
+  google.protobuf.Struct specs = 15;
+
+  // --- Metadata ---
+  repeated string tags = 16;
+  int64 views = 17;
+  double rating = 18;
+
+  google.protobuf.Timestamp created_at = 19;
+  google.protobuf.Timestamp updated_at = 20;
+}

@@ -9,7 +9,7 @@ import { AppLogger } from '../../../infrastructure/logger/app.logger';
 import { ClientKafka } from '@nestjs/microservices';
 import { CartService } from '../../cart-items/cart.service/cart.service';
 import { InvoicesService } from '../invoices.service/invoices.service';
-import { FinanceClientService } from '../../../infrastructure/http-clients/finance-client/finance-client.service';
+import { FinanceGrpcClientService } from '../../../infrastructure/grpc-clients/finance-grpc/finance-grpc-client.service';
 
 @Injectable()
 export class InvoicesUsecase implements OnModuleInit {
@@ -17,7 +17,7 @@ export class InvoicesUsecase implements OnModuleInit {
     private readonly invoicesService: InvoicesService,
     private readonly ordersService: OrdersService,
     private readonly cartService: CartService,
-    private readonly financeClient: FinanceClientService,
+    private readonly financeClient: FinanceGrpcClientService,
     private readonly logger: AppLogger,
     @Inject('KAFKA_PRODUCER') private readonly kafkaClient: ClientKafka,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
@@ -51,6 +51,7 @@ export class InvoicesUsecase implements OnModuleInit {
 
     try {
       const wallet = await this.financeClient.getMyWallet();
+      console.log(wallet)
       const availableBalance = Number(wallet.available_balance);
       const sufficient = availableBalance >= totalAmount;
 

@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"finance/cmd/wallet/handlers"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,14 +16,18 @@ import (
 	"finance/cmd/wallet/usecases"
 	"finance/config"
 	"finance/infrastructure/delivery/kafka"
+	grpcHandler "finance/infrastructure/grpc"
 	"finance/infrastructure/logger"
 	"finance/middleware"
 	"finance/model"
+	"finance/proto/financePb"
 	"finance/routes"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 func main() {
@@ -109,6 +114,30 @@ func main() {
 		}
 	}()
 
+	// gRPC Server Setup
+	financeGrpcHandler := grpcHandler.NewFinanceGrpcServer(walletUseCase, paymentUsecase)
+	grpcServer := grpc.NewServer()
+	financePb.RegisterFinanceServiceServer(grpcServer, financeGrpcHandler)
+	reflection.Register(grpcServer)
+
+	grpcPort := cfg.App.GrpcPort
+	if grpcPort == "" {
+		grpcPort = "50053"
+	}
+
+	lis, err := net.Listen("tcp", ":"+grpcPort)
+	if err != nil {
+		logger.Error(ctx, "infra:bootstrap", "Failed to listen on gRPC port", err, nil)
+	}
+	go func() {
+		logger.Info(ctx, "infra:bootstrap", "Server gRPC is running", logrus.Fields{
+			"port": grpcPort,
+		})
+		if err := grpcServer.Serve(lis); err != nil {
+			logger.Error(ctx, "infra:bootstrap", "Failed to start gRPC Server", err, nil)
+		}
+	}()
+
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
@@ -116,6 +145,11 @@ func main() {
 	logger.Warn(ctx, "infra:bootstrap", "Received OS shutdown signal, initiating graceful shutdown...", nil)
 
 	cancel()
+
+	// Shutdown gRPC Server
+	logger.Info(ctx, "infra:bootstrap", "Shutting down gRPC Server...", nil)
+	grpcServer.GracefulStop()
+	logger.Info(ctx, "infra:bootstrap", "gRPC Server closed successfully", nil)
 
 	if err := consumer.Close(); err != nil {
 		logger.Error(ctx, "infra:kafka", "Error while closing Kafka consumer", err, nil)
