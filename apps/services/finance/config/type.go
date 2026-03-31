@@ -7,10 +7,12 @@ type AppConfig struct {
 	Kafka         KafkaConfig         `mapstructure:"KAFKA"`
 	HostService   HostServices        `mapstructure:"HOST_SERVICES"`
 	Xendit        Xendit              `mapstructure:"XENDIT"`
+	Redis         RedisConfig         `mapstructure:"REDIS"`
 }
 
 type APP struct {
 	Port       string `mapstructure:"PORT"`
+	GrpcPort   string `mapstructure:"GRPC_PORT"`
 	AuthSecret string `mapstructure:"AUTH_SECRET"`
 	Env        string `mapstructure:"ENV"`
 }
@@ -43,4 +45,10 @@ type HostServices struct {
 type Xendit struct {
 	APIKey        string `mapstructure:"API_KEY"`
 	WebhookSecret string `mapstructure:"WEBHOOK_SECRET"`
+}
+
+type RedisConfig struct {
+	Addr     string `mapstructure:"ADDR"`
+	Password string `mapstructure:"PASSWORD"`
+	DB       int    `mapstructure:"DB"`
 }

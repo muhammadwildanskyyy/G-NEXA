@@ -3,7 +3,7 @@ title: Agregasi Pembayaran (Order Grouping)
 sidebar_position: 4
 ---
 
-# 4. Agregasi Pembayaran Multi-Tenant (Parent-Child Mapping)
+#  Agregasi Pembayaran Multi-Tenant (Parent-Child Mapping)
 
 Karakteristik utama dari platform *multi-seller* seperti GNEXA adalah kebebasan pengguna untuk berbelanja dari berbagai toko yang berbeda dalam satu kali sesi keranjang belanja. Hal ini menciptakan kompleksitas data transaksi yang sangat tinggi di sisi *backend*.
 

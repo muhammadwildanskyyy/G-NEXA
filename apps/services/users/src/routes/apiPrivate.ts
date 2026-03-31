@@ -12,9 +12,9 @@ import { storeController } from "../cmd/controllers/store.controller";
 const routerPrivate = express.Router();
 routerPrivate.use(authMiddleware);
 
-routerPrivate.get("/users/me", authController.me);
-routerPrivate.put("/users/update-user", userController.updateUser);
-routerPrivate.get("/users/activation-code", userController.updateUser);
+routerPrivate.get("/me", authController.me);
+routerPrivate.put("/update-user", userController.updateUser);
+routerPrivate.get("/activation-code", userController.updateUser);
 
 routerPrivate.post(
   "/store/register",

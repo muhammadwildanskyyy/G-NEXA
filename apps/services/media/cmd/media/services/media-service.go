@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"mime/multipart"
 	"time"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 )
 
@@ -20,15 +22,17 @@ type MediaStorage interface {
 	UploadFiles(ctx context.Context, filesHeader []*multipart.FileHeader) ([]*model.Media, error)
 	DeleteFile(ctx context.Context, id string) error
 	DeleteFiles(ctx context.Context, ids []string) error
+	GetMediaByID(ctx context.Context, id string) (*model.Media, error)
 }
 
 type cloudinaryService struct {
 	repo       repositories.MediaRepository
 	cld        *cloudinary.Cloudinary
 	folderName string
+	Redis      *redis.Client
 }
 
-func NewMediaService(repo repositories.MediaRepository, cldURL string, folder string) MediaStorage {
+func NewMediaService(repo repositories.MediaRepository, cldURL string, folder string, redis *redis.Client) MediaStorage {
 	cld, err := cloudinary.NewFromURL(cldURL)
 	if err != nil {
 		// Gunakan context Background untuk inisialisasi awal, lalu panic agar fail-fast
@@ -41,6 +45,7 @@ func NewMediaService(repo repositories.MediaRepository, cldURL string, folder st
 		repo:       repo,
 		cld:        cld,
 		folderName: folder,
+		Redis:      redis,
 	}
 }
 
@@ -166,14 +171,45 @@ func (s *cloudinaryService) DeleteFile(ctx context.Context, id string) error {
 		return err
 	}
 
+	// Invalidate cache
+	if s.Redis != nil {
+		s.Redis.Del(ctx, "media:"+id)
+	}
+
 	logger.Info(ctx, "service:media", "File and metadata deleted successfully", logrus.Fields{
 		"media_id": id,
 	})
 	return nil
 }
 
+func (s *cloudinaryService) GetMediaByID(ctx context.Context, id string) (*model.Media, error) {
+	cacheKey := "media:" + id
+	if s.Redis != nil {
+		var cachedMedia model.Media
+		val, err := s.Redis.Get(ctx, cacheKey).Result()
+		if err == nil {
+			if err := json.Unmarshal([]byte(val), &cachedMedia); err == nil {
+				return &cachedMedia, nil
+			}
+		}
+	}
+
+	media, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Cache result
+	if s.Redis != nil {
+		data, _ := json.Marshal(media)
+		s.Redis.Set(ctx, cacheKey, data, 5*time.Minute)
+	}
+
+	return media, nil
+}
+
 func (s *cloudinaryService) DeleteFiles(ctx context.Context, ids []string) error {
-	logger.Info(ctx, "service:media", "Initiating batch file deletion", logrus.Fields{
+	logger.Info(ctx, "service:media", "Batch file deletion", logrus.Fields{
 		"total_files": len(ids),
 	})
 

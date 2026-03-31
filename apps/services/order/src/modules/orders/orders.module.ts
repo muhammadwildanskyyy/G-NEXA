@@ -4,7 +4,8 @@ import { OrdersRepository } from './orders.repository/orders.repository';
 import { OrdersController } from './orders.controller/orders.controller';
 
 import { OrdersUsecase } from './orders.usecase/orders.usecase';
-import { HttpClientsModule } from '../../infrastructure/http-clients/http-clients.module';
+import { ProductGrpcClientModule } from '../../infrastructure/grpc-clients/product-grpc/product-grpc-client.module';
+import { UserGrpcClientModule } from '../../infrastructure/grpc-clients/user-grpc/user-grpc-client.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { EnvConfig } from '../../config/env.validation';
@@ -17,7 +18,8 @@ import { CartItemsModule } from '../cart-items/cart-items.module';
 const appLogger = new AppLogger();
 @Module({
   imports: [
-    HttpClientsModule,
+    ProductGrpcClientModule,
+    UserGrpcClientModule,
     JwtModule.register({
       global: true,
       secret: new ConfigService<EnvConfig>().get('SECRET'),

@@ -9,9 +9,18 @@ export const envSchema = z.object({
   USER_SERVICE_URL: z.string().url(),
   FINANCE_SERVICE_URL: z.string().url(),
 
+  PRODUCT_GRPC_URL: z.string().default('product-service:50051'),
+  USER_GRPC_URL: z.string().default('user-service:50052'),
+  FINANCE_GRPC_URL: z.string().default('finance-service:50053'),
+
   KAFKA_BROKER: z.string(),
 
   SECRET: z.string(),
+
+  REDIS_HOST: z.string().default('redis'),
+  REDIS_PORT: z.coerce.number().default(6379),
+  REDIS_PASSWORD: z.string().optional(),
+  REDIS_DB: z.coerce.number().default(0),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

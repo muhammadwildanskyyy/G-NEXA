@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package users;
+
+option go_package = "proto/userPb";
+
+import "google/protobuf/timestamp.proto";
+
+// ─── Services ───
+
+service UserService {
+  rpc GetUser (UserRequest) returns (UserResponse);
+  rpc GetStoreById (StoreRequest) returns (StoreResponse);
+  rpc GetStoreByOwner (StoreByOwnerRequest) returns (StoreResponse);
+}
+
+// ─── Request Messages ───
+
+message UserRequest {
+  string user_id = 1;
+}
+
+message StoreRequest {
+  string store_id = 1;
+}
+
+message StoreByOwnerRequest {
+  string owner_id = 1;
+}
+
+// ─── Response Messages ───
+
+message UserResponse {
+  string id = 1;
+  string full_name = 2;
+  string email = 3;
+  string role = 4;
+  bool is_active = 5;
+  string phone_number = 6;
+  string profile_picture = 7;
+  string bio = 8;
+  google.protobuf.Timestamp created_at = 9;
+  google.protobuf.Timestamp updated_at = 10;
+}
+
+message StoreResponse {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string status = 4;
+  bool is_verified = 5;
+  string logo_url = 6;
+  string cover_url = 7;
+  string address = 8;
+  string city = 9;
+  string province = 10;
+  string postal_code = 11;
+  double latitude = 12;
+  double longitude = 13;
+  string user_id = 14;
+  google.protobuf.Timestamp created_at = 15;
+  google.protobuf.Timestamp updated_at = 16;
+}

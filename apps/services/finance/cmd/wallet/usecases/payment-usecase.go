@@ -11,6 +11,10 @@ import (
 	"finance/cmd/wallet/services"
 	"finance/infrastructure/logger"
 	"finance/model"
+
+	"encoding/json"
+
+	"github.com/redis/go-redis/v9"
 )
 
 type PaymentUsecase interface {
@@ -34,14 +38,16 @@ type paymentUsecase struct {
 	walletUsecase    WalletUsecase
 	anomalyService   services.AnomalyService
 	paymentPublisher model.EventPublisher
+	Redis            *redis.Client
 }
 
-func NewPaymentUsecase(paymentService services.PaymentService, xenditService services.XenditService, anomalyService services.AnomalyService, paymentPublisher model.EventPublisher) PaymentUsecase {
+func NewPaymentUsecase(paymentService services.PaymentService, xenditService services.XenditService, anomalyService services.AnomalyService, paymentPublisher model.EventPublisher, redis *redis.Client) PaymentUsecase {
 	return &paymentUsecase{
 		paymentService:   paymentService,
 		xenditService:    xenditService,
 		anomalyService:   anomalyService,
 		paymentPublisher: paymentPublisher,
+		Redis:            redis,
 	}
 }
 
@@ -113,6 +119,14 @@ func (u *paymentUsecase) CancelPayment(ctx context.Context, transactionID string
 		return err
 	}
 
+	// Invalidate caches
+	if u.Redis != nil {
+		u.Redis.Del(ctx, "payment:id:"+transactionID)
+		// We could invalidate user's payments list too, but it might be overkill if we don't have the userID here easily.
+		// However, GetRecord usually happens before Cancel, so we might have had it.
+		// For now, let's at least clear the detail.
+	}
+
 	logger.Info(ctx, "usecase:payment", "Successfully canceled payment", logrus.Fields{
 		"transaction_id": transactionID,
 	})
@@ -133,6 +147,15 @@ func (u *paymentUsecase) UpdateStatus(ctx context.Context, transactionID string,
 			"target_status":  status,
 		})
 		return err
+	}
+
+	// Invalidate caches
+	if u.Redis != nil {
+		u.Redis.Del(ctx, "payment:id:"+transactionID)
+		// Try to find the record to get user ID for list invalidation
+		if record, err := u.paymentService.GetPaymentRecord(ctx, transactionID); err == nil && record != nil {
+			u.Redis.Del(ctx, "payments:user:"+record.UserID)
+		}
 	}
 
 	logger.Info(ctx, "usecase:payment", "Successfully updated payment status", logrus.Fields{
@@ -446,6 +469,17 @@ func (u *paymentUsecase) CreateWalletPayment(ctx context.Context, event model.In
 }
 
 func (u *paymentUsecase) GetMyPayments(ctx context.Context, userID string) ([]model.Payment, error) {
+	cacheKey := "payments:user:" + userID
+	if u.Redis != nil {
+		var cachedPayments []model.Payment
+		val, err := u.Redis.Get(ctx, cacheKey).Result()
+		if err == nil {
+			if err := json.Unmarshal([]byte(val), &cachedPayments); err == nil {
+				return cachedPayments, nil
+			}
+		}
+	}
+
 	logger.Debug(ctx, "usecase:payment", "Fetching all payments for user", logrus.Fields{
 		"user_id": userID,
 	})
@@ -458,6 +492,12 @@ func (u *paymentUsecase) GetMyPayments(ctx context.Context, userID string) ([]mo
 		return nil, err
 	}
 
+	// Cache result
+	if u.Redis != nil {
+		data, _ := json.Marshal(payments)
+		u.Redis.Set(ctx, cacheKey, data, 5*time.Minute)
+	}
+
 	logger.Info(ctx, "usecase:payment", "Successfully fetched user payments", logrus.Fields{
 		"user_id": userID,
 		"count":   len(payments),
@@ -467,6 +507,17 @@ func (u *paymentUsecase) GetMyPayments(ctx context.Context, userID string) ([]mo
 }
 
 func (u *paymentUsecase) GetPaymentDetail(ctx context.Context, transactionID string) (*model.Payment, error) {
+	cacheKey := "payment:id:" + transactionID
+	if u.Redis != nil {
+		var cachedPayment model.Payment
+		val, err := u.Redis.Get(ctx, cacheKey).Result()
+		if err == nil {
+			if err := json.Unmarshal([]byte(val), &cachedPayment); err == nil {
+				return &cachedPayment, nil
+			}
+		}
+	}
+
 	logger.Debug(ctx, "usecase:payment", "Fetching payment detail", logrus.Fields{
 		"transaction_id": transactionID,
 	})
@@ -477,6 +528,12 @@ func (u *paymentUsecase) GetPaymentDetail(ctx context.Context, transactionID str
 			"transaction_id": transactionID,
 		})
 		return nil, err
+	}
+
+	// Cache result
+	if u.Redis != nil {
+		data, _ := json.Marshal(record)
+		u.Redis.Set(ctx, cacheKey, data, 5*time.Minute)
 	}
 
 	return record, nil

@@ -19,13 +19,13 @@ import { AppLogger } from '../../../infrastructure/logger/app.logger';
 import { AppException } from '../../../common/filters/global.exception/app.exception';
 import { Invoice } from '@prisma/client';
 
-@Controller('/v1/api/invoice')
+@Controller('/v1/api/checkouts')
 @UseGuards(JwtAuthGuard)
 export class InvoicesController {
   constructor(
     private readonly invoiceUsecase: InvoicesUsecase,
     private readonly logger: AppLogger,
-  ) {}
+  ) { }
 
   @Post('/create')
   async createInvoice(

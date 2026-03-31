@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package finance;
+
+option go_package = "proto/financePb";
+
+import "google/protobuf/timestamp.proto";
+
+// ─── Services ───
+
+service FinanceService {
+  rpc GetWallet (WalletRequest) returns (WalletResponse);
+  rpc GetPayments (PaymentsRequest) returns (PaymentsResponse);
+}
+
+// ─── Request Messages ───
+
+message WalletRequest {
+  string user_id = 1;
+}
+
+message PaymentsRequest {
+  string user_id = 1;
+}
+
+// ─── Response Messages ───
+
+message WalletResponse {
+  string id = 1;
+  string user_id = 2;
+  double available_balance = 3;
+  double pending_balance = 4;
+  string currency = 5;
+  string status = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Timestamp updated_at = 8;
+}
+
+message PaymentItem {
+  string id = 1;
+  string user_id = 2;
+  string transaction_id = 3;
+  string transaction_type = 4;
+  string xendit_payment_req_id = 5;
+  double amount = 6;
+  string currency = 7;
+  string method_type = 8;
+  string channel_code = 9;
+  string payment_action_info = 10;
+  string status = 11;
+  google.protobuf.Timestamp expires_at = 12;
+  google.protobuf.Timestamp paid_at = 13;
+  google.protobuf.Timestamp created_at = 14;
+  google.protobuf.Timestamp updated_at = 15;
+}
+
+message PaymentsResponse {
+  repeated PaymentItem payments = 1;
+}

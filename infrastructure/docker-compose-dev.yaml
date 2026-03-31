@@ -14,7 +14,21 @@ services:
       - "5532:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./pg-init/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./pg-init:/docker-entrypoint-initdb.d
+    networks:
+      - g-nexa-network
+
+  # ------------------------------------
+  # 1.5 CACHE: REDIS
+  # ------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: g-nexa-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
     networks:
       - g-nexa-network
 
@@ -89,7 +103,8 @@ services:
     container_name: g-nexa-user-service
     restart: always
     ports:
-      - "8081:8081"
+      # - "8081:8081"
+      - "50052:50052"
 
     env_file:
       - ../apps/services/users/.env
@@ -104,6 +119,8 @@ services:
 
     depends_on:
       - postgres
+      - kafka
+      - redis
     networks:
       - g-nexa-network
 
@@ -117,7 +134,8 @@ services:
     container_name: g-nexa-product-service
     restart: always
     ports:
-      - "8082:8082"
+      - "50051:50051"
+    # - "8082:8082"
 
     env_file:
       - ../apps/services/product/files/config/.env
@@ -130,6 +148,8 @@ services:
 
     depends_on:
       - mongo
+      - kafka
+      - redis
     networks:
       - g-nexa-network
 
@@ -142,8 +162,8 @@ services:
       target: development # Pastikan ini development
     container_name: g-nexa-media-service
     restart: always
-    ports:
-      - "8083:8083"
+    # ports:
+    # - "8083:8083"
 
     env_file:
       - ../apps/services/media/files/config/.env
@@ -156,6 +176,7 @@ services:
 
     depends_on:
       - postgres
+      - kafka
     networks:
       - g-nexa-network
 
@@ -168,8 +189,8 @@ services:
       target: development
     container_name: g-nexa-order-service
     restart: always
-    ports:
-      - "8084:8084"
+    # ports:
+    # - "8084:8084"
     env_file:
       - ../apps/services/order/.env
     volumes:
@@ -178,6 +199,8 @@ services:
     command: /bin/sh -c "npx prisma migrate dev --name auto_dev && npm run start:dev"
     depends_on:
       - postgres
+      - kafka
+      - redis
     networks:
       - g-nexa-network
 
@@ -190,7 +213,7 @@ services:
       target: development
     container_name: g-nexa-finance-service
     ports:
-      - "8085:8085"
+      - "50053:50053"
     env_file:
       - ../apps/services/finance/files/config/.env
     volumes:
@@ -199,6 +222,7 @@ services:
     depends_on:
       - postgres
       - kafka
+      - redis
     networks:
       - g-nexa-network
   # ------------------------------------
@@ -229,6 +253,25 @@ services:
     networks:
       - g-nexa-network
 
+  kong:
+    image: kong:latest
+    container_name: g-nexa-kong-gateway
+    restart: always
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: "/usr/local/kong/declarative/kong.yaml"
+      KONG_PROXY_ACCESS_LOG: "/dev/stdout"
+      KONG_ADMIN_ACCESS_LOG: "/dev/stdout"
+      KONG_PROXY_ERROR_LOG: "/dev/stderr"
+      KONG_ADMIN_ERROR_LOG: "/dev/stderr"
+    ports:
+      - "8000:8000"
+      # - "8001:8001" # PORT ADMIN (Opsional)
+    volumes:
+      - ../kong.yaml:/usr/local/kong/declarative/kong.yaml
+    networks:
+      - g-nexa-network
+
 # ---------------------------------------
 # 8. NETWORK & VOLUMES
 # ---------------------------------------
@@ -241,3 +284,4 @@ volumes:
   mongo_data:
   kafka_data:
     driver: local
+  redis_data:

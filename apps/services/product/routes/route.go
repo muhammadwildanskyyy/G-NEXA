@@ -10,24 +10,28 @@ import (
 
 func SetupRoutes(router *gin.Engine, productHandler handlers.ProductHandler, categoryHandler handlers.CategoryHandler, authSecret string) {
 
-	router.Use(middleware.TracingMiddleware())
-	router.Use(middleware.AuthMiddleware(authSecret))
+	api := router.Group("/v1/api/products")
+	{
+		// PUBLIC ROUTES
+		api.GET("", productHandler.GetProductInfo)
+		api.GET("/categories", categoryHandler.GetAllCategory)
 
-	// product
-	router.POST("/v1/product", middleware.AclMiddleware([]string{constant.USER_ROLE.SELLER, constant.USER_ROLE.ADMIN}), productHandler.CreateProduct)
-	router.POST("/v1/batch-product", middleware.AclMiddleware([]string{constant.USER_ROLE.SELLER, constant.USER_ROLE.ADMIN}), productHandler.CreateProductBulk)
-	router.GET("/v1/products", productHandler.GetProductInfo)
-	router.GET("/v1/product/:product_id", productHandler.GetProductByID)
-	router.DELETE("/v1/product/:product_id", middleware.AclMiddleware([]string{constant.USER_ROLE.SELLER, constant.USER_ROLE.ADMIN}), productHandler.DeleteProduct)
-	router.PUT("/v1/product/:product_id", middleware.AclMiddleware([]string{constant.USER_ROLE.SELLER, constant.USER_ROLE.ADMIN}), productHandler.UpdateProduct)
-	router.GET("/v1/products-by-category/:category_id", productHandler.GetAllProductsByCategoryId)
+		// PROTECTED ROUTES
+		protected := api.Group("", middleware.AuthMiddleware(authSecret))
+		{
+			// product
+			protected.POST("", middleware.AclMiddleware([]string{constant.USER_ROLE.SELLER, constant.USER_ROLE.ADMIN}), productHandler.CreateProduct)
+			protected.POST("/batch", middleware.AclMiddleware([]string{constant.USER_ROLE.SELLER, constant.USER_ROLE.ADMIN}), productHandler.CreateProductBulk)
+			protected.GET("/:product_id", productHandler.GetProductByID)
+			protected.DELETE("/:product_id", middleware.AclMiddleware([]string{constant.USER_ROLE.SELLER, constant.USER_ROLE.ADMIN}), productHandler.DeleteProduct)
+			protected.PUT("/:product_id", middleware.AclMiddleware([]string{constant.USER_ROLE.SELLER, constant.USER_ROLE.ADMIN}), productHandler.UpdateProduct)
+			protected.GET("/by-category/:category_id", productHandler.GetAllProductsByCategoryId)
 
-	// category
-
-	router.POST("/v1/category", middleware.AclMiddleware([]string{constant.USER_ROLE.ADMIN}), categoryHandler.CreateCategory)
-	router.GET("/v1/categories", middleware.AclMiddleware([]string{constant.USER_ROLE.ADMIN, constant.USER_ROLE.BUYER, constant.USER_ROLE.SELLER}), categoryHandler.GetAllCategory)
-	router.GET("/v1/category/:category_id", middleware.AclMiddleware([]string{constant.USER_ROLE.ADMIN, constant.USER_ROLE.BUYER, constant.USER_ROLE.SELLER}), categoryHandler.GetCategoryById)
-	router.DELETE("/v1/category/:category_id", middleware.AclMiddleware([]string{constant.USER_ROLE.ADMIN}), categoryHandler.Deletecategory)
-	router.PUT("/v1/category/:category_id", middleware.AclMiddleware([]string{constant.USER_ROLE.ADMIN}), categoryHandler.Updatecategory)
-
+			// category
+			protected.POST("/categories", middleware.AclMiddleware([]string{constant.USER_ROLE.ADMIN}), categoryHandler.CreateCategory)
+			protected.GET("/categories/:category_id", middleware.AclMiddleware([]string{constant.USER_ROLE.ADMIN, constant.USER_ROLE.BUYER, constant.USER_ROLE.SELLER}), categoryHandler.GetCategoryById)
+			protected.DELETE("/categories/:category_id", middleware.AclMiddleware([]string{constant.USER_ROLE.ADMIN}), categoryHandler.Deletecategory)
+			protected.PUT("/categories/:category_id", middleware.AclMiddleware([]string{constant.USER_ROLE.ADMIN}), categoryHandler.Updatecategory)
+		}
+	}
 }

@@ -21,7 +21,7 @@ import { CartUsecase } from '../cart.usecase/cart.usecase';
 import { User } from '../../../common/decorators/user/user.decorator';
 
 // 🚀 Standardized API route prefix (plural noun is best practice for REST)
-@Controller('api/v1/carts')
+@Controller('/v1/api/orders/cart/my-items')
 @UseGuards(JwtAuthGuard)
 export class CartController {
   constructor(

@@ -24,13 +24,18 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.14.3",
+    "@grpc/proto-loader": "^0.8.0",
+    "@grpc/reflection": "^1.0.4",
     "@prisma/client": "^6.0.0",
+    "@types/ioredis": "^5.0.0",
     "bcrypt": "^6.0.0",
     "chalk": "^5.6.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "ejs": "^4.0.1",
     "express": "^5.2.1",
+    "ioredis": "^5.10.0",
     "jsonwebtoken": "^9.0.3",
     "kafkajs": "^2.2.4",
     "morgan": "^1.10.1",
