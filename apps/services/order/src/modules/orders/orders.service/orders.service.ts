@@ -3,20 +3,22 @@ import { OrdersRepository } from '../orders.repository/orders.repository';
 import { StoreOrderDto, UpdateOrderDto } from '../dto/order.dto';
 import { Product } from '../../../infrastructure/http-clients/product-client/dto/product.dto';
 import { AppException } from '../../../common/filters/global.exception/app.exception';
-import { ProductClientService } from '../../../infrastructure/http-clients/product-client/product-client.service';
+import { ProductGrpcClientService } from '../../../infrastructure/grpc-clients/product-grpc/product-grpc-client.service';
 import { Order, OrderStatus, Prisma } from '@prisma/client';
 import { User } from '../../../infrastructure/http-clients/user-client/dto/user.dto';
-import { UserClientService } from '../../../infrastructure/http-clients/user-client/user-client.service';
+import { UserGrpcClientService } from '../../../infrastructure/grpc-clients/user-grpc/user-grpc-client.service';
 import { Store } from '../../../infrastructure/http-clients/user-client/dto/store.dto';
 import { AppLogger } from '../../../infrastructure/logger/app.logger';
+import { ClsService } from 'nestjs-cls';
 
 @Injectable()
 export class OrdersService {
   constructor(
     private readonly orderRepository: OrdersRepository,
-    private readonly productClient: ProductClientService,
-    private readonly userClient: UserClientService,
-    private readonly logger: AppLogger, // 🚀 Inject logger di sini
+    private readonly productClient: ProductGrpcClientService,
+    private readonly userClient: UserGrpcClientService,
+    private readonly logger: AppLogger,
+    private readonly cls: ClsService,
   ) {}
 
   async getValidProduct(params: StoreOrderDto): Promise<Product[]> {
@@ -143,20 +145,22 @@ export class OrdersService {
   }
 
   async getUserInfo(): Promise<User> {
-    this.logger.dbg('service:order', 'Fetching user info from user-client');
-    return this.userClient.getUserInfo();
+    this.logger.dbg('service:order', 'Fetching user info via gRPC');
+    const userId: string = this.cls.get('user_id');
+    return this.userClient.getUserById(userId);
   }
 
   async getStoreByOwner(): Promise<Store> {
     this.logger.dbg(
       'service:order',
-      'Fetching store by owner from user-client',
+      'Fetching store by owner via gRPC',
     );
-    return this.userClient.getStoreByOwner();
+    const userId: string = this.cls.get('user_id');
+    return this.userClient.getStoreByOwner(userId);
   }
 
   async getStoreById(storeId: string): Promise<Store> {
-    this.logger.dbg('service:order', 'Fetching store by ID from user-client', {
+    this.logger.dbg('service:order', 'Fetching store by ID via gRPC', {
       store_id: storeId,
     });
     return this.userClient.getStoreById(storeId);
@@ -268,7 +272,7 @@ export class OrdersService {
       orderItems.push({
         product_id: cartItem.product_id,
         quantity: cartItem.quantity,
-        price_at_purchase: realProduct.price, // Menyimpan harga saat ini (snapshot harga)
+        price_at_purchase: realProduct.price,
       });
     }
 

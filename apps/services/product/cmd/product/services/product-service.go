@@ -2,16 +2,14 @@ package services
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
-	"net/http"
 	"product-service/cmd/product/repositories"
 	"product-service/config"
+	grpcclient "product-service/infrastructure/grpc-client"
 	"product-service/infrastructure/logger"
 	"product-service/model"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -34,54 +32,27 @@ type productService struct {
 	ProductRepository  repositories.ProductRepository
 	CategoryRepository repositories.CategoryRepository
 	HostServices       config.HostServices
+	UserGrpcClient     *grpcclient.UserGrpcClient
 }
 
-func NewProductService(productRepository repositories.ProductRepository, categoryRepository repositories.CategoryRepository, HostServices config.HostServices) ProductService {
+func NewProductService(productRepository repositories.ProductRepository, categoryRepository repositories.CategoryRepository, HostServices config.HostServices, userGrpcClient *grpcclient.UserGrpcClient) ProductService {
 	return &productService{
 		ProductRepository:  productRepository,
 		CategoryRepository: categoryRepository,
 		HostServices:       HostServices,
+		UserGrpcClient:     userGrpcClient,
 	}
 }
 
 func (ps *productService) CreateProduct(ctx context.Context, product *model.CreateProductRequest) (*model.Product, error) {
-	// 1. External Service Call (User-Service to verify Store)
-	httpClient := &http.Client{Timeout: time.Second * 10}
-	targetURL := fmt.Sprintf("http://user-service:8081/v1/api/users/store/%v", product.StoreID)
+	// 1. gRPC Call to User-Service to verify Store
+	logger.Info(ctx, "infra:user-service", "Fetching store data via gRPC", logrus.Fields{"store_id": product.StoreID})
 
-	logger.Info(ctx, "infra:user-service", "Fetching store data from upstream", logrus.Fields{"store_id": product.StoreID})
-
-	req, err := http.NewRequestWithContext(ctx, "GET", targetURL, nil)
+	store, err := ps.UserGrpcClient.GetStoreById(ctx, product.StoreID)
 	if err != nil {
-		return nil, err
+		logger.Error(ctx, "infra:user-service", "gRPC GetStoreById failed", err, nil)
+		return nil, fmt.Errorf("failed to verify store: %v", err)
 	}
-
-	accessToken, ok := ctx.Value("access_token").(string)
-	if !ok {
-		logger.Warn(ctx, "service:product", "Product creation denied: Access token missing", nil)
-		return nil, errors.New("access token missing from header")
-	}
-
-	req.Header.Set("Authorization", "Bearer "+accessToken)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		logger.Error(ctx, "infra:user-service", "Upstream request failed", err, nil)
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		logger.Warn(ctx, "infra:user-service", "Upstream returned non-OK status", logrus.Fields{"status": resp.StatusCode})
-		return nil, fmt.Errorf("upstream API returned status: %d", resp.StatusCode)
-	}
-
-	var response model.APIResponseStore
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-	store := response.Data
 
 	// 2. Category & Specs Validation
 	category, err := ps.CategoryRepository.SelectCategoryById(ctx, product.CategoryID)
@@ -99,7 +70,7 @@ func (ps *productService) CreateProduct(ctx context.Context, product *model.Crea
 
 	categoryId, _ := primitive.ObjectIDFromHex(product.CategoryID)
 	productInput := &model.Product{
-		StoreID:     store.ID,
+		StoreID:     store.Id,
 		CategoryID:  &categoryId,
 		Name:        product.Name,
 		Slug:        product.Slug,

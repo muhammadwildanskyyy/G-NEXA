@@ -4,7 +4,6 @@ import {
   Delete,
   Get,
   Param,
-  Post,
   Put,
   UseGuards,
 } from '@nestjs/common';
@@ -31,7 +30,7 @@ export class OrdersController {
   constructor(
     private readonly orderUsecase: OrdersUsecase,
     private readonly logger: AppLogger, // 🚀 Inject logger di sini
-  ) {}
+  ) { }
 
   @Get('/user')
   async getOrderbyUserId(

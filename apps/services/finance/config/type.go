@@ -12,6 +12,7 @@ type AppConfig struct {
 
 type APP struct {
 	Port       string `mapstructure:"PORT"`
+	GrpcPort   string `mapstructure:"GRPC_PORT"`
 	AuthSecret string `mapstructure:"AUTH_SECRET"`
 	Env        string `mapstructure:"ENV"`
 }

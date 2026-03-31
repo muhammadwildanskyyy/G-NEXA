@@ -2,14 +2,14 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { CartRepository } from '../cart.repository/cart.repository';
 import { CartItem } from '@prisma/client';
 import { AppException } from '../../../common/filters/global.exception/app.exception';
-import { ProductClientService } from '../../../infrastructure/http-clients/product-client/product-client.service';
+import { ProductGrpcClientService } from '../../../infrastructure/grpc-clients/product-grpc/product-grpc-client.service';
 import { AppLogger } from '../../../infrastructure/logger/app.logger'; // 🚀 Added Logger
 
 @Injectable()
 export class CartService {
   constructor(
     private readonly cartRepository: CartRepository,
-    private readonly productClient: ProductClientService,
+    private readonly productClient: ProductGrpcClientService,
     private readonly logger: AppLogger, // 🚀 Injected Logger
   ) {}
 

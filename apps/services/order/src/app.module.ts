@@ -13,6 +13,9 @@ import { ClsModule } from 'nestjs-cls';
 import { CartItemsModule } from './modules/cart-items/cart-items.module';
 import { InvoicesModule } from './modules/invoices/invoices.module';
 import { ShippingAddressesModule } from './modules/shipping-addresses/shipping-addresses.module';
+import { ProductGrpcClientModule } from './infrastructure/grpc-clients/product-grpc/product-grpc-client.module';
+import { UserGrpcClientModule } from './infrastructure/grpc-clients/user-grpc/user-grpc-client.module';
+import { FinanceGrpcClientModule } from './infrastructure/grpc-clients/finance-grpc/finance-grpc-client.module';
 
 @Module({
   imports: [
@@ -43,6 +46,9 @@ import { ShippingAddressesModule } from './modules/shipping-addresses/shipping-a
     CartItemsModule,
     InvoicesModule,
     ShippingAddressesModule,
+    ProductGrpcClientModule,
+    UserGrpcClientModule,
+    FinanceGrpcClientModule,
   ],
   controllers: [AppController],
   providers: [AppService],

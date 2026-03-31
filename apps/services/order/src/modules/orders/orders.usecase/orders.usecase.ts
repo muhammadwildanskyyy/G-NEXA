@@ -14,7 +14,7 @@ import { Product } from '../../../infrastructure/http-clients/product-client/dto
 import { AppLogger } from '../../../infrastructure/logger/app.logger';
 import { ClientKafka } from '@nestjs/microservices';
 import { CartService } from '../../cart-items/cart.service/cart.service';
-import { UserClientService } from 'src/infrastructure/http-clients/user-client/user-client.service';
+import { UserGrpcClientService } from 'src/infrastructure/grpc-clients/user-grpc/user-grpc-client.service';
 
 @Injectable()
 export class OrdersUsecase implements OnModuleInit {
@@ -22,7 +22,7 @@ export class OrdersUsecase implements OnModuleInit {
     private readonly orderService: OrdersService,
     private readonly logger: AppLogger,
     private readonly cartService: CartService,
-    private readonly userService: UserClientService,
+    private readonly userService: UserGrpcClientService,
     @Inject('KAFKA_PRODUCER') private readonly kafkaClient: ClientKafka,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) { }
