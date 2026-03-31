@@ -3,37 +3,37 @@ import { themes as prismThemes } from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'G-NEXA',
-  tagline: 'Engineering the Future of Multi-Seller Microservices',
-  favicon: 'img/favicon.png',
+  title: "G-NEXA",
+  tagline: "Engineering the Future of Multi-Seller Microservices",
+  favicon: "img/favicon.png",
 
-  url: 'https://muhammadwildan.com', // Placeholder for actual domain
-  baseUrl: '/',
+  url: "https://muhammadwildan.com", // Placeholder for actual domain
+  baseUrl: "/",
 
-  organizationName: 'muhammadwildanskyyy', 
-  projectName: 'G-NEXA', 
+  organizationName: "muhammadwildanskyyy",
+  projectName: "G-NEXA",
 
-  onBrokenLinks: 'throw', 
-  onBrokenMarkdownLinks: 'throw',
+  onBrokenLinks: "throw",
+  onBrokenMarkdownLinks: "throw",
 
   i18n: {
-    defaultLocale: 'en',
-    locales: ['en'],
+    defaultLocale: "en",
+    locales: ["en"],
   },
 
   presets: [
     [
-      'classic',
+      "classic",
       /** @type {import('@docusaurus/preset-classic').Options} */
       ({
         docs: {
-          sidebarPath: './sidebars.js',
+          sidebarPath: "./sidebars.js",
           editUrl:
-            'https://github.com/muhammadwildanskyyy/G-NEXA/edit/main/apps/web/public/project-showcase/',
+            "https://github.com/muhammadwildanskyyy/G-NEXA/edit/main/apps/web/public/project-showcase/",
         },
         blog: false,
         theme: {
-          customCss: './src/css/custom.css',
+          customCss: "./src/css/custom.css",
         },
       }),
     ],
@@ -43,51 +43,51 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       navbar: {
-        title: 'G-NEXA',
+        title: "G-NEXA",
         logo: {
-          alt: 'G-NEXA Logo',
-          src: 'img/logo.png',
+          alt: "G-NEXA Logo",
+          src: "img/logo.png",
         },
         items: [
           {
-            type: 'docSidebar',
-            sidebarId: 'gnexaSidebar',
-            position: 'left',
-            label: 'Engineering Journal',
+            type: "docSidebar",
+            sidebarId: "gnexaSidebar",
+            position: "left",
+            label: "Engineering Journal",
           },
           {
-            href: 'https://github.com/muhammadwildan/G-NEXA',
-            label: 'GitHub (Coming Soon)',
-            position: 'right',
+            href: "https://github.com/muhammadwildanskyyy/G-NEXA.git",
+            label: "GitHub ",
+            position: "right",
           },
         ],
       },
       footer: {
-        style: 'dark',
+        style: "dark",
         links: [
           {
-            title: 'Documentation',
+            title: "Documentation",
             items: [
               {
-                label: 'Vision',
-                to: '/docs/overview/vision',
+                label: "Vision",
+                to: "/docs/overview/vision",
               },
               {
-                label: 'Components',
-                to: '/docs/components/user-service',
+                label: "Components",
+                to: "/docs/components/user-service",
               },
               {
-                label: 'Core Engineering',
-                to: '/docs/engineering/saga-pattern',
+                label: "Core Engineering",
+                to: "/docs/engineering/saga-pattern",
               },
             ],
           },
           {
-            title: 'Repository',
+            title: "Repository",
             items: [
               {
-                label: 'GitHub (Coming Soon)',
-                href: 'https://github.com/muhammadwildan/G-NEXA',
+                label: "GitHub",
+                href: "https://github.com/muhammadwildanskyyy/G-NEXA.git",
               },
             ],
           },
@@ -99,13 +99,13 @@ const config = {
         darkTheme: prismThemes.dracula,
       },
       mermaid: {
-        theme: { light: 'neutral', dark: 'forest' },
+        theme: { light: "neutral", dark: "forest" },
       },
     }),
   markdown: {
     mermaid: true,
   },
-  themes: ['@docusaurus/theme-mermaid'],
+  themes: ["@docusaurus/theme-mermaid"],
 };
 
 export default config;
