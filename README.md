@@ -178,6 +178,18 @@ Some useful `task` commands during development:
 
 ---
 
+## 📮 Postman API Documentation
+
+We provide complete Postman Collections for testing all microservices. You can find them in the `posmant/` directory. Import these JSON files into your Postman workspace to test the endpoints:
+
+- `posmant/User Service.postman_collection.json`
+- `posmant/ProductService.postman_collection.json`
+- `posmant/Order Service.postman_collection.json`
+- `posmant/Finance Service.postman_collection.json`
+- `posmant/Media Service.postman_collection.json`
+
+---
+
 ## 📚 Further Documentation Exploration
 
 To technically dissect the architectural decisions, solutions for *race conditions*, the implementation of *Idempotency*, and *Saga Pattern Orchestration*, full documentation is available on our **Interactive Documentation Portal**:
