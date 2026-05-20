@@ -96,6 +96,21 @@ tasks:
       # Jika variabel 's' kosong, tampilkan semua log. Jika ada isinya, tampilkan service itu saja
       - docker compose -f {{.DEV_COMPOSE}} logs -f {{.s}}
 
+  logs:services:
+    desc: "Melihat logs khusus untuk service aplikasi saja (tanpa DB/Kafka/Redis)"
+    cmds:
+      - docker compose -f {{.DEV_COMPOSE}} logs -f user-service product-service media-service order-service finance-service
+
+  prod:logs:
+    desc: "Melihat logs real-time di mode Production (Contoh: task prod:logs s=user-service)"
+    cmds:
+      - docker compose -f {{.PROD_COMPOSE}} logs -f {{.s}}
+
+  prod:logs:services:
+    desc: "Melihat logs khusus untuk service aplikasi saja di mode Production"
+    cmds:
+      - docker compose -f {{.PROD_COMPOSE}} logs -f user-service product-service media-service order-service finance-service
+
   shell:
     desc: "Masuk ke dalam container (Contoh: task shell s=g-nexa-user-service)"
     cmds:

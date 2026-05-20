@@ -19,14 +19,22 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /product-app .
 
 # --- STAGE 4: PRODUCTION (Siap Live Server) ---
 FROM alpine:latest AS production
-WORKDIR /root/
+WORKDIR /app/
 
 # [TAMBAHAN WAJIB] Install sertifikat SSL & Timezone
-RUN apk --no-cache add ca-certificates tzdata
+# Serta buat user non-root bernama 'appuser'
+RUN apk --no-cache add ca-certificates tzdata && \
+    adduser -D -g '' appuser
 
 # Copy binary dari stage builder
 COPY --from=builder /product-app .
 COPY --from=development /app/files ./files
+
+# Berikan hak akses kepada appuser
+RUN chown -R appuser:appuser /app/
+
+# Gunakan user non-root
+USER appuser
 
 # Jalankan binary
 CMD ["./product-app"]

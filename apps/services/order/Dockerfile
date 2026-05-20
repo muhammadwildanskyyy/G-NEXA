@@ -5,6 +5,7 @@ FROM node:22-alpine AS base
 WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
+COPY proto ./proto/
 
 # ==========================================
 # STAGE 2: DEVELOPMENT
@@ -36,6 +37,9 @@ RUN npx prisma generate
 
 # Copy hasil build JS dari stage builder
 COPY --from=builder /app/dist ./dist
+
+# Jalankan sebagai user non-root demi keamanan
+USER node
 
 EXPOSE 3000
 CMD ["npm", "run", "start:prod"]

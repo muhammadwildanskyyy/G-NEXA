@@ -1,1 +1,0 @@
-G-NEXA (Gabungan: Go, Nest, Express, X Next/Nuxt, Api Gateway).

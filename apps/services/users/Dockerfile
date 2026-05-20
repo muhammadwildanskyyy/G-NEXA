@@ -19,20 +19,20 @@ COPY package.json bun.lockb* ./
 COPY prisma ./prisma
 # 1. Install SEMUA deps dulu untuk bisa menjalankan 'prisma generate'
 RUN bun install --frozen-lockfile
-# 2. Generate Prisma Client (Wajib ada sebelum masuk production)
-RUN bunx prisma generate
-# 3. Hapus folder node_modules dan install ulang HANYA production deps
+# 2. Hapus folder node_modules dan install ulang HANYA production deps
 # (Agar image akhir kecil & bersih)
 RUN rm -rf node_modules && bun install --production --frozen-lockfile
+# 3. Generate Prisma Client (Wajib ada sebelum masuk production)
+RUN bunx prisma generate
 
 # --- STAGE 4: PRODUCTION (Siap Live Server) ---
 FROM oven/bun:1-alpine AS production
 WORKDIR /app
 
 # Copy node_modules (yang sudah bersih) dan Prisma Client dari stage builder
-COPY --from=builder /app/node_modules ./node_modules
+COPY --chown=bun:bun --from=builder /app/node_modules ./node_modules
 # Copy source code aplikasi
-COPY . .
+COPY --chown=bun:bun . .
 
 # Set user ke non-root demi keamanan
 USER bun

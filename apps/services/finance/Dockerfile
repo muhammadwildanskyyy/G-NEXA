@@ -27,6 +27,9 @@ WORKDIR /root/
 # [TAMBAHAN WAJIB] Install sertifikat SSL & Timezone
 RUN apk --no-cache add ca-certificates tzdata
 
+# Copy config folder so Viper can read the .env file
+COPY --from=builder /app/files/config ./files/config
+
 # Copy binary dari stage builder
 COPY --from=builder /finance-app .
 

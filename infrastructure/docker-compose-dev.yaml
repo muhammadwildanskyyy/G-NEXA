@@ -228,30 +228,30 @@ services:
   # ------------------------------------
   # 7. WEB MARKET PLACE
   # ------------------------------------
-  web-market-place:
-    build:
-      context: ../apps/web/public/market-place
-      target: development
-    container_name: g-nexa-web-market-place
-    restart: always
-    ports:
-      - "3000:3000"
+  # web-market-place:
+  #   build:
+  #     context: ../apps/web/public/market-place
+  #     target: development
+  #   container_name: g-nexa-web-market-place
+  #   restart: always
+  #   ports:
+  #     - "3000:3000"
 
-    env_file:
-      - ../apps/web/public/market-place/.env
-    environment:
-      - PORT=3000
-    volumes:
-      - ../apps/web/public/market-place:/app # 1. Sync Source Code (Hot Reload)
-      - /app/node_modules # 2. Cegah node_modules laptop menimpa container
-      - /app/.next # 3. [PENTING] Simpan cache build Next.js di dalam container saja
+  #   env_file:
+  #     - ../apps/web/public/market-place/.env
+  #   environment:
+  #     - PORT=3000
+  #   volumes:
+  #     - ../apps/web/public/market-place:/app # 1. Sync Source Code (Hot Reload)
+  #     - /app/node_modules # 2. Cegah node_modules laptop menimpa container
+  #     - /app/.next # 3. [PENTING] Simpan cache build Next.js di dalam container saja
 
-    depends_on:
-      - user-service
-      - product-service
+  #   depends_on:
+  #     - user-service
+  #     - product-service
 
-    networks:
-      - g-nexa-network
+  #   networks:
+  #     - g-nexa-network
 
   kong:
     image: kong:latest

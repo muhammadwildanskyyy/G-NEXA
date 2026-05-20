@@ -11,15 +11,39 @@ services:
     environment:
       POSTGRES_DB: postgres
     ports:
-      - "5532:5432"
+      - "5532:5432" # Akses lokal dev, jika murni prod bisa dihapus
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./pg-init/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - g-nexa-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # ------------------------------------
-  # 2. DATABASE: MONGODB (Product DB)
+  # 2. CACHE: REDIS
+  # ------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: g-nexa-redis
+    restart: always
+    ports:
+      - "6379:6379" # Akses lokal dev, jika murni prod bisa dihapus
+    volumes:
+      - redis_data:/data
+    networks:
+      - g-nexa-network
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ------------------------------------
+  # 3. DATABASE: MONGODB (Product DB)
   # ------------------------------------
   mongo:
     image: mongo:8.0.0
@@ -32,38 +56,45 @@ services:
       - mongo_data:/data/db
     networks:
       - g-nexa-network
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
+  # ------------------------------------
+  # 4. KAFKA MESSAGE BROKER
+  # ------------------------------------
   kafka:
     image: apache/kafka:3.7.0
     container_name: g-nexa-kafka
     user: root
     ports:
-      - "9092:9092" # Port untuk akses dari laptop (Host / Luar Docker)
-      - "29092:29092" # Port untuk akses antar container di dalam Docker
+      - "9092:9092"
+      - "29092:29092"
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
-      # Konfigurasi Listener (Sangat penting agar bisa diakses dari Host & Container)
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,INTERNAL://0.0.0.0:29092,CONTROLLER://0.0.0.0:9093
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,INTERNAL://kafka:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
-      # Pengaturan Wajib KRaft untuk 1 Node
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      # UUID unik untuk inisialisasi cluster otomatis
       CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
     volumes:
       - kafka_data:/tmp/kafka-logs
     networks:
       - g-nexa-network
+    healthcheck:
+      test: [ "CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list || exit 1" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
 
-  # ------------------------------------
-  # 2.Kafka UI
-  # ------------------------------------
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
     container_name: gnexa_kafka_ui
@@ -73,60 +104,87 @@ services:
       - KAFKA_CLUSTERS_0_NAME=GNEXA-Local
       - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:29092
     depends_on:
-      - kafka
+      kafka:
+        condition: service_healthy
     networks:
       - g-nexa-network
 
   # ------------------------------------
-  # 3. USER SERVICE (Bun Production)
+  # 5. KONG API GATEWAY
+  # ------------------------------------
+  kong:
+    image: kong:latest
+    container_name: g-nexa-kong
+    restart: always
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /opt/kong/kong.yaml
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001, 0.0.0.0:8444 ssl
+    ports:
+      - "8000:8000"
+      - "443:8443"
+      - "8001:8001" # Admin API, untuk keamanan production bisa dihapus
+    volumes:
+      - ../kong.yaml:/opt/kong/kong.yaml
+    networks:
+      - g-nexa-network
+
+  # ------------------------------------
+  # 6. USER SERVICE (Bun Production)
   # ------------------------------------
   user-service:
     build:
       context: ../apps/services/users
-      target: production # <--- [PENTING] Pakai Stage Production
+      target: production
     container_name: g-nexa-user-service
-    restart: always # <--- Auto restart jika crash
+    restart: always
     ports:
-      - "8081:8081" # Port aplikasi tetap dibuka untuk Nginx/Frontend
-
+      - "50052:50052"
+    # Port 8081 DITUTUP dari host agar hanya Kong yang bisa akses
     env_file:
       - ../apps/services/users/.env
     environment:
-      - NODE_ENV=production # <--- Mode Production
+      - NODE_ENV=production
       - PORT=8081
-
     command: /bin/sh -c "bunx prisma migrate deploy && bun src/server.ts"
-
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - g-nexa-network
 
   # ------------------------------------
-  # 4. PRODUCT SERVICE (Go Production)
+  # 7. PRODUCT SERVICE (Go Production)
   # ------------------------------------
   product-service:
     build:
       context: ../apps/services/product
-      target: production # <--- [PENTING] Pakai Stage Production (Alpine + Binary)
+      target: production
     container_name: g-nexa-product-service
     restart: always
     ports:
-      - "8082:8082"
-
+      - "50051:50051"
     env_file:
       - ../apps/services/product/files/config/.env
     environment:
       - APP_ENV=production
       - PORT=8082
-
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - g-nexa-network
 
   # ------------------------------------
-  # 4. PRODUCT media (Go + Hot Reload)
+  # 8. MEDIA SERVICE (Go)
   # ------------------------------------
   media-service:
     build:
@@ -134,21 +192,18 @@ services:
       target: production
     container_name: g-nexa-media-service
     restart: always
-    ports:
-      - "8083:8083"
-
     env_file:
       - ../apps/services/media/files/config/.env
     environment:
       - PORT=8083
-
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - g-nexa-network
 
   # ------------------------------------
-  # 6. ORDER SERVICE
+  # 9. ORDER SERVICE
   # ------------------------------------
   order-service:
     build:
@@ -156,56 +211,60 @@ services:
       target: production
     container_name: gnexa-order-service
     restart: always
-    ports:
-      - "8084:8084"
     env_file:
       - ../apps/services/order/.env
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - g-nexa-network
 
   # ------------------------------------
-  # 6. FINANCE SERVICE
+  # 10. FINANCE SERVICE
   # ------------------------------------
   finance-service:
     build:
       context: ../apps/services/finance
       target: production
     container_name: g-nexa-finance-service
+    restart: always
     ports:
-      - "8085:8085"
+      - "50053:50053"
     environment:
       - KAFKA_BROKER=kafka:29092
     env_file:
       - ../apps/services/finance/files/config/.env
     depends_on:
-      - postgres
-      - kafka
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - g-nexa-network
+  # ------------------------------------
+  # 11. WEB MARKETPLACE
+  # ------------------------------------
+  # web-market-place:
+  #   build:
+  #     context: ../apps/web/public/market-place
+  #     target: production
+  #   container_name: g-nexa-web-market-place
+  #   restart: always
+  #   ports:
+  #     - "3000:3000" # Diekspos langsung untuk akses browser/frontend
+  #   environment:
+  #     - NODE_ENV=production
+  #     - PORT=3000
+  #   networks:
+  #     - g-nexa-network
 
-  web-market-place:
-    build:
-      context: ../apps/web/public/market-place
-      target: production
-
-    container_name: g-nexa-web-market-place
-    restart: always
-    ports:
-      - "3000:3000"
-
-    # Environment Runtime (Hanya untuk Server-Side)
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-
-    networks:
-      - g-nexa-network
-
-# ---------------------------------------
-# NETWORK & VOLUMES
-# ---------------------------------------
+  # ---------------------------------------
+  # 12. NETWORK & VOLUMES
+  # ---------------------------------------
 networks:
   g-nexa-network:
     driver: bridge
@@ -215,3 +274,4 @@ volumes:
   mongo_data:
   kafka_data:
     driver: local
+  redis_data:
