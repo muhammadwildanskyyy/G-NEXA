@@ -1,0 +1,983 @@
+{
+  "info": {
+    "_postman_id": "59cc2127-6f64-46a8-b8a9-b65ca3253579",
+    "name": "ProductService",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40663290",
+    "_collection_link": "https://go.postman.co/collection/40663290-59cc2127-6f64-46a8-b8a9-b65ca3253579?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Product",
+      "item": [
+        {
+          "name": "Create Product",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_SELLER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{AUTHORIZATION_TOKEN}}",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": " {\n    \"store_id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n    \"category_id\": \"698de7629deabc23ea184727\",\n    \"name\": \"Asus ROG Zephyrus G14\",\n    \"slug\": \"asus-rog-zephyrus-g14\",\n    \"description\": \"Laptop gaming powerful dengan desain compact.\",\n    \"condition\": \"new\",\n    \"price\": 5000000,\n    \"stock\": 10,\n    \"is_active\": true,\n    \"weight\": 1700,\n    \"dimensions\": { \"length\": 32, \"width\": 22, \"height\": 2 },\n    \"images\": [\n      \"https://loremflickr.com/800/600/laptop,gaming\",\n      \"https://loremflickr.com/800/600/rog,asus\"\n    ],\n    \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n    \"specs\": {\n      \"processor\": \"AMD Ryzen 5\",\n      \"ram\": \"16GB\",\n      \"storage\": 1000\n    },\n    \"tags\": [\"gaming\", \"asus\", \"rog\", \"laptop\"],\n    \"views\": 1500,\n    \"rating\": 4.8\n  }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/products",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "products"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Create Product",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{AUTHORIZATION_TOKEN}}",
+                    "type": "text",
+                    "disabled": true
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": " {\n    \"store_id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n    \"category_id\": \"698de7629deabc23ea184727\",\n    \"name\": \"Asus ROG Zephyrus G14\",\n    \"slug\": \"asus-rog-zephyrus-g14\",\n    \"description\": \"Laptop gaming powerful dengan desain compact.\",\n    \"condition\": \"new\",\n    \"price\": 5000000,\n    \"stock\": 10,\n    \"is_active\": true,\n    \"weight\": 1700,\n    \"dimensions\": { \"length\": 32, \"width\": 22, \"height\": 2 },\n    \"images\": [\n      \"https://loremflickr.com/800/600/laptop,gaming\",\n      \"https://loremflickr.com/800/600/rog,asus\"\n    ],\n    \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n    \"specs\": {\n      \"processor\": \"AMD Ryzen 5\",\n      \"ram\": \"16GB\",\n      \"storage\": 1000\n    },\n    \"tags\": [\"gaming\", \"asus\", \"rog\", \"laptop\"],\n    \"views\": 1500,\n    \"rating\": 4.8\n  }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL_PRODUCT_SERVICE}}/v1/api/products",
+                  "host": [
+                    "{{BASE_URL_PRODUCT_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "products"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "816"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:43:45 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "487"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "16"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "173fe659742dd27a779a3b047c1b6676"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": {\n        \"id\": \"69b6c5a0480e5e367bd74acc\",\n        \"store_id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n        \"category_id\": \"698de7629deabc23ea184727\",\n        \"name\": \"Asus ROG Zephyrus G14\",\n        \"slug\": \"asus-rog-zephyrus-g14\",\n        \"description\": \"Laptop gaming powerful dengan desain compact.\",\n        \"condition\": \"new\",\n        \"price\": 5000000,\n        \"stock\": 10,\n        \"is_active\": true,\n        \"weight\": 1700,\n        \"dimensions\": {\n            \"length\": 32,\n            \"width\": 22,\n            \"height\": 2\n        },\n        \"images\": [\n            \"https://loremflickr.com/800/600/laptop,gaming\",\n            \"https://loremflickr.com/800/600/rog,asus\"\n        ],\n        \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n        \"specs\": {\n            \"processor\": \"AMD Ryzen 5\",\n            \"ram\": \"16GB\",\n            \"storage\": 1000\n        },\n        \"tags\": [\n            \"gaming\",\n            \"asus\",\n            \"rog\",\n            \"laptop\"\n        ],\n        \"views\": 0,\n        \"rating\": 0,\n        \"created_at\": \"2026-03-15T14:43:44.996839678Z\",\n        \"updated_at\": \"2026-03-15T14:43:44.996839678Z\"\n    },\n    \"meta\": {\n        \"code\": 201,\n        \"message\": \"Success Create Product\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Produtcs",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{AUTHORIZATION_TOKEN}}",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"store_id\" : \"tghfrtghrtg\",\n    \"category_id\": \"697b1cb43446075bc5243e91\",\n    \"name\" : \"Iphone 17 Pro Max\",\n    \"slug\": \"iphone\",\n    \"description\": \"Ini description\",\n    \"condition\": \"new\",\n    \"price\": 20000000,\n    \"stock\": 100,\n    \"is_active\": true,\n    \"weight\": 500,\n    \"dimension\": {\n        \"length\": 20,\n        \"width\" :20,\n        \"height\": 50\n    },\n    \"images\": [\"ejrfbhveuh\",\"uyhbfvuy\"],\n    \"thumbnail\" : \"eghtrh\",\n    \"specs\":{\n        \"erfgerfg\":\"ergfe\"\n    },\n    \"tags\": [\"iphone\",\"17 pro max\"]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/products?page=1&limit=5&sort_by=views",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                },
+                {
+                  "key": "search",
+                  "value": "As",
+                  "disabled": true
+                },
+                {
+                  "key": "category_id",
+                  "value": "698de7629deabc23ea184728",
+                  "disabled": true
+                },
+                {
+                  "key": "store_id",
+                  "value": "1b09dda5-8ae9-4667-a2d5-ff1c71014af8",
+                  "disabled": true
+                },
+                {
+                  "key": "condition",
+                  "value": "new",
+                  "disabled": true
+                },
+                {
+                  "key": "min_price",
+                  "value": "10000000",
+                  "disabled": true
+                },
+                {
+                  "key": "max_price",
+                  "value": "50000000",
+                  "disabled": true
+                },
+                {
+                  "key": "sort_by",
+                  "value": "views"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Produtcs",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{AUTHORIZATION_TOKEN}}",
+                    "type": "text",
+                    "disabled": true
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"store_id\" : \"tghfrtghrtg\",\n    \"category_id\": \"697b1cb43446075bc5243e91\",\n    \"name\" : \"Iphone 17 Pro Max\",\n    \"slug\": \"iphone\",\n    \"description\": \"Ini description\",\n    \"condition\": \"new\",\n    \"price\": 20000000,\n    \"stock\": 100,\n    \"is_active\": true,\n    \"weight\": 500,\n    \"dimension\": {\n        \"length\": 20,\n        \"width\" :20,\n        \"height\": 50\n    },\n    \"images\": [\"ejrfbhveuh\",\"uyhbfvuy\"],\n    \"thumbnail\" : \"eghtrh\",\n    \"specs\":{\n        \"erfgerfg\":\"ergfe\"\n    },\n    \"tags\": [\"iphone\",\"17 pro max\"]\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL_PRODUCT_SERVICE}}/v1/api/products?store_id=1b09dda5-8ae9-4667-a2d5-ff1c71014af8&min_price=10000000&sort_by=views",
+                  "host": [
+                    "{{BASE_URL_PRODUCT_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "products"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "disabled": true
+                    },
+                    {
+                      "key": "limit",
+                      "value": "5",
+                      "disabled": true
+                    },
+                    {
+                      "key": "search",
+                      "value": "Asus",
+                      "disabled": true
+                    },
+                    {
+                      "key": "category_id",
+                      "value": "698de7629deabc23ea184728",
+                      "disabled": true
+                    },
+                    {
+                      "key": "store_id",
+                      "value": "1b09dda5-8ae9-4667-a2d5-ff1c71014af8"
+                    },
+                    {
+                      "key": "condition",
+                      "value": "new",
+                      "disabled": true
+                    },
+                    {
+                      "key": "min_price",
+                      "value": "10000000"
+                    },
+                    {
+                      "key": "max_price",
+                      "value": "50000000",
+                      "disabled": true
+                    },
+                    {
+                      "key": "sort_by",
+                      "value": "views"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1607"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:43:58 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "66"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "31"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "24010e26d789d83063d7e119c0fd0e1e"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": {\n        \"products\": [\n            {\n                \"id\": \"69ae26066cdbc3fe8cbe091e\",\n                \"store_id\": \"1b09dda5-8ae9-4667-a2d5-ff1c71014af8\",\n                \"category_id\": \"698de7629deabc23ea184727\",\n                \"name\": \"Asus ROG Zephyrus G14\",\n                \"slug\": \"asus-rog-zephyrus-g14\",\n                \"description\": \"Laptop gaming powerful dengan desain compact.\",\n                \"condition\": \"new\",\n                \"price\": 25000000,\n                \"stock\": 0,\n                \"is_active\": true,\n                \"weight\": 1700,\n                \"dimensions\": {\n                    \"length\": 32,\n                    \"width\": 22,\n                    \"height\": 2\n                },\n                \"images\": [\n                    \"https://loremflickr.com/800/600/laptop,gaming\",\n                    \"https://loremflickr.com/800/600/rog,asus\"\n                ],\n                \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n                \"specs\": {\n                    \"processor\": \"AMD Ryzen 5\",\n                    \"ram\": \"16GB\",\n                    \"storage\": 1000\n                },\n                \"tags\": [\n                    \"gaming\",\n                    \"asus\",\n                    \"rog\",\n                    \"laptop\"\n                ],\n                \"views\": 0,\n                \"rating\": 0,\n                \"created_at\": \"2026-03-09T01:44:38.134Z\",\n                \"updated_at\": \"2026-03-12T00:16:33.863Z\"\n            },\n            {\n                \"id\": \"69ae2b726cdbc3fe8cbe091f\",\n                \"store_id\": \"1b09dda5-8ae9-4667-a2d5-ff1c71014af8\",\n                \"category_id\": \"698de7629deabc23ea184727\",\n                \"name\": \"Asus ROG Zephyrus G14\",\n                \"slug\": \"asus-rog-zephyrus-g14\",\n                \"description\": \"Laptop gaming powerful dengan desain compact.\",\n                \"condition\": \"new\",\n                \"price\": 25000000,\n                \"stock\": 8,\n                \"is_active\": true,\n                \"weight\": 1700,\n                \"dimensions\": {\n                    \"length\": 32,\n                    \"width\": 22,\n                    \"height\": 2\n                },\n                \"images\": [\n                    \"https://loremflickr.com/800/600/laptop,gaming\",\n                    \"https://loremflickr.com/800/600/rog,asus\"\n                ],\n                \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n                \"specs\": {\n                    \"processor\": \"AMD Ryzen 5\",\n                    \"ram\": \"16GB\",\n                    \"storage\": 1000\n                },\n                \"tags\": [\n                    \"gaming\",\n                    \"asus\",\n                    \"rog\",\n                    \"laptop\"\n                ],\n                \"views\": 0,\n                \"rating\": 0,\n                \"created_at\": \"2026-03-09T02:07:46.73Z\",\n                \"updated_at\": \"2026-03-12T04:23:48.174Z\"\n            }\n        ],\n        \"total_data\": 2,\n        \"total_page\": 1,\n        \"page\": 1,\n        \"limit\": 10\n    },\n    \"meta\": {\n        \"code\": 200,\n        \"message\": \"Success Get Products\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update product",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n           \n            \"store_id\": \"4a3fa729-5efe-4384-b70b-7617443d8f0d\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Iphone 18 Pro Max\",\n            \"slug\": \"iphone\",\n            \"description\": \"Ini description\",\n            \"condition\": \"new\",\n            \"price\": 1000000,\n            \"stock\": 100,\n            \"is_active\": true,\n            \"weight\": 500,\n            \"dimensions\": {\n                \"length\": 20,\n                \"width\": 20,\n                \"height\": 50\n            },\n            \"images\": [\n                \"ejrfbhveuh\",\n                \"uyhbfvuy\"\n            ],\n            \"thumbnail\": \"eghtrh\",\n            \"specs\": {\n                \"erfgerfg\": \"ergfe\"\n            },\n            \"tags\": [\n                \"iphone\",\n                \"17 pro max\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-01-29T08:53:00.107Z\",\n            \"updated_at\": \"2026-01-29T08:53:00.107Z\"\n        }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/products/69a1f72134cd6ee59c4f71b2",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "products",
+                "69a1f72134cd6ee59c4f71b2"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Update product",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n           \n            \"store_id\": \"4a3fa729-5efe-4384-b70b-7617443d8f0d\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Iphone 18 Pro Max\",\n            \"slug\": \"iphone\",\n            \"description\": \"Ini description\",\n            \"condition\": \"new\",\n            \"price\": 1000000,\n            \"stock\": 100,\n            \"is_active\": true,\n            \"weight\": 500,\n            \"dimensions\": {\n                \"length\": 20,\n                \"width\": 20,\n                \"height\": 50\n            },\n            \"images\": [\n                \"ejrfbhveuh\",\n                \"uyhbfvuy\"\n            ],\n            \"thumbnail\": \"eghtrh\",\n            \"specs\": {\n                \"erfgerfg\": \"ergfe\"\n            },\n            \"tags\": [\n                \"iphone\",\n                \"17 pro max\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-01-29T08:53:00.107Z\",\n            \"updated_at\": \"2026-01-29T08:53:00.107Z\"\n        }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL_PRODUCT_SERVICE}}/v1/api/products/69a1f72134cd6ee59c4f71b2",
+                  "host": [
+                    "{{BASE_URL_PRODUCT_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "products",
+                    "69a1f72134cd6ee59c4f71b2"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "602"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:44:07 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "31"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "25"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "950dd617b174ac31cd39204692c2e639"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": {\n        \"id\": \"69a1f72134cd6ee59c4f71b2\",\n        \"store_id\": \"4a3fa729-5efe-4384-b70b-7617443d8f0d\",\n        \"category_id\": \"698de7629deabc23ea184727\",\n        \"name\": \"Iphone 18 Pro Max\",\n        \"slug\": \"iphone\",\n        \"description\": \"Ini description\",\n        \"condition\": \"new\",\n        \"price\": 1000000,\n        \"stock\": 100,\n        \"is_active\": true,\n        \"weight\": 500,\n        \"dimensions\": {\n            \"length\": 20,\n            \"width\": 20,\n            \"height\": 50\n        },\n        \"images\": [\n            \"ejrfbhveuh\",\n            \"uyhbfvuy\"\n        ],\n        \"thumbnail\": \"eghtrh\",\n        \"specs\": {\n            \"erfgerfg\": \"ergfe\"\n        },\n        \"tags\": [\n            \"iphone\",\n            \"17 pro max\"\n        ],\n        \"views\": 0,\n        \"rating\": 0,\n        \"created_at\": \"0001-01-01T00:00:00Z\",\n        \"updated_at\": \"2026-03-15T14:44:07.603Z\"\n    },\n    \"meta\": {\n        \"code\": 200,\n        \"message\": \"Success Update Product\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Product",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/products/69a1f72134cd6ee59c4f71b2",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "products",
+                "69a1f72134cd6ee59c4f71b2"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Delete Product",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL_PRODUCT_SERVICE}}/v1/api/products/69a1f72134cd6ee59c4f71b2",
+                  "host": [
+                    "{{BASE_URL_PRODUCT_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "products",
+                    "69a1f72134cd6ee59c4f71b2"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "68"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:44:33 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "21"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "22"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "6ebaab4b6008f47c3009b6234f4b612b"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": null,\n    \"meta\": {\n        \"code\": 200,\n        \"message\": \"Success Delete Product\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Product By Id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_SELLER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/products/6a0dc93ff9aa82227478529f",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "products",
+                "6a0dc93ff9aa82227478529f"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Product By Id",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL_PRODUCT_SERVICE}}/v1/api/products/69ae26066cdbc3fe8cbe091e",
+                  "host": [
+                    "{{BASE_URL_PRODUCT_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "products",
+                    "69ae26066cdbc3fe8cbe091e"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "801"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:44:44 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "16"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "17"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "9aba2b5ed187564c03db894b0f63d20f"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": {\n        \"id\": \"69ae26066cdbc3fe8cbe091e\",\n        \"store_id\": \"1b09dda5-8ae9-4667-a2d5-ff1c71014af8\",\n        \"category_id\": \"698de7629deabc23ea184727\",\n        \"name\": \"Asus ROG Zephyrus G14\",\n        \"slug\": \"asus-rog-zephyrus-g14\",\n        \"description\": \"Laptop gaming powerful dengan desain compact.\",\n        \"condition\": \"new\",\n        \"price\": 25000000,\n        \"stock\": 0,\n        \"is_active\": true,\n        \"weight\": 1700,\n        \"dimensions\": {\n            \"length\": 32,\n            \"width\": 22,\n            \"height\": 2\n        },\n        \"images\": [\n            \"https://loremflickr.com/800/600/laptop,gaming\",\n            \"https://loremflickr.com/800/600/rog,asus\"\n        ],\n        \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n        \"specs\": {\n            \"processor\": \"AMD Ryzen 5\",\n            \"ram\": \"16GB\",\n            \"storage\": 1000\n        },\n        \"tags\": [\n            \"gaming\",\n            \"asus\",\n            \"rog\",\n            \"laptop\"\n        ],\n        \"views\": 0,\n        \"rating\": 0,\n        \"created_at\": \"2026-03-09T01:44:38.134Z\",\n        \"updated_at\": \"2026-03-12T00:16:33.863Z\"\n    },\n    \"meta\": {\n        \"code\": 200,\n        \"message\": \"Success Get Product\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Prfoduct By Categoy Id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "{{AUTHORIZATION_TOKEN}}",
+                "type": "text",
+                "disabled": true
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"store_id\" : \"tghfrtghrtg\",\n    \"category_id\": \"697b1cb43446075bc5243e91\",\n    \"name\" : \"Iphone 17 Pro Max\",\n    \"slug\": \"iphone\",\n    \"description\": \"Ini description\",\n    \"condition\": \"new\",\n    \"price\": 20000000,\n    \"stock\": 100,\n    \"is_active\": true,\n    \"weight\": 500,\n    \"dimension\": {\n        \"length\": 20,\n        \"width\" :20,\n        \"height\": 50\n    },\n    \"images\": [\"ejrfbhveuh\",\"uyhbfvuy\"],\n    \"thumbnail\" : \"eghtrh\",\n    \"specs\":{\n        \"erfgerfg\":\"ergfe\"\n    },\n    \"tags\": [\"iphone\",\"17 pro max\"]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/products/by-category/698de7629deabc23ea184727",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "products",
+                "by-category",
+                "698de7629deabc23ea184727"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Prfoduct By Categoy Id",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "{{AUTHORIZATION_TOKEN}}",
+                    "type": "text",
+                    "disabled": true
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"store_id\" : \"tghfrtghrtg\",\n    \"category_id\": \"697b1cb43446075bc5243e91\",\n    \"name\" : \"Iphone 17 Pro Max\",\n    \"slug\": \"iphone\",\n    \"description\": \"Ini description\",\n    \"condition\": \"new\",\n    \"price\": 20000000,\n    \"stock\": 100,\n    \"is_active\": true,\n    \"weight\": 500,\n    \"dimension\": {\n        \"length\": 20,\n        \"width\" :20,\n        \"height\": 50\n    },\n    \"images\": [\"ejrfbhveuh\",\"uyhbfvuy\"],\n    \"thumbnail\" : \"eghtrh\",\n    \"specs\":{\n        \"erfgerfg\":\"ergfe\"\n    },\n    \"tags\": [\"iphone\",\"17 pro max\"]\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL_PRODUCT_SERVICE}}/v1/api/products/by-category/698de7629deabc23ea184727",
+                  "host": [
+                    "{{BASE_URL_PRODUCT_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "products",
+                    "by-category",
+                    "698de7629deabc23ea184727"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:45:43 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "17"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "26"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "3c222201d1273257d17ad45e60233027"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": [\n        {\n            \"id\": \"698dff5e8929655849fa0d03\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-12T16:27:10.067Z\",\n            \"updated_at\": \"2026-02-12T16:27:10.067Z\"\n        },\n        {\n            \"id\": \"6990c6218f7993021eac65c4\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-14T18:59:45.397Z\",\n            \"updated_at\": \"2026-02-14T18:59:45.397Z\"\n        },\n        {\n            \"id\": \"69987e0750352539dcdf7892\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T15:30:15.967Z\",\n            \"updated_at\": \"2026-02-20T15:30:15.967Z\"\n        },\n        {\n            \"id\": \"69987e0e50352539dcdf7893\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T15:30:22.265Z\",\n            \"updated_at\": \"2026-02-20T15:30:22.265Z\"\n        },\n        {\n            \"id\": \"69987e1e3cdb17f9a0a1a200\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T15:30:38.767Z\",\n            \"updated_at\": \"2026-02-20T15:30:38.767Z\"\n        },\n        {\n            \"id\": \"69987e7576ed94fe3a99db4b\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T15:32:05.731Z\",\n            \"updated_at\": \"2026-02-20T15:32:05.731Z\"\n        },\n        {\n            \"id\": \"69987eba76ed94fe3a99db4c\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T15:33:14.826Z\",\n            \"updated_at\": \"2026-02-20T15:33:14.826Z\"\n        },\n        {\n            \"id\": \"69987f3676ed94fe3a99db4d\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T15:35:18.378Z\",\n            \"updated_at\": \"2026-02-20T15:35:18.378Z\"\n        },\n        {\n            \"id\": \"6998804844b89340e10774b0\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T15:39:52.833Z\",\n            \"updated_at\": \"2026-02-20T15:39:52.833Z\"\n        },\n        {\n            \"id\": \"699880a344b89340e10774b1\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T15:41:23.275Z\",\n            \"updated_at\": \"2026-02-20T15:41:23.275Z\"\n        },\n        {\n            \"id\": \"699880e58473eacd3e1ba443\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T15:42:29.853Z\",\n            \"updated_at\": \"2026-02-20T15:42:29.853Z\"\n        },\n        {\n            \"id\": \"699881580f5591f8a973ea28\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T15:44:24.274Z\",\n            \"updated_at\": \"2026-02-20T15:44:24.274Z\"\n        },\n        {\n            \"id\": \"699881ba0f5591f8a973ea29\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T15:46:02.408Z\",\n            \"updated_at\": \"2026-02-20T15:46:02.408Z\"\n        },\n        {\n            \"id\": \"699881f10f5591f8a973ea2a\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T15:46:57.824Z\",\n            \"updated_at\": \"2026-02-20T15:46:57.824Z\"\n        },\n        {\n            \"id\": \"699882240f5591f8a973ea2b\",\n            \"store_id\": \"store_official_01\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T15:47:48.51Z\",\n            \"updated_at\": \"2026-02-20T15:47:48.51Z\"\n        },\n        {\n            \"id\": \"69988848cd265c4b5944864d\",\n            \"store_id\": \"\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T16:14:00.372Z\",\n            \"updated_at\": \"2026-02-20T16:14:00.372Z\"\n        },\n        {\n            \"id\": \"69988f0ae337f349f5bd3682\",\n            \"store_id\": \"\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T16:42:50.021Z\",\n            \"updated_at\": \"2026-02-20T16:42:50.021Z\"\n        },\n        {\n            \"id\": \"69988f5bab05770894d0b04e\",\n            \"store_id\": \"\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 8,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T16:44:11.846Z\",\n            \"updated_at\": \"2026-03-02T20:44:42.489Z\"\n        },\n        {\n            \"id\": \"69988fb28cea79ef8d42ca39\",\n            \"store_id\": \"\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T16:45:38.988Z\",\n            \"updated_at\": \"2026-02-20T16:45:38.988Z\"\n        },\n        {\n            \"id\": \"69988ff082089d3057492e9a\",\n            \"store_id\": \"\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T16:46:40.066Z\",\n            \"updated_at\": \"2026-02-20T16:46:40.066Z\"\n        },\n        {\n            \"id\": \"69989148638d30b87533c2e0\",\n            \"store_id\": \"b9d6f80f-6f27-4c1f-9cd5-1560b9fed76c\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 3,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-20T16:52:24.438Z\",\n            \"updated_at\": \"2026-03-02T20:44:42.475Z\"\n        },\n        {\n            \"id\": \"69a09260d8b4f808bfab4cec\",\n            \"store_id\": \"4a3fa729-5efe-4384-b70b-7617443d8f0d\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-26T18:35:12.601Z\",\n            \"updated_at\": \"2026-02-26T18:35:12.601Z\"\n        },\n        {\n            \"id\": \"69a1f6e34c0103ecf6c616bc\",\n            \"store_id\": \"4a3fa729-5efe-4384-b70b-7617443d8f0d\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-27T19:56:19.244Z\",\n            \"updated_at\": \"2026-02-27T19:56:19.244Z\"\n        },\n        {\n            \"id\": \"69a1f7deb48e2f7a90bd0360\",\n            \"store_id\": \"4a3fa729-5efe-4384-b70b-7617443d8f0d\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-02-27T20:00:30.673Z\",\n            \"updated_at\": \"2026-02-27T20:00:30.673Z\"\n        },\n        {\n            \"id\": \"69ae26066cdbc3fe8cbe091e\",\n            \"store_id\": \"1b09dda5-8ae9-4667-a2d5-ff1c71014af8\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 0,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-03-09T01:44:38.134Z\",\n            \"updated_at\": \"2026-03-12T00:16:33.863Z\"\n        },\n        {\n            \"id\": \"69ae2b726cdbc3fe8cbe091f\",\n            \"store_id\": \"1b09dda5-8ae9-4667-a2d5-ff1c71014af8\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 25000000,\n            \"stock\": 8,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-03-09T02:07:46.73Z\",\n            \"updated_at\": \"2026-03-12T04:23:48.174Z\"\n        },\n        {\n            \"id\": \"69b366bd1683eb7e3b5cc821\",\n            \"store_id\": \"1b09dda5-8ae9-4667-a2d5-ff1c71014af8\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 5000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-03-13T01:22:05.364Z\",\n            \"updated_at\": \"2026-03-13T01:22:05.364Z\"\n        },\n        {\n            \"id\": \"69b366de1683eb7e3b5cc822\",\n            \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 5000000,\n            \"stock\": 6,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-03-13T01:22:38.622Z\",\n            \"updated_at\": \"2026-03-13T02:18:12.681Z\"\n        },\n        {\n            \"id\": \"69b366f61683eb7e3b5cc823\",\n            \"store_id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 5000000,\n            \"stock\": 6,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-03-13T01:23:02.07Z\",\n            \"updated_at\": \"2026-03-13T02:17:36.643Z\"\n        },\n        {\n            \"id\": \"69b6c5a0480e5e367bd74acc\",\n            \"store_id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n            \"category_id\": \"698de7629deabc23ea184727\",\n            \"name\": \"Asus ROG Zephyrus G14\",\n            \"slug\": \"asus-rog-zephyrus-g14\",\n            \"description\": \"Laptop gaming powerful dengan desain compact.\",\n            \"condition\": \"new\",\n            \"price\": 5000000,\n            \"stock\": 10,\n            \"is_active\": true,\n            \"weight\": 1700,\n            \"dimensions\": {\n                \"length\": 32,\n                \"width\": 22,\n                \"height\": 2\n            },\n            \"images\": [\n                \"https://loremflickr.com/800/600/laptop,gaming\",\n                \"https://loremflickr.com/800/600/rog,asus\"\n            ],\n            \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n            \"specs\": {\n                \"processor\": \"AMD Ryzen 5\",\n                \"ram\": \"16GB\",\n                \"storage\": 1000\n            },\n            \"tags\": [\n                \"gaming\",\n                \"asus\",\n                \"rog\",\n                \"laptop\"\n            ],\n            \"views\": 0,\n            \"rating\": 0,\n            \"created_at\": \"2026-03-15T14:43:44.996Z\",\n            \"updated_at\": \"2026-03-15T14:43:44.996Z\"\n        }\n    ],\n    \"meta\": {\n        \"code\": 200,\n        \"message\": \"Success Get Products\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create Many Product",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"store_id\": \"store_official_01\",\n    \"category_id\": \"698de7629deabc23ea184727\",\n    \"name\": \"Asus ROG Zephyrus G14\",\n    \"slug\": \"asus-rog-zephyrus-g14\",\n    \"description\": \"Laptop gaming powerful dengan desain compact.\",\n    \"condition\": \"new\",\n    \"price\": 25000000,\n    \"stock\": 10,\n    \"is_active\": true,\n    \"weight\": 1700,\n    \"dimensions\": { \"length\": 32, \"width\": 22, \"height\": 2 },\n    \"images\": [\n      \"https://loremflickr.com/800/600/laptop,gaming\",\n      \"https://loremflickr.com/800/600/rog,asus\"\n    ],\n    \"thumbnail\": \"https://loremflickr.com/300/300/laptop,gaming\",\n    \"specs\": {\n      \"processor\": \"AMD Ryzen 5\",\n      \"ram\": \"16GB\",\n      \"storage\": 1000\n    },\n    \"tags\": [\"gaming\", \"asus\", \"rog\", \"laptop\"],\n    \"views\": 1500,\n    \"rating\": 4.8\n  },\n  {\n    \"store_id\": \"store_official_01\",\n    \"category_id\": \"698de7629deabc23ea184727\",\n    \"name\": \"MacBook Air M2\",\n    \"slug\": \"macbook-air-m2\",\n    \"description\": \"Laptop tipis dan ringan dari Apple dengan chip M2.\",\n    \"condition\": \"new\",\n    \"price\": 18000000,\n    \"stock\": 25,\n    \"is_active\": true,\n    \"weight\": 1240,\n    \"dimensions\": { \"length\": 30, \"width\": 21, \"height\": 1 },\n    \"images\": [\"https://loremflickr.com/800/600/macbook,apple\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/macbook,apple\",\n    \"specs\": {\n      \"processor\": \"Apple M1/M2\",\n      \"ram\": \"8GB\",\n      \"storage\": 256\n    },\n    \"tags\": [\"apple\", \"macbook\", \"office\", \"design\"],\n    \"views\": 3200,\n    \"rating\": 4.9\n  },\n  {\n    \"store_id\": \"store_tekno_jkt\",\n    \"category_id\": \"698de7629deabc23ea184727\",\n    \"name\": \"Lenovo ThinkPad X1 Carbon\",\n    \"slug\": \"lenovo-thinkpad-x1\",\n    \"description\": \"Laptop bisnis terbaik dengan ketahanan militer.\",\n    \"condition\": \"new\",\n    \"price\": 28000000,\n    \"stock\": 5,\n    \"is_active\": true,\n    \"weight\": 1100,\n    \"dimensions\": { \"length\": 31, \"width\": 22, \"height\": 1 },\n    \"images\": [\"https://loremflickr.com/800/600/thinkpad,lenovo\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/thinkpad,lenovo\",\n    \"specs\": {\n      \"processor\": \"Intel Core i7\",\n      \"ram\": \"16GB\",\n      \"storage\": 512\n    },\n    \"tags\": [\"bisnis\", \"lenovo\", \"thinkpad\"],\n    \"views\": 500,\n    \"rating\": 4.7\n  },\n  {\n    \"store_id\": \"store_tekno_jkt\",\n    \"category_id\": \"698de7629deabc23ea184727\",\n    \"name\": \"Acer Swift 3\",\n    \"slug\": \"acer-swift-3\",\n    \"description\": \"Laptop pelajar budget friendly performa oke.\",\n    \"condition\": \"new\",\n    \"price\": 8500000,\n    \"stock\": 50,\n    \"is_active\": true,\n    \"weight\": 1400,\n    \"dimensions\": { \"length\": 32, \"width\": 23, \"height\": 2 },\n    \"images\": [\"https://loremflickr.com/800/600/laptop,acer\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/laptop,acer\",\n    \"specs\": {\n      \"processor\": \"Intel Core i5\",\n      \"ram\": \"8GB\",\n      \"storage\": 512\n    },\n    \"tags\": [\"acer\", \"pelajar\", \"murah\"],\n    \"views\": 8000,\n    \"rating\": 4.5\n  },\n  {\n    \"store_id\": \"store_official_01\",\n    \"category_id\": \"698de7629deabc23ea184727\",\n    \"name\": \"HP Pavilion Gaming\",\n    \"slug\": \"hp-pavilion-gaming\",\n    \"description\": \"Laptop gaming entry level.\",\n    \"condition\": \"used\",\n    \"price\": 10000000,\n    \"stock\": 2,\n    \"is_active\": true,\n    \"weight\": 2200,\n    \"dimensions\": { \"length\": 35, \"width\": 25, \"height\": 3 },\n    \"images\": [\"https://loremflickr.com/800/600/laptop,gaming,hp\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/laptop,hp\",\n    \"specs\": {\n      \"processor\": \"Intel Core i5\",\n      \"ram\": \"8GB\",\n      \"storage\": 256\n    },\n    \"tags\": [\"hp\", \"gaming\", \"bekas\"],\n    \"views\": 600,\n    \"rating\": 4.2\n  },\n  {\n    \"store_id\": \"store_cell_01\",\n    \"category_id\": \"698de7629deabc23ea184728\",\n    \"name\": \"Samsung Galaxy S24 Ultra\",\n    \"slug\": \"samsung-s24-ultra\",\n    \"description\": \"HP Flagship Samsung dengan AI.\",\n    \"condition\": \"new\",\n    \"price\": 21000000,\n    \"stock\": 15,\n    \"is_active\": true,\n    \"weight\": 230,\n    \"dimensions\": { \"length\": 16, \"width\": 7, \"height\": 1 },\n    \"images\": [\"https://loremflickr.com/800/600/samsung,smartphone\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/samsung,smartphone\",\n    \"specs\": {\n      \"brand\": \"Samsung\",\n      \"screen_size\": 6.8,\n      \"nfc\": \"Ya\"\n    },\n    \"tags\": [\"samsung\", \"android\", \"flagship\"],\n    \"views\": 5000,\n    \"rating\": 4.9\n  },\n  {\n    \"store_id\": \"store_cell_01\",\n    \"category_id\": \"698de7629deabc23ea184728\",\n    \"name\": \"iPhone 15 Pro\",\n    \"slug\": \"iphone-15-pro\",\n    \"description\": \"iPhone terbaru dengan titanium.\",\n    \"condition\": \"new\",\n    \"price\": 20000000,\n    \"stock\": 20,\n    \"is_active\": true,\n    \"weight\": 180,\n    \"dimensions\": { \"length\": 15, \"width\": 7, \"height\": 1 },\n    \"images\": [\"https://loremflickr.com/800/600/iphone,smartphone\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/iphone,smartphone\",\n    \"specs\": {\n      \"brand\": \"Apple\",\n      \"screen_size\": 6.1,\n      \"nfc\": \"Ya\"\n    },\n    \"tags\": [\"apple\", \"iphone\", \"ios\"],\n    \"views\": 10000,\n    \"rating\": 5.0\n  },\n  {\n    \"store_id\": \"store_murah_02\",\n    \"category_id\": \"698de7629deabc23ea184728\",\n    \"name\": \"Xiaomi Redmi Note 13\",\n    \"slug\": \"redmi-note-13\",\n    \"description\": \"HP Murah spek dewa.\",\n    \"condition\": \"new\",\n    \"price\": 3000000,\n    \"stock\": 100,\n    \"is_active\": true,\n    \"weight\": 190,\n    \"dimensions\": { \"length\": 16, \"width\": 7, \"height\": 1 },\n    \"images\": [\"https://loremflickr.com/800/600/xiaomi,smartphone\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/xiaomi,smartphone\",\n    \"specs\": {\n      \"brand\": \"Xiaomi\",\n      \"screen_size\": 6.6,\n      \"nfc\": \"Ya\"\n    },\n    \"tags\": [\"xiaomi\", \"murah\", \"android\"],\n    \"views\": 2000,\n    \"rating\": 4.6\n  },\n  {\n    \"store_id\": \"store_cell_01\",\n    \"category_id\": \"698de7629deabc23ea184728\",\n    \"name\": \"Oppo Reno 10\",\n    \"slug\": \"oppo-reno-10\",\n    \"description\": \"Jagonya kamera portrait.\",\n    \"condition\": \"new\",\n    \"price\": 6000000,\n    \"stock\": 30,\n    \"is_active\": true,\n    \"weight\": 185,\n    \"dimensions\": { \"length\": 16, \"width\": 7, \"height\": 1 },\n    \"images\": [\"https://loremflickr.com/800/600/oppo,smartphone\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/oppo,smartphone\",\n    \"specs\": {\n      \"brand\": \"Oppo\",\n      \"screen_size\": 6.7,\n      \"nfc\": \"Ya\"\n    },\n    \"tags\": [\"oppo\", \"kamera\", \"selfie\"],\n    \"views\": 1500,\n    \"rating\": 4.5\n  },\n  {\n    \"store_id\": \"store_bekas_berkah\",\n    \"category_id\": \"698de7629deabc23ea184728\",\n    \"name\": \"iPhone 11\",\n    \"slug\": \"iphone-11-bekas\",\n    \"description\": \"iPhone 11 bekas mulus fullset.\",\n    \"condition\": \"used\",\n    \"price\": 5000000,\n    \"stock\": 1,\n    \"is_active\": true,\n    \"weight\": 190,\n    \"dimensions\": { \"length\": 15, \"width\": 7, \"height\": 1 },\n    \"images\": [\"https://loremflickr.com/800/600/iphone11,smartphone\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/iphone11,smartphone\",\n    \"specs\": {\n      \"brand\": \"Apple\",\n      \"screen_size\": 6.1,\n      \"nfc\": \"Ya\"\n    },\n    \"tags\": [\"apple\", \"bekas\", \"murah\"],\n    \"views\": 500,\n    \"rating\": 4.0\n  },\n  {\n    \"store_id\": \"store_fashion_01\",\n    \"category_id\": \"698de7629deabc23ea18472c\",\n    \"name\": \"Kaos Polos Hitam Premium\",\n    \"slug\": \"kaos-polos-hitam\",\n    \"description\": \"Bahan katun combed 30s adem.\",\n    \"condition\": \"new\",\n    \"price\": 50000,\n    \"stock\": 200,\n    \"is_active\": true,\n    \"weight\": 200,\n    \"dimensions\": { \"length\": 30, \"width\": 20, \"height\": 1 },\n    \"images\": [\"https://loremflickr.com/800/600/tshirt,black\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/tshirt,black\",\n    \"specs\": {\n      \"size\": \"L\",\n      \"material\": \"Katun\"\n    },\n    \"tags\": [\"kaos\", \"pria\", \"wanita\", \"santai\"],\n    \"views\": 300,\n    \"rating\": 4.5\n  },\n  {\n    \"store_id\": \"store_fashion_01\",\n    \"category_id\": \"698de7629deabc23ea18472c\",\n    \"name\": \"Kemeja Flanel Kotak-Kotak\",\n    \"slug\": \"kemeja-flanel\",\n    \"description\": \"Cocok untuk kuliah atau kerja santai.\",\n    \"condition\": \"new\",\n    \"price\": 120000,\n    \"stock\": 50,\n    \"is_active\": true,\n    \"weight\": 300,\n    \"dimensions\": { \"length\": 30, \"width\": 20, \"height\": 2 },\n    \"images\": [\"https://loremflickr.com/800/600/flanel,shirt\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/flanel,shirt\",\n    \"specs\": {\n      \"size\": \"XL\",\n      \"material\": \"Linen\"\n    },\n    \"tags\": [\"kemeja\", \"pria\", \"kuliah\"],\n    \"views\": 150,\n    \"rating\": 4.7\n  },\n  {\n    \"store_id\": \"store_sport\",\n    \"category_id\": \"698de7629deabc23ea18472c\",\n    \"name\": \"Jersey Bola Timnas\",\n    \"slug\": \"jersey-timnas\",\n    \"description\": \"Jersey grade ori.\",\n    \"condition\": \"new\",\n    \"price\": 85000,\n    \"stock\": 40,\n    \"is_active\": true,\n    \"weight\": 200,\n    \"dimensions\": { \"length\": 30, \"width\": 20, \"height\": 1 },\n    \"images\": [\"https://loremflickr.com/800/600/jersey,soccer\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/jersey,soccer\",\n    \"specs\": {\n      \"size\": \"M\",\n      \"material\": \"Polyester\"\n    },\n    \"tags\": [\"bola\", \"olahraga\", \"jersey\"],\n    \"views\": 1000,\n    \"rating\": 4.3\n  },\n  {\n    \"store_id\": \"store_fashion_01\",\n    \"category_id\": \"698de7629deabc23ea18472c\",\n    \"name\": \"Dress Pesta Wanita\",\n    \"slug\": \"dress-pesta\",\n    \"description\": \"Dress elegan untuk acara formal.\",\n    \"condition\": \"new\",\n    \"price\": 250000,\n    \"stock\": 10,\n    \"is_active\": true,\n    \"weight\": 400,\n    \"dimensions\": { \"length\": 40, \"width\": 30, \"height\": 5 },\n    \"images\": [\"https://loremflickr.com/800/600/dress,fashion\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/dress,fashion\",\n    \"specs\": {\n      \"size\": \"S\",\n      \"material\": \"Linen\"\n    },\n    \"tags\": [\"wanita\", \"pesta\", \"dress\"],\n    \"views\": 600,\n    \"rating\": 4.8\n  },\n  {\n    \"store_id\": \"store_thrifting\",\n    \"category_id\": \"698de7629deabc23ea18472c\",\n    \"name\": \"Jaket Bomber Bekas\",\n    \"slug\": \"jaket-bomber-second\",\n    \"description\": \"Masih layak pakai, warna sedikit pudar.\",\n    \"condition\": \"used\",\n    \"price\": 70000,\n    \"stock\": 1,\n    \"is_active\": true,\n    \"weight\": 500,\n    \"dimensions\": { \"length\": 35, \"width\": 25, \"height\": 5 },\n    \"images\": [\"https://loremflickr.com/800/600/jacket,bomber\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/jacket,bomber\",\n    \"specs\": {\n      \"size\": \"L\",\n      \"material\": \"Polyester\"\n    },\n    \"tags\": [\"jaket\", \"bekas\", \"thrifting\"],\n    \"views\": 200,\n    \"rating\": 4.0\n  },\n  {\n    \"store_id\": \"store_snack_01\",\n    \"category_id\": \"698de7629deabc23ea184731\",\n    \"name\": \"Keripik Singkong Pedas\",\n    \"slug\": \"keripik-singkong-pedas\",\n    \"description\": \"Keripik singkong level 10.\",\n    \"condition\": \"new\",\n    \"price\": 15000,\n    \"stock\": 100,\n    \"is_active\": true,\n    \"weight\": 250,\n    \"dimensions\": { \"length\": 20, \"width\": 15, \"height\": 5 },\n    \"images\": [\"https://loremflickr.com/800/600/chips,snack\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/chips,snack\",\n    \"specs\": {\n      \"flavor\": \"Pedas\",\n      \"weight\": 250\n    },\n    \"tags\": [\"snack\", \"pedas\", \"keripik\"],\n    \"views\": 400,\n    \"rating\": 4.6\n  },\n  {\n    \"store_id\": \"store_snack_01\",\n    \"category_id\": \"698de7629deabc23ea184731\",\n    \"name\": \"Basreng Original\",\n    \"slug\": \"basreng-ori\",\n    \"description\": \"Baso goreng renyah rasa original.\",\n    \"condition\": \"new\",\n    \"price\": 18000,\n    \"stock\": 50,\n    \"is_active\": true,\n    \"weight\": 200,\n    \"dimensions\": { \"length\": 20, \"width\": 15, \"height\": 5 },\n    \"images\": [\"https://loremflickr.com/800/600/meatball,snack\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/meatball,snack\",\n    \"specs\": {\n      \"flavor\": \"Original\",\n      \"weight\": 200\n    },\n    \"tags\": [\"basreng\", \"asin\", \"cemilan\"],\n    \"views\": 300,\n    \"rating\": 4.5\n  },\n  {\n    \"store_id\": \"store_kue_01\",\n    \"category_id\": \"698de7629deabc23ea184731\",\n    \"name\": \"Pie Susu Bali\",\n    \"slug\": \"pie-susu\",\n    \"description\": \"Oleh-oleh khas Bali.\",\n    \"condition\": \"new\",\n    \"price\": 35000,\n    \"stock\": 20,\n    \"is_active\": true,\n    \"weight\": 300,\n    \"dimensions\": { \"length\": 25, \"width\": 15, \"height\": 3 },\n    \"images\": [\"https://loremflickr.com/800/600/pie,bali\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/pie,bali\",\n    \"specs\": {\n      \"flavor\": \"Manis\",\n      \"weight\": 300\n    },\n    \"tags\": [\"bali\", \"manis\", \"kue\"],\n    \"views\": 800,\n    \"rating\": 4.9\n  },\n  {\n    \"store_id\": \"store_snack_01\",\n    \"category_id\": \"698de7629deabc23ea184731\",\n    \"name\": \"Makaroni Ngehe\",\n    \"slug\": \"makaroni-asin\",\n    \"description\": \"Makaroni bantet rasa asin gurih.\",\n    \"condition\": \"new\",\n    \"price\": 10000,\n    \"stock\": 150,\n    \"is_active\": true,\n    \"weight\": 100,\n    \"dimensions\": { \"length\": 15, \"width\": 10, \"height\": 3 },\n    \"images\": [\"https://loremflickr.com/800/600/macaroni,pasta\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/macaroni,pasta\",\n    \"specs\": {\n      \"flavor\": \"Asin\",\n      \"weight\": 100\n    },\n    \"tags\": [\"makaroni\", \"murah\", \"micin\"],\n    \"views\": 1200,\n    \"rating\": 4.7\n  },\n  {\n    \"store_id\": \"store_impor\",\n    \"category_id\": \"698de7629deabc23ea184731\",\n    \"name\": \"Coklat Impor Dark\",\n    \"slug\": \"coklat-dark\",\n    \"description\": \"Coklat 90% Cocoa pahit.\",\n    \"condition\": \"new\",\n    \"price\": 50000,\n    \"stock\": 30,\n    \"is_active\": true,\n    \"weight\": 100,\n    \"dimensions\": { \"length\": 15, \"width\": 8, \"height\": 1 },\n    \"images\": [\"https://loremflickr.com/800/600/dark,chocolate\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/dark,chocolate\",\n    \"specs\": {\n      \"flavor\": \"Original\",\n      \"weight\": 100\n    },\n    \"tags\": [\"coklat\", \"diet\", \"mahal\"],\n    \"views\": 200,\n    \"rating\": 4.8\n  },\n  {\n    \"store_id\": \"store_lauk_pauk\",\n    \"category_id\": \"698de7629deabc23ea184732\",\n    \"name\": \"Rendang Daging Sapi Kemasan 250g\",\n    \"slug\": \"rendang-sapi-kemasan\",\n    \"description\": \"Rendang asli Padang, daging empuk siap makan.\",\n    \"condition\": \"new\",\n    \"price\": 85000,\n    \"stock\": 50,\n    \"is_active\": true,\n    \"weight\": 300,\n    \"dimensions\": { \"length\": 15, \"width\": 10, \"height\": 5 },\n    \"images\": [\"https://loremflickr.com/800/600/rendang,meat\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/rendang,meat\",\n    \"specs\": {\n      \"expiry_date\": \"31 Desember 2025\",\n      \"serving_type\": \"Siap Saji\"\n    },\n    \"tags\": [\"rendang\", \"padang\", \"daging\", \"lauk\"],\n    \"views\": 1200,\n    \"rating\": 4.9\n  },\n  {\n    \"store_id\": \"store_frozen_mart\",\n    \"category_id\": \"698de7629deabc23ea184732\",\n    \"name\": \"Chicken Nugget Premium 500g\",\n    \"slug\": \"chicken-nugget-premium\",\n    \"description\": \"Nugget ayam crispy, favorit anak-anak.\",\n    \"condition\": \"new\",\n    \"price\": 45000,\n    \"stock\": 100,\n    \"is_active\": true,\n    \"weight\": 550,\n    \"dimensions\": { \"length\": 20, \"width\": 15, \"height\": 5 },\n    \"images\": [\"https://loremflickr.com/800/600/nugget,chicken\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/nugget,chicken\",\n    \"specs\": {\n      \"expiry_date\": \"20 Agustus 2024\",\n      \"serving_type\": \"Frozen\"\n    },\n    \"tags\": [\"nugget\", \"ayam\", \"frozen\", \"sarapan\"],\n    \"views\": 800,\n    \"rating\": 4.7\n  },\n  {\n    \"store_id\": \"store_mie_instan\",\n    \"category_id\": \"698de7629deabc23ea184732\",\n    \"name\": \"Mie Goreng Instan (1 Dus)\",\n    \"slug\": \"mie-goreng-dus\",\n    \"description\": \"1 Dus isi 40 bungkus. Penyelamat anak kost.\",\n    \"condition\": \"new\",\n    \"price\": 115000,\n    \"stock\": 200,\n    \"is_active\": true,\n    \"weight\": 4000,\n    \"dimensions\": { \"length\": 40, \"width\": 30, \"height\": 20 },\n    \"images\": [\"https://loremflickr.com/800/600/noodles,food\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/noodles,food\",\n    \"specs\": {\n      \"expiry_date\": \"1 Januari 2025\",\n      \"serving_type\": \"Perlu Dimasak\"\n    },\n    \"tags\": [\"mie\", \"instan\", \"grosir\", \"murah\"],\n    \"views\": 5000,\n    \"rating\": 4.8\n  },\n  {\n    \"store_id\": \"store_frozen_mart\",\n    \"category_id\": \"698de7629deabc23ea184732\",\n    \"name\": \"Ayam Ungkep Bumbu Kuning (1 Ekor)\",\n    \"slug\": \"ayam-ungkep-bumbu-kuning\",\n    \"description\": \"Ayam kampung asli, tinggal goreng.\",\n    \"condition\": \"new\",\n    \"price\": 75000,\n    \"stock\": 30,\n    \"is_active\": true,\n    \"weight\": 800,\n    \"dimensions\": { \"length\": 25, \"width\": 15, \"height\": 10 },\n    \"images\": [\"https://loremflickr.com/800/600/friedchicken,food\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/friedchicken,food\",\n    \"specs\": {\n      \"expiry_date\": \"3 Bulan di Freezer\",\n      \"serving_type\": \"Frozen\"\n    },\n    \"tags\": [\"ayam\", \"lauk\", \"praktis\", \"frozen\"],\n    \"views\": 600,\n    \"rating\": 4.6\n  },\n  {\n    \"store_id\": \"store_impor_food\",\n    \"category_id\": \"698de7629deabc23ea184732\",\n    \"name\": \"Spaghetti Bolognese Instan\",\n    \"slug\": \"spaghetti-bolognese\",\n    \"description\": \"Pasta Italia lengkap dengan saus daging.\",\n    \"condition\": \"new\",\n    \"price\": 25000,\n    \"stock\": 60,\n    \"is_active\": true,\n    \"weight\": 300,\n    \"dimensions\": { \"length\": 20, \"width\": 5, \"height\": 5 },\n    \"images\": [\"https://loremflickr.com/800/600/spaghetti,pasta\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/spaghetti,pasta\",\n    \"specs\": {\n      \"expiry_date\": \"15 Oktober 2025\",\n      \"serving_type\": \"Perlu Dimasak\"\n    },\n    \"tags\": [\"pasta\", \"italia\", \"spaghetti\"],\n    \"views\": 300,\n    \"rating\": 4.5\n  },\n  {\n    \"store_id\": \"store_elektronik_01\",\n    \"category_id\": \"698de7629deabc23ea184729\",\n    \"name\": \"Samsung Smart TV 55 Inch 4K\",\n    \"slug\": \"samsung-smart-tv-55\",\n    \"description\": \"TV 4K Crystal UHD dengan kualitas gambar tajam.\",\n    \"condition\": \"new\",\n    \"price\": 7500000,\n    \"stock\": 10,\n    \"is_active\": true,\n    \"weight\": 15000,\n    \"dimensions\": { \"length\": 120, \"width\": 10, \"height\": 70 },\n    \"images\": [\"https://loremflickr.com/800/600/tv,television\", \"https://loremflickr.com/800/600/screen,display\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/tv,television\",\n    \"specs\": { \"resolution\": \"4K\", \"type\": \"LED\" },\n    \"tags\": [\"samsung\", \"tv\", \"4k\"],\n    \"views\": 500,\n    \"rating\": 4.8\n  },\n  {\n    \"store_id\": \"store_elektronik_01\",\n    \"category_id\": \"698de7629deabc23ea184729\",\n    \"name\": \"LG OLED TV 65 Inch\",\n    \"slug\": \"lg-oled-tv-65\",\n    \"description\": \"Warna hitam pekat sempurna dengan teknologi OLED.\",\n    \"condition\": \"new\",\n    \"price\": 25000000,\n    \"stock\": 5,\n    \"is_active\": true,\n    \"weight\": 20000,\n    \"dimensions\": { \"length\": 140, \"width\": 5, \"height\": 80 },\n    \"images\": [\"https://loremflickr.com/800/600/oled,tv\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/oled,tv\",\n    \"specs\": { \"resolution\": \"4K\", \"type\": \"OLED\" },\n    \"tags\": [\"lg\", \"oled\", \"premium\"],\n    \"views\": 1200,\n    \"rating\": 5.0\n  },\n  {\n    \"store_id\": \"store_camera_pro\",\n    \"category_id\": \"698de7629deabc23ea18472a\",\n    \"name\": \"Sony Alpha A6400 Kit\",\n    \"slug\": \"sony-a6400\",\n    \"description\": \"Kamera mirrorless terbaik untuk vlogging.\",\n    \"condition\": \"new\",\n    \"price\": 13000000,\n    \"stock\": 8,\n    \"is_active\": true,\n    \"weight\": 800,\n    \"dimensions\": { \"length\": 15, \"width\": 10, \"height\": 10 },\n    \"images\": [\"https://loremflickr.com/800/600/camera,sony\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/camera,sony\",\n    \"specs\": { \"megapixels\": 24, \"sensor\": \"APS-C\" },\n    \"tags\": [\"sony\", \"camera\", \"mirrorless\"],\n    \"views\": 2000,\n    \"rating\": 4.9\n  },\n  {\n    \"store_id\": \"store_camera_pro\",\n    \"category_id\": \"698de7629deabc23ea18472a\",\n    \"name\": \"Canon EOS R5 Body Only\",\n    \"slug\": \"canon-eos-r5\",\n    \"description\": \"Kamera profesional full frame 8K recording.\",\n    \"condition\": \"new\",\n    \"price\": 55000000,\n    \"stock\": 2,\n    \"is_active\": true,\n    \"weight\": 1200,\n    \"dimensions\": { \"length\": 18, \"width\": 12, \"height\": 10 },\n    \"images\": [\"https://loremflickr.com/800/600/canon,camera\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/canon,camera\",\n    \"specs\": { \"megapixels\": 45, \"sensor\": \"Full Frame\" },\n    \"tags\": [\"canon\", \"profesional\", \"photography\"],\n    \"views\": 3000,\n    \"rating\": 5.0\n  },\n  {\n    \"store_id\": \"store_gadget_01\",\n    \"category_id\": \"698de7629deabc23ea18472b\",\n    \"name\": \"Apple Watch Series 9\",\n    \"slug\": \"apple-watch-9\",\n    \"description\": \"Smartwatch tercanggih dari Apple.\",\n    \"condition\": \"new\",\n    \"price\": 7000000,\n    \"stock\": 20,\n    \"is_active\": true,\n    \"weight\": 200,\n    \"dimensions\": { \"length\": 10, \"width\": 5, \"height\": 2 },\n    \"images\": [\"https://loremflickr.com/800/600/smartwatch,apple\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/smartwatch,apple\",\n    \"specs\": { \"strap_material\": \"Karet\", \"water_resistant\": \"Ya\" },\n    \"tags\": [\"apple\", \"watch\", \"ios\"],\n    \"views\": 4000,\n    \"rating\": 4.8\n  },\n  {\n    \"store_id\": \"store_fashion_01\",\n    \"category_id\": \"698de7629deabc23ea18472d\",\n    \"name\": \"Celana Jeans Levi's 501\",\n    \"slug\": \"levis-501\",\n    \"description\": \"Jeans original fit legendaris.\",\n    \"condition\": \"new\",\n    \"price\": 1200000,\n    \"stock\": 50,\n    \"is_active\": true,\n    \"weight\": 800,\n    \"dimensions\": { \"length\": 40, \"width\": 30, \"height\": 2 },\n    \"images\": [\"https://loremflickr.com/800/600/jeans,pants\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/jeans,pants\",\n    \"specs\": { \"waist_size\": 32, \"type\": \"Jeans\" },\n    \"tags\": [\"levis\", \"jeans\", \"pria\"],\n    \"views\": 1500,\n    \"rating\": 4.9\n  },\n  {\n    \"store_id\": \"store_fashion_01\",\n    \"category_id\": \"698de7629deabc23ea18472d\",\n    \"name\": \"Celana Chino Slim Fit\",\n    \"slug\": \"chino-slim-fit\",\n    \"description\": \"Celana santai cocok untuk kerja.\",\n    \"condition\": \"new\",\n    \"price\": 350000,\n    \"stock\": 100,\n    \"is_active\": true,\n    \"weight\": 500,\n    \"dimensions\": { \"length\": 40, \"width\": 30, \"height\": 2 },\n    \"images\": [\"https://loremflickr.com/800/600/chino,pants\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/chino,pants\",\n    \"specs\": { \"waist_size\": 30, \"type\": \"Chino\" },\n    \"tags\": [\"chino\", \"kerja\", \"santai\"],\n    \"views\": 800,\n    \"rating\": 4.6\n  },\n  {\n    \"store_id\": \"store_aksesoris\",\n    \"category_id\": \"698de7629deabc23ea18472e\",\n    \"name\": \"Kalung Emas 18K\",\n    \"slug\": \"kalung-emas-18k\",\n    \"description\": \"Kalung emas asli desain minimalis.\",\n    \"condition\": \"new\",\n    \"price\": 2500000,\n    \"stock\": 10,\n    \"is_active\": true,\n    \"weight\": 50,\n    \"dimensions\": { \"length\": 10, \"width\": 10, \"height\": 2 },\n    \"images\": [\"https://loremflickr.com/800/600/necklace,gold\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/necklace,gold\",\n    \"specs\": { \"type\": \"Kalung\" },\n    \"tags\": [\"emas\", \"perhiasan\", \"wanita\"],\n    \"views\": 2000,\n    \"rating\": 5.0\n  },\n  {\n    \"store_id\": \"store_sepatu_jkt\",\n    \"category_id\": \"698de7629deabc23ea18472f\",\n    \"name\": \"Nike Air Jordan 1 High\",\n    \"slug\": \"nike-air-jordan-1\",\n    \"description\": \"Sepatu basket lifestyle paling hits.\",\n    \"condition\": \"new\",\n    \"price\": 3500000,\n    \"stock\": 15,\n    \"is_active\": true,\n    \"weight\": 1200,\n    \"dimensions\": { \"length\": 35, \"width\": 25, \"height\": 15 },\n    \"images\": [\"https://loremflickr.com/800/600/sneakers,nike\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/sneakers,nike\",\n    \"specs\": { \"shoe_size\": 42, \"gender\": \"Pria\" },\n    \"tags\": [\"nike\", \"sneakers\", \"jordan\"],\n    \"views\": 5000,\n    \"rating\": 4.9\n  },\n  {\n    \"store_id\": \"store_fashion_01\",\n    \"category_id\": \"698de7629deabc23ea184730\",\n    \"name\": \"Jaket Gunung Waterproof\",\n    \"slug\": \"jaket-gunung-eiger\",\n    \"description\": \"Tahan hujan deras, cocok untuk hiking.\",\n    \"condition\": \"new\",\n    \"price\": 850000,\n    \"stock\": 30,\n    \"is_active\": true,\n    \"weight\": 900,\n    \"dimensions\": { \"length\": 30, \"width\": 25, \"height\": 5 },\n    \"images\": [\"https://loremflickr.com/800/600/jacket,hiking\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/jacket,hiking\",\n    \"specs\": { \"hoodie\": \"Ya\", \"waterproof\": \"Ya\" },\n    \"tags\": [\"outdoor\", \"gunung\", \"jaket\"],\n    \"views\": 900,\n    \"rating\": 4.7\n  },\n  {\n    \"store_id\": \"store_minuman\",\n    \"category_id\": \"698de7629deabc23ea184733\",\n    \"name\": \"Kopi Susu Gula Aren 1L\",\n    \"slug\": \"kopi-susu-1l\",\n    \"description\": \"Kopi susu kekinian botol 1 liter.\",\n    \"condition\": \"new\",\n    \"price\": 85000,\n    \"stock\": 50,\n    \"is_active\": true,\n    \"weight\": 1100,\n    \"dimensions\": { \"length\": 10, \"width\": 10, \"height\": 25 },\n    \"images\": [\"https://loremflickr.com/800/600/coffee,bottle\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/coffee,bottle\",\n    \"specs\": { \"sugar_level\": \"Normal\" },\n    \"tags\": [\"kopi\", \"minuman\", \"segar\"],\n    \"views\": 600,\n    \"rating\": 4.8\n  },\n  {\n    \"store_id\": \"store_sembako\",\n    \"category_id\": \"698de7629deabc23ea184734\",\n    \"name\": \"Beras Organik Pandan Wangi 5kg\",\n    \"slug\": \"beras-organik-5kg\",\n    \"description\": \"Beras sehat bebas pestisida.\",\n    \"condition\": \"new\",\n    \"price\": 95000,\n    \"stock\": 100,\n    \"is_active\": true,\n    \"weight\": 5000,\n    \"dimensions\": { \"length\": 30, \"width\": 20, \"height\": 10 },\n    \"images\": [\"https://loremflickr.com/800/600/rice,sack\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/rice,sack\",\n    \"specs\": { \"organic\": \"Ya\" },\n    \"tags\": [\"beras\", \"sembako\", \"sehat\"],\n    \"views\": 300,\n    \"rating\": 4.9\n  },\n  {\n    \"store_id\": \"store_frozen_mart\",\n    \"category_id\": \"698de7629deabc23ea184735\",\n    \"name\": \"Sosis Sapi Premium 1kg\",\n    \"slug\": \"sosis-sapi-1kg\",\n    \"description\": \"Sosis dengan daging sapi asli 90%.\",\n    \"condition\": \"new\",\n    \"price\": 120000,\n    \"stock\": 40,\n    \"is_active\": true,\n    \"weight\": 1000,\n    \"dimensions\": { \"length\": 20, \"width\": 15, \"height\": 5 },\n    \"images\": [\"https://loremflickr.com/800/600/sausage,food\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/sausage,food\",\n    \"specs\": { \"storage_temp\": \"-18 Derajat Celcius\" },\n    \"tags\": [\"sosis\", \"frozen\", \"daging\"],\n    \"views\": 500,\n    \"rating\": 4.7\n  },\n  {\n    \"store_id\": \"store_frozen_mart\",\n    \"category_id\": \"698de7629deabc23ea184735\",\n    \"name\": \"Kentang Goreng Shoestring 1kg\",\n    \"slug\": \"kentang-goreng-1kg\",\n    \"description\": \"Kentang goreng ala restoran cepat saji.\",\n    \"condition\": \"new\",\n    \"price\": 35000,\n    \"stock\": 80,\n    \"is_active\": true,\n    \"weight\": 1000,\n    \"dimensions\": { \"length\": 30, \"width\": 20, \"height\": 5 },\n    \"images\": [\"https://loremflickr.com/800/600/frenchfries,food\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/frenchfries,food\",\n    \"specs\": { \"storage_temp\": \"-18 Derajat Celcius\" },\n    \"tags\": [\"kentang\", \"frozen\", \"snack\"],\n    \"views\": 700,\n    \"rating\": 4.6\n  },\n  {\n    \"store_id\": \"store_mainan\",\n    \"category_id\": \"698de7629deabc23ea184736\",\n    \"name\": \"LEGO City Police Station\",\n    \"slug\": \"lego-city-police\",\n    \"description\": \"Mainan edukasi balok susun seri polisi.\",\n    \"condition\": \"new\",\n    \"price\": 1500000,\n    \"stock\": 10,\n    \"is_active\": true,\n    \"weight\": 1200,\n    \"dimensions\": { \"length\": 40, \"width\": 30, \"height\": 10 },\n    \"images\": [\"https://loremflickr.com/800/600/lego,toys\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/lego,toys\",\n    \"specs\": { \"age_group\": \"4-7 Tahun\", \"material\": \"Plastik\" },\n    \"tags\": [\"lego\", \"mainan\", \"edukasi\"],\n    \"views\": 800,\n    \"rating\": 4.9\n  },\n  {\n    \"store_id\": \"store_musik\",\n    \"category_id\": \"698de7629deabc23ea184737\",\n    \"name\": \"Gitar Akustik Yamaha F310\",\n    \"slug\": \"yamaha-f310\",\n    \"description\": \"Gitar pemula dengan suara jernih.\",\n    \"condition\": \"new\",\n    \"price\": 1400000,\n    \"stock\": 20,\n    \"is_active\": true,\n    \"weight\": 3000,\n    \"dimensions\": { \"length\": 100, \"width\": 40, \"height\": 15 },\n    \"images\": [\"https://loremflickr.com/800/600/guitar,acoustic\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/guitar,acoustic\",\n    \"specs\": { \"instrument_type\": \"Gitar\", \"brand\": \"Yamaha\" },\n    \"tags\": [\"gitar\", \"musik\", \"yamaha\"],\n    \"views\": 1200,\n    \"rating\": 4.8\n  },\n  {\n    \"store_id\": \"store_sport\",\n    \"category_id\": \"698de7629deabc23ea184738\",\n    \"name\": \"Bola Sepak Adidas Al Rihla\",\n    \"slug\": \"bola-adidas-al-rihla\",\n    \"description\": \"Bola resmi piala dunia.\",\n    \"condition\": \"new\",\n    \"price\": 500000,\n    \"stock\": 50,\n    \"is_active\": true,\n    \"weight\": 450,\n    \"dimensions\": { \"length\": 25, \"width\": 25, \"height\": 25 },\n    \"images\": [\"https://loremflickr.com/800/600/soccer,ball\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/soccer,ball\",\n    \"specs\": { \"sport_type\": \"Sepakbola\" },\n    \"tags\": [\"bola\", \"olahraga\", \"adidas\"],\n    \"views\": 900,\n    \"rating\": 4.7\n  },\n  {\n    \"store_id\": \"store_game_center\",\n    \"category_id\": \"698de7629deabc23ea184739\",\n    \"name\": \"PlayStation 5 Console Disc Edition\",\n    \"slug\": \"ps5-console\",\n    \"description\": \"Konsol next-gen Sony dengan grafik 4K 120Hz.\",\n    \"condition\": \"new\",\n    \"price\": 9500000,\n    \"stock\": 5,\n    \"is_active\": true,\n    \"weight\": 4500,\n    \"dimensions\": { \"length\": 40, \"width\": 26, \"height\": 10 },\n    \"images\": [\"https://loremflickr.com/800/600/ps5,console\"],\n    \"thumbnail\": \"https://loremflickr.com/300/300/ps5,console\",\n    \"specs\": { \"platform\": \"PlayStation\", \"genre\": \"Console\" },\n    \"tags\": [\"ps5\", \"sony\", \"gaming\"],\n    \"views\": 5000,\n    \"rating\": 5.0\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/products/batch",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "products",
+                "batch"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Categpry",
+      "item": [
+        {
+          "name": "Create Category",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n  \"name\": \"Laptop\",\n  \"slug\": \"laptop\",\n  \"parent_id\": \"697b1c073446075bc5243e8f\",\n  \"templates\": [\n    {\n      \"key\": \"processor\",\n      \"label\": \"Processor\",\n      \"type\": \"dropdown\",\n      \"required\": true,\n      \"options\": [\"Intel Core i3\", \"Intel Core i5\", \"Intel Core i7\", \"AMD Ryzen 5\", \"Apple M1/M2\"]\n    },\n    {\n      \"key\": \"storage_type\",\n      \"label\": \"Tipe Storage\",\n      \"type\": \"dropdown\",\n      \"required\": true,\n      \"options\": [\"SSD\", \"HDD\"]\n    },\n    {\n      \"key\": \"screen_size\",\n      \"label\": \"Ukuran Layar (inch)\",\n      \"type\": \"number\",\n      \"required\": true\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/products/categories",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "products",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category By Id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_BUYER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n  \"name\": \"Laptop\",\n  \"slug\": \"laptop\",\n  \"parent_id\": \"697b1c073446075bc5243e8f\",\n  \"templates\": [\n    {\n      \"key\": \"processor\",\n      \"label\": \"Processor\",\n      \"type\": \"dropdown\",\n      \"required\": true,\n      \"options\": [\"Intel Core i3\", \"Intel Core i5\", \"Intel Core i7\", \"AMD Ryzen 5\", \"Apple M1/M2\"]\n    },\n    {\n      \"key\": \"storage_type\",\n      \"label\": \"Tipe Storage\",\n      \"type\": \"dropdown\",\n      \"required\": true,\n      \"options\": [\"SSD\", \"HDD\"]\n    },\n    {\n      \"key\": \"screen_size\",\n      \"label\": \"Ukuran Layar (inch)\",\n      \"type\": \"number\",\n      \"required\": true\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/products/categories/698de7629deabc23ea184730",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "products",
+                "categories",
+                "698de7629deabc23ea184730"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Category",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_SELLER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/products/categories/categories",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "products",
+                "categories",
+                "categories"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \n  \"name\": \"Laptoppp\",\n  \"slug\": \"laptop\",\n  \"parent_id\": \"697b1c073446075bc5243e8f\",\n  \"templates\": [\n    {\n      \"key\": \"processor\",\n      \"label\": \"Processor\",\n      \"type\": \"dropdown\",\n      \"required\": true,\n      \"options\": [\"Intel Core i3\", \"Intel Core i5\", \"Intel Core i7\", \"AMD Ryzen 5\", \"Apple M1/M2\"]\n    },\n    {\n      \"key\": \"storage_type\",\n      \"label\": \"Tipe Storage\",\n      \"type\": \"dropdown\",\n      \"required\": true,\n      \"options\": [\"SSD\", \"HDD\"]\n    },\n    {\n      \"key\": \"screen_size\",\n      \"label\": \"Ukuran Layar (inch)\",\n      \"type\": \"number\",\n      \"required\": true\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/products/categories/697c72da2dbcdd526895e602",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "products",
+                "categories",
+                "697c72da2dbcdd526895e602"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/products/categories/697c72da2dbcdd526895e602",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "products",
+                "categories",
+                "697c72da2dbcdd526895e602"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

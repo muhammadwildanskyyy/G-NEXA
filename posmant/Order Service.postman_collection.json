@@ -1,0 +1,1418 @@
+{
+  "info": {
+    "_postman_id": "13bb995c-a99c-4815-9429-94d79c5f2c92",
+    "name": "Order Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40663290",
+    "_collection_link": "https://go.postman.co/collection/40663290-13bb995c-a99c-4815-9429-94d79c5f2c92?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Order",
+      "item": [
+        {
+          "name": "Get Order By User Id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_BUYER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idempotensi_Key\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n  \"store_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"shipping_address\": {\n    \"recipient_name\": \"Rama\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n    \"city\": \"Surabaya\",\n    \"province\": \"Jawa Timur\",\n    \"postal_code\": \"60111\",\n    \"courier\": \"JNE Regular\"\n  },\n  \"items\": [\n    {\n      \"product_id\": \"69989148638d30b87533c2e0\",\n      \"quantity\": 2\n    },\n    {\n      \"product_id\": \"69988f5bab05770894d0b04e\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/user",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "user"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Order By User Id",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"idempotensi_Key\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n  \"store_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"shipping_address\": {\n    \"recipient_name\": \"Rama\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n    \"city\": \"Surabaya\",\n    \"province\": \"Jawa Timur\",\n    \"postal_code\": \"60111\",\n    \"courier\": \"JNE Regular\"\n  },\n  \"items\": [\n    {\n      \"product_id\": \"69989148638d30b87533c2e0\",\n      \"quantity\": 2\n    },\n    {\n      \"product_id\": \"69988f5bab05770894d0b04e\",\n      \"quantity\": 1\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL_ORDER_SERVICE}}/v1/api/orders/user",
+                  "host": [
+                    "{{BASE_URL_ORDER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "orders",
+                    "user"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "3198"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "X-Correlation-ID",
+                  "value": "943f2618-5cbc-4814-b0fa-77134187650c"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"c7e-mOtgnE49Jgo2aIEzGsg9B2xaLDI\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:46:07 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "590"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "88"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "e5c6622aee5a5f0bd081c759a57bbc41"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Success Get Orders By User Id\",\n        \"code\": 200\n    },\n    \"data\": [\n        {\n            \"id\": \"902826b3-58ef-4965-996a-ad645af4efa4\",\n            \"invoice_id\": \"078f2b51-b69c-4db4-8e90-d25fdd2eb53b\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n            \"status\": \"COMPLETED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T01:38:51.107Z\",\n            \"updated_at\": \"2026-03-13T01:44:07.713Z\"\n        },\n        {\n            \"id\": \"b5f824a8-e105-44bf-9764-cad54045dfb8\",\n            \"invoice_id\": \"078f2b51-b69c-4db4-8e90-d25fdd2eb53b\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n            \"status\": \"CANCELLED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T01:38:51.128Z\",\n            \"updated_at\": \"2026-03-13T02:07:58.303Z\"\n        },\n        {\n            \"id\": \"e68e9cb4-08b7-4497-8a8a-52c75d0fcd62\",\n            \"invoice_id\": \"119b6327-4475-4c0f-a834-4e1919c3a4ed\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n            \"status\": \"COMPLETED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T02:11:29.531Z\",\n            \"updated_at\": \"2026-03-13T02:12:14.089Z\"\n        },\n        {\n            \"id\": \"1c249dac-8d99-4258-8e0a-93fa348dc960\",\n            \"invoice_id\": \"119b6327-4475-4c0f-a834-4e1919c3a4ed\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n            \"status\": \"COMPLETED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T02:11:29.543Z\",\n            \"updated_at\": \"2026-03-13T02:13:18.274Z\"\n        },\n        {\n            \"id\": \"58e26955-0891-41a8-b85a-051372de7314\",\n            \"invoice_id\": \"e1378e52-f794-4d43-be42-5d02769dc528\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n            \"status\": \"CANCELLED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T02:17:34.565Z\",\n            \"updated_at\": \"2026-03-13T02:18:07.486Z\"\n        },\n        {\n            \"id\": \"356726c7-b4e4-4ae8-bfa6-6b366154a579\",\n            \"invoice_id\": \"e1378e52-f794-4d43-be42-5d02769dc528\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n            \"status\": \"COMPLETED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T02:17:34.590Z\",\n            \"updated_at\": \"2026-03-13T02:25:40.217Z\"\n        }\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Order By Order Id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_BUYER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idempotensi_Key\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n  \"store_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"shipping_address\": {\n    \"recipient_name\": \"Rama\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n    \"city\": \"Surabaya\",\n    \"province\": \"Jawa Timur\",\n    \"postal_code\": \"60111\",\n    \"courier\": \"JNE Regular\"\n  },\n  \"items\": [\n    {\n      \"product_id\": \"69989148638d30b87533c2e0\",\n      \"quantity\": 2\n    },\n    {\n      \"product_id\": \"69988f5bab05770894d0b04e\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/b5f824a8-e105-44bf-9764-cad54045dfb8",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "b5f824a8-e105-44bf-9764-cad54045dfb8"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Order By Order Id",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"idempotensi_Key\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n  \"store_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"shipping_address\": {\n    \"recipient_name\": \"Rama\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n    \"city\": \"Surabaya\",\n    \"province\": \"Jawa Timur\",\n    \"postal_code\": \"60111\",\n    \"courier\": \"JNE Regular\"\n  },\n  \"items\": [\n    {\n      \"product_id\": \"69989148638d30b87533c2e0\",\n      \"quantity\": 2\n    },\n    {\n      \"product_id\": \"69988f5bab05770894d0b04e\",\n      \"quantity\": 1\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL_ORDER_SERVICE}}/v1/api/orders/902826b3-58ef-4965-996a-ad645af4efa4",
+                  "host": [
+                    "{{BASE_URL_ORDER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "orders",
+                    "902826b3-58ef-4965-996a-ad645af4efa4"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "592"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "X-Correlation-ID",
+                  "value": "3db0e2e9-eecb-4007-8335-43c6188e35f0"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"250-MIEQXpyZn81LzVAnJakdyf80lSs\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:46:35 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "100"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "15"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "703ddd38075614005c7c343b0bf80817"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Success Get Orders By Order Id\",\n        \"code\": 200\n    },\n    \"data\": {\n        \"id\": \"902826b3-58ef-4965-996a-ad645af4efa4\",\n        \"invoice_id\": \"078f2b51-b69c-4db4-8e90-d25fdd2eb53b\",\n        \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n        \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n        \"status\": \"COMPLETED\",\n        \"total_price\": \"10000000\",\n        \"shipping_address\": {\n            \"city\": \"Jakarta\",\n            \"province\": \"DKI Jakarta\",\n            \"postal_code\": \"10110\",\n            \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n            \"phone_number\": \"081234567890\",\n            \"recipient_name\": \"buyer 1\"\n        },\n        \"created_at\": \"2026-03-13T01:38:51.107Z\",\n        \"updated_at\": \"2026-03-13T01:44:07.713Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Orders",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_BUYER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idempotensi_Key\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n  \"store_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"shipping_address\": {\n    \"recipient_name\": \"Rama\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n    \"city\": \"Surabaya\",\n    \"province\": \"Jawa Timur\",\n    \"postal_code\": \"60111\",\n    \"courier\": \"JNE Regular\"\n  },\n  \"items\": [\n    {\n      \"product_id\": \"69989148638d30b87533c2e0\",\n      \"quantity\": 2\n    },\n    {\n      \"product_id\": \"69988f5bab05770894d0b04e\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Orders",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"idempotensi_Key\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n  \"store_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"shipping_address\": {\n    \"recipient_name\": \"Rama\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n    \"city\": \"Surabaya\",\n    \"province\": \"Jawa Timur\",\n    \"postal_code\": \"60111\",\n    \"courier\": \"JNE Regular\"\n  },\n  \"items\": [\n    {\n      \"product_id\": \"69989148638d30b87533c2e0\",\n      \"quantity\": 2\n    },\n    {\n      \"product_id\": \"69988f5bab05770894d0b04e\",\n      \"quantity\": 1\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL_ORDER_SERVICE}}/v1/api/orders",
+                  "host": [
+                    "{{BASE_URL_ORDER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "orders"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "4241"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "X-Correlation-ID",
+                  "value": "7e06de64-57cb-4eab-be30-047c70dae04e"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"1091-BToydMVvF0oRXqveqM4+pxzcA7Y\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:47:46 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "82"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "11"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "0f36445ca8b82979802e695c4d56cc6a"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Success Get Orders By Order Id\",\n        \"code\": 200\n    },\n    \"data\": [\n        {\n            \"id\": \"873517eb-5ee0-4c7f-828f-0c5a52481d1f\",\n            \"invoice_id\": \"37456cfd-5542-4cab-82d8-40c5093fdcab\",\n            \"user_id\": \"eab46733-4cdb-4dba-91b7-848d0efd4e36\",\n            \"store_id\": \"1b09dda5-8ae9-4667-a2d5-ff1c71014af8\",\n            \"status\": \"PAID\",\n            \"total_price\": \"25000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"Budi Santoso\"\n            },\n            \"created_at\": \"2026-03-12T03:18:29.938Z\",\n            \"updated_at\": \"2026-03-12T03:21:38.810Z\"\n        },\n        {\n            \"id\": \"bbf64938-d197-4294-bbc7-593689644c7d\",\n            \"invoice_id\": \"ba824a8c-6278-4e62-8588-3e9f55b108f1\",\n            \"user_id\": \"eab46733-4cdb-4dba-91b7-848d0efd4e36\",\n            \"store_id\": \"1b09dda5-8ae9-4667-a2d5-ff1c71014af8\",\n            \"status\": \"PAID\",\n            \"total_price\": \"25000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"Budi Santoso\"\n            },\n            \"created_at\": \"2026-03-12T04:23:44.881Z\",\n            \"updated_at\": \"2026-03-12T04:23:51.052Z\"\n        },\n        {\n            \"id\": \"902826b3-58ef-4965-996a-ad645af4efa4\",\n            \"invoice_id\": \"078f2b51-b69c-4db4-8e90-d25fdd2eb53b\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n            \"status\": \"COMPLETED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T01:38:51.107Z\",\n            \"updated_at\": \"2026-03-13T01:44:07.713Z\"\n        },\n        {\n            \"id\": \"b5f824a8-e105-44bf-9764-cad54045dfb8\",\n            \"invoice_id\": \"078f2b51-b69c-4db4-8e90-d25fdd2eb53b\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n            \"status\": \"CANCELLED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T01:38:51.128Z\",\n            \"updated_at\": \"2026-03-13T02:07:58.303Z\"\n        },\n        {\n            \"id\": \"e68e9cb4-08b7-4497-8a8a-52c75d0fcd62\",\n            \"invoice_id\": \"119b6327-4475-4c0f-a834-4e1919c3a4ed\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n            \"status\": \"COMPLETED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T02:11:29.531Z\",\n            \"updated_at\": \"2026-03-13T02:12:14.089Z\"\n        },\n        {\n            \"id\": \"1c249dac-8d99-4258-8e0a-93fa348dc960\",\n            \"invoice_id\": \"119b6327-4475-4c0f-a834-4e1919c3a4ed\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n            \"status\": \"COMPLETED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T02:11:29.543Z\",\n            \"updated_at\": \"2026-03-13T02:13:18.274Z\"\n        },\n        {\n            \"id\": \"58e26955-0891-41a8-b85a-051372de7314\",\n            \"invoice_id\": \"e1378e52-f794-4d43-be42-5d02769dc528\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n            \"status\": \"CANCELLED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T02:17:34.565Z\",\n            \"updated_at\": \"2026-03-13T02:18:07.486Z\"\n        },\n        {\n            \"id\": \"356726c7-b4e4-4ae8-bfa6-6b366154a579\",\n            \"invoice_id\": \"e1378e52-f794-4d43-be42-5d02769dc528\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n            \"status\": \"COMPLETED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T02:17:34.590Z\",\n            \"updated_at\": \"2026-03-13T02:25:40.217Z\"\n        }\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Order",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"shipping_address\": {\n    \"recipient_name\": \"Joko\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n    \"city\": \"Surabaya\",\n    \"province\": \"Jawa Timur\",\n    \"postal_code\": \"60111\",\n    \"courier\": \"JNE Regular\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/update/902826b3-58ef-4965-996a-ad645af4efa4",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "update",
+                "902826b3-58ef-4965-996a-ad645af4efa4"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Update Order",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"shipping_address\": {\n    \"recipient_name\": \"Joko\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n    \"city\": \"Surabaya\",\n    \"province\": \"Jawa Timur\",\n    \"postal_code\": \"60111\",\n    \"courier\": \"JNE Regular\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL_ORDER_SERVICE}}/v1/api/orders/update/902826b3-58ef-4965-996a-ad645af4efa4",
+                  "host": [
+                    "{{BASE_URL_ORDER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "orders",
+                    "update",
+                    "902826b3-58ef-4965-996a-ad645af4efa4"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "592"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "X-Correlation-ID",
+                  "value": "bb3c65b8-71fd-4c00-8798-ea8f27b567fa"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"250-/IIC1iaFUDRw+ovNqNgEOESUE2I\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:48:07 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "117"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "5"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "ace3910673300f320cf3cb2755959c0e"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Success Update Order\",\n        \"code\": 200\n    },\n    \"data\": {\n        \"id\": \"902826b3-58ef-4965-996a-ad645af4efa4\",\n        \"invoice_id\": \"078f2b51-b69c-4db4-8e90-d25fdd2eb53b\",\n        \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n        \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n        \"status\": \"COMPLETED\",\n        \"total_price\": \"10000000\",\n        \"shipping_address\": {\n            \"city\": \"Surabaya\",\n            \"province\": \"Jawa Timur\",\n            \"postal_code\": \"60111\",\n            \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n            \"phone_number\": \"081234567890\",\n            \"recipient_name\": \"Joko\"\n        },\n        \"created_at\": \"2026-03-13T01:38:51.107Z\",\n        \"updated_at\": \"2026-03-15T14:48:06.985Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"shipping_address\": {\n    \"recipient_name\": \"Joko\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n    \"city\": \"Surabaya\",\n    \"province\": \"Jawa Timur\",\n    \"postal_code\": \"60111\",\n    \"courier\": \"JNE Regular\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/delete/902826b3-58ef-4965-996a-ad645af4efa4",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "delete",
+                "902826b3-58ef-4965-996a-ad645af4efa4"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Delete Order",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"shipping_address\": {\n    \"recipient_name\": \"Joko\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n    \"city\": \"Surabaya\",\n    \"province\": \"Jawa Timur\",\n    \"postal_code\": \"60111\",\n    \"courier\": \"JNE Regular\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL_ORDER_SERVICE}}/v1/api/orders/delete/902826b3-58ef-4965-996a-ad645af4efa4",
+                  "host": [
+                    "{{BASE_URL_ORDER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "orders",
+                    "delete",
+                    "902826b3-58ef-4965-996a-ad645af4efa4"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "592"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "X-Correlation-ID",
+                  "value": "588709cc-b2a7-4522-be69-83126feb562a"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"250-xnRqGQ5VkJv34/pw5Tnzi9VB5Go\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:48:32 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "126"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "4"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "a782c52a2d140b6d93547d2e8c492855"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Success delete Order\",\n        \"code\": 200\n    },\n    \"data\": {\n        \"id\": \"902826b3-58ef-4965-996a-ad645af4efa4\",\n        \"invoice_id\": \"078f2b51-b69c-4db4-8e90-d25fdd2eb53b\",\n        \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n        \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n        \"status\": \"COMPLETED\",\n        \"total_price\": \"10000000\",\n        \"shipping_address\": {\n            \"city\": \"Surabaya\",\n            \"province\": \"Jawa Timur\",\n            \"postal_code\": \"60111\",\n            \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n            \"phone_number\": \"081234567890\",\n            \"recipient_name\": \"Joko\"\n        },\n        \"created_at\": \"2026-03-13T01:38:51.107Z\",\n        \"updated_at\": \"2026-03-15T14:48:06.985Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel Order",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_SELLER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idempotensi_Key\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n  \"store_id\": \"9d402e2c-823a-433a-af7a-592245553f8a\",\n  \"shipping_address\": {\n    \"recipient_name\": \"Rama\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n    \"city\": \"Surabaya\",\n    \"province\": \"Jawa Timur\",\n    \"postal_code\": \"60111\",\n    \"courier\": \"JNE Regular\"\n  },\n  \"items\": [\n    {\n      \"product_id\": \"69989148638d30b87533c2e0\",\n      \"quantity\": 2\n    },\n    {\n      \"product_id\": \"69988f5bab05770894d0b04e\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/af394d64-bbf3-4b96-ac39-9e3766633a31/cancel",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "af394d64-bbf3-4b96-ac39-9e3766633a31",
+                "cancel"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order By Seller Store",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_SELLER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idempotensi_Key\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n  \"store_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"shipping_address\": {\n    \"recipient_name\": \"Rama\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n    \"city\": \"Surabaya\",\n    \"province\": \"Jawa Timur\",\n    \"postal_code\": \"60111\",\n    \"courier\": \"JNE Regular\"\n  },\n  \"items\": [\n    {\n      \"product_id\": \"69989148638d30b87533c2e0\",\n      \"quantity\": 2\n    },\n    {\n      \"product_id\": \"69988f5bab05770894d0b04e\",\n      \"quantity\": 1\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/store",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "store"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Order By Seller Store",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"idempotensi_Key\": \"f47ac10b-58cc-4372-a567-0e02b2c3d479\",\n  \"store_id\": \"123e4567-e89b-12d3-a456-426614174000\",\n  \"shipping_address\": {\n    \"recipient_name\": \"Rama\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Pahlawan No. 1, Kota Surabaya, Jawa Timur 60111\",\n    \"city\": \"Surabaya\",\n    \"province\": \"Jawa Timur\",\n    \"postal_code\": \"60111\",\n    \"courier\": \"JNE Regular\"\n  },\n  \"items\": [\n    {\n      \"product_id\": \"69989148638d30b87533c2e0\",\n      \"quantity\": 2\n    },\n    {\n      \"product_id\": \"69988f5bab05770894d0b04e\",\n      \"quantity\": 1\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL_ORDER_SERVICE}}/v1/api/orders/store",
+                  "host": [
+                    "{{BASE_URL_ORDER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "orders",
+                    "store"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "1115"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "X-Correlation-ID",
+                  "value": "116864a8-d4c6-4219-bce0-f50f14b8b0f6"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"45b-0fEKV1pKE+8DtrACtiLPaBV9jiI\""
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 15:02:14 GMT"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "1016"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "15"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "84ea570e099cef3a55932e0193209c6a"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Success Get Orders By Order Id\",\n        \"code\": 200\n    },\n    \"data\": [\n        {\n            \"id\": \"e68e9cb4-08b7-4497-8a8a-52c75d0fcd62\",\n            \"invoice_id\": \"119b6327-4475-4c0f-a834-4e1919c3a4ed\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n            \"status\": \"COMPLETED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T02:11:29.531Z\",\n            \"updated_at\": \"2026-03-13T02:12:14.089Z\"\n        },\n        {\n            \"id\": \"58e26955-0891-41a8-b85a-051372de7314\",\n            \"invoice_id\": \"e1378e52-f794-4d43-be42-5d02769dc528\",\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n            \"status\": \"CANCELLED\",\n            \"total_price\": \"10000000\",\n            \"shipping_address\": {\n                \"city\": \"Jakarta\",\n                \"province\": \"DKI Jakarta\",\n                \"postal_code\": \"10110\",\n                \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n                \"phone_number\": \"081234567890\",\n                \"recipient_name\": \"buyer 1\"\n            },\n            \"created_at\": \"2026-03-13T02:17:34.565Z\",\n            \"updated_at\": \"2026-03-13T02:18:07.486Z\"\n        }\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Order Complete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_BUYER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idempotensi_Key\": \"123e4567-e89b-12d3-a456-626674197942\",\n  \"shipping_address\": {\n    \"recipient_name\": \"buyer 1\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n    \"city\": \"Jakarta\",\n    \"province\": \"DKI Jakarta\",\n    \"postal_code\": \"10110\"\n  },\n  \"payment_method\" : \"WALLET\",\n//   \"bank_code\":\"BCA\",\n  \"orders\": [\n    {\n      \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n      \"items\": [\n        {\n          \"product_id\": \"69b366de1683eb7e3b5cc822\",\n          \"quantity\": 2\n        }\n      ]\n    },\n    {\n      \"store_id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n      \"items\": [\n        {\n          \"product_id\": \"69b366f61683eb7e3b5cc823\",\n          \"quantity\": 2\n        }\n      ]\n    }\n  ]\n}\n"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/356726c7-b4e4-4ae8-bfa6-6b366154a579/complete",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "356726c7-b4e4-4ae8-bfa6-6b366154a579",
+                "complete"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Order Cancel",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_SELLER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/58e26955-0891-41a8-b85a-051372de7314/cancel",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "58e26955-0891-41a8-b85a-051372de7314",
+                "cancel"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cart Items",
+      "item": [
+        {
+          "name": "upsert cart items",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_BUYER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"product_id\":\"69a09260d8b4f808bfab4cec\",\n    \"store_id\" : \"4a3fa729-5efe-4384-b70b-7617443d8f0d\",\n    \"quantity_to_add\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/cart/my-items/upsert",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "cart",
+                "my-items",
+                "upsert"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All My Cart",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_BUYER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"product_id\":\"69a1f7deb48e2f7a90bd0360\",\n    \"store_id\" : \"4a3fa729-5efe-4384-b70b-7617443d8f0d\",\n    \"quantity_to_add\": -1\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/cart/my-items",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "cart",
+                "my-items"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Cart By Product Id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"product_id\":\"69a1f7deb48e2f7a90bd0360\",\n    \"store_id\" : \"4a3fa729-5efe-4384-b70b-7617443d8f0d\",\n    \"quantity_to_add\": -1\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/cart/my-items/69a1f7deb48e2f7a90bd0370",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "cart",
+                "my-items",
+                "69a1f7deb48e2f7a90bd0370"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Total Price From Selected Cart",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_BUYER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"product_id\":\"69a1f7deb48e2f7a90bd0360\",\n    \"store_id\" : \"4a3fa729-5efe-4384-b70b-7617443d8f0d\",\n    \"quantity_to_add\": -1\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api//orders/cart/my-items/total-price",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "",
+                "orders",
+                "cart",
+                "my-items",
+                "total-price"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Invoice",
+      "item": [
+        {
+          "name": "Create Invoice",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_BUYER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idempotensi_Key\": \"123e4567-e89b-12d3-a456-626677147942\",\n  \"shipping_address\": {\n    \"recipient_name\": \"buyer 1\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n    \"city\": \"Jakarta\",\n    \"province\": \"DKI Jakarta\",\n    \"postal_code\": \"10110\"\n  },\n  \"payment_method\" : \"WALLET\",\n//   \"bank_code\":\"BCA\",\n  \"orders\": [\n    {\n      \"store_id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n      \"items\": [\n        {\n          \"product_id\": \"69b366de1683eb7e3b5cc822\",\n          \"quantity\": 2\n        }\n      ]\n    },\n    {\n      \"store_id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n      \"items\": [\n        {\n          \"product_id\": \"69b366f61683eb7e3b5cc823\",\n          \"quantity\": 2\n        }\n      ]\n    }\n  ]\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/checkouts/create",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "checkouts",
+                "create"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Invoice User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/checkouts/user",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "checkouts",
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "cek wallet balance",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"total_amount\":500000000}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/checkouts/check-wallet-balance",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "checkouts",
+                "check-wallet-balance"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Invoices",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/checkouts",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "checkouts"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Invoice",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/checkouts/6345e03a-caac-4871-bc3d-5fe263096b9e",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "checkouts",
+                "6345e03a-caac-4871-bc3d-5fe263096b9e"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "UpdateInvoice",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idempotensi_Key\": \"123e4567-e89b-12d3-a456-426614174001\",\n  \"shipping_address\": {\n    \"recipient_name\": \"Budi Santoso\",\n    \"phone_number\": \"081234567890\",\n    \"full_address\": \"Jl. Kemerdekaan No. 45, Komplek Permai\",\n    \"city\": \"Jakarta\",\n    \"province\": \"DKI Jakarta\",\n    \"postal_code\": \"10110\"\n  },\n  \"orders\": [\n    {\n      \"store_id\": \"1b09dda5-8ae9-4667-a2d5-ff1c71014af8\",\n      \"items\": [\n        {\n          \"product_id\": \"69ae26066cdbc3fe8cbe091e\",\n          \"quantity\": 2\n        }\n      ]\n    }\n  ]\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/checkouts/update/6345e03a-caac-4871-bc3d-5fe263096b9e",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "checkouts",
+                "update",
+                "6345e03a-caac-4871-bc3d-5fe263096b9e"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Invoice",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/checkouts/delete/6345e03a-caac-4871-bc3d-5fe263096b9e",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "checkouts",
+                "delete",
+                "6345e03a-caac-4871-bc3d-5fe263096b9e"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Shipping Address",
+      "item": [
+        {
+          "name": "Create Shipping Adresss",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient_name\": \"Budi Santoso\",\n  \"phone_number\": \"081234567890\",\n  \"full_address\": \"Jl. Merdeka No. 45, Komplek Permai Blok B2\",\n  \"city\": \"Jakarta Selatan\",\n  \"province\": \"DKI Jakarta\",\n  \"postal_code\": \"12345\",\n  \"is_primary\": true\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/shipping-address",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "shipping-address"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Shipping Adress by User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/shipping-address/user",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "shipping-address",
+                "user"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Shipping Adress by Id",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/shipping-address/9daf0c6e-d9ba-4dff-94ee-1660a7f85261",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "shipping-address",
+                "9daf0c6e-d9ba-4dff-94ee-1660a7f85261"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Shipping adress",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient_name\": \"Budi Santoso\",\n  \"phone_number\": \"081234567890\",\n  \"full_address\": \"Jl. Merdeka No. 45, Komplek Permai Blok B2\",\n  \"city\": \"Jakarta Selatan\",\n  \"province\": \"DKI Jakarta\",\n  \"postal_code\": \"12345\",\n  \"is_primary\": true\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/shipping-address/9daf0c6e-d9ba-4dff-94ee-1660a7f85261",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "shipping-address",
+                "9daf0c6e-d9ba-4dff-94ee-1660a7f85261"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "delete Shipping adress",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"recipient_name\": \"Budi Santoso\",\n  \"phone_number\": \"081234567890\",\n  \"full_address\": \"Jl. Merdeka No. 45, Komplek Permai Blok B2\",\n  \"city\": \"Jakarta Selatan\",\n  \"province\": \"DKI Jakarta\",\n  \"postal_code\": \"12345\",\n  \"is_primary\": true\n}\n",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/orders/shipping-address/9daf0c6e-d9ba-4dff-94ee-1660a7f85261",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "orders",
+                "shipping-address",
+                "9daf0c6e-d9ba-4dff-94ee-1660a7f85261"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

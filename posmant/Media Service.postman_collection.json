@@ -1,0 +1,337 @@
+{
+  "info": {
+    "_postman_id": "144cc896-a293-4771-b0b8-9b70e1cf55a2",
+    "name": "Media Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40663290",
+    "_collection_link": "https://go.postman.co/collection/40663290-144cc896-a293-4771-b0b8-9b70e1cf55a2?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Media",
+      "item": [
+        {
+          "name": "Upload Media",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "uuid": "612b0963-d2fb-40e5-8b06-5d862a2fa169",
+                  "src": "postman-cloud:///1f1076ae-a717-4d30-9224-791af607d227"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/media/upload",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "media",
+                "upload"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Upload Media",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "uuid": "612b0963-d2fb-40e5-8b06-5d862a2fa169",
+                      "src": "postman-cloud:///1f1076ae-a717-4d30-9224-791af607d227"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{BASE_URL_MEDIA_SERVICE}}/v1/api/media/upload",
+                  "host": [
+                    "{{BASE_URL_MEDIA_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "media",
+                    "upload"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "425"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 15:10:11 GMT"
+                },
+                {
+                  "key": "X-Correlation-Id",
+                  "value": "3ed56628-9920-45a3-a81c-8ac53771583f"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "3448"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "49"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "0883c16a8d9df47ee474e4689a3fd039"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": {\n        \"id\": \"2f761750-07e0-40fc-8f9f-c86e59d0f4f3\",\n        \"file_name\": \"WhatsApp Image 2025-12-31 at 13.52.55.jpeg\",\n        \"file_url\": \"https://res.cloudinary.com/dwjpzves4/image/upload/v1773587411/gnexa_media/k6lylmk64yxvhig7u58a.jpg\",\n        \"public_id\": \"gnexa_media/k6lylmk64yxvhig7u58a\",\n        \"MediaType\": \"image\",\n        \"created_at\": \"2026-03-15T15:10:11.8231493Z\",\n        \"updated_at\": \"2026-03-15T15:10:11.8231493Z\"\n    },\n    \"meta\": {\n        \"code\": 201,\n        \"message\": \"Upload success\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Media",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "uuid": "612b0963-d2fb-40e5-8b06-5d862a2fa169",
+                  "src": "postman-cloud:///1f1076ae-a717-4d30-9224-791af607d227"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/media/2f761750-07e0-40fc-8f9f-c86e59d0f4f3",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "media",
+                "2f761750-07e0-40fc-8f9f-c86e59d0f4f3"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Delete Media",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "file",
+                      "type": "file",
+                      "uuid": "612b0963-d2fb-40e5-8b06-5d862a2fa169",
+                      "src": "postman-cloud:///1f1076ae-a717-4d30-9224-791af607d227"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{BASE_URL_MEDIA_SERVICE}}/v1/api/media/2f761750-07e0-40fc-8f9f-c86e59d0f4f3",
+                  "host": [
+                    "{{BASE_URL_MEDIA_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "media",
+                    "2f761750-07e0-40fc-8f9f-c86e59d0f4f3"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "72"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 15:10:31 GMT"
+                },
+                {
+                  "key": "X-Correlation-Id",
+                  "value": "afed95d4-e5ab-4296-b14f-3391f39f04f7"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "770"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "38"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "a97eb25506716b461ef88e4046590873"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"data\": null,\n    \"meta\": {\n        \"code\": 200,\n        \"message\": \"Media deleted successfully\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Upload many Media",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "files",
+                  "type": "file",
+                  "uuid": "612b0963-d2fb-40e5-8b06-5d862a2fa169",
+                  "src": [
+                    "postman-cloud:///1f1076ae-a717-4d30-9224-791af607d227",
+                    "postman-cloud:///1f055925-1544-49f0-84e5-73da7205fd65"
+                  ]
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/media/uploads",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "media",
+                "uploads"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"ids\":[\"5cb31aa4-fc94-4a7e-afa0-cbba2a264985\",\"1458b596-fccc-473e-a1b6-c08abf8f8500\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/media/batch-delete",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "media",
+                "batch-delete"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

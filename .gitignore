@@ -1,7 +1,7 @@
 # ----------------------------------------------------------------------
-# 1. SECURITY & CREDENTIALS (SANGAT KRUSIAL)
+# 1. SECURITY & CREDENTIALS 
 # ----------------------------------------------------------------------
-# Abaikan semua file environment yang mungkin berisi API Keys atau Password
+
 .env
 .env.local
 .env.*.local
@@ -27,10 +27,9 @@ gcloud_credentials
 !package.json
 !tsconfig.json
 !manifest.json
-# (Penting: Baris !*.json di atas melakukan un-ignore untuk file json konfigurasi yang sah.
-# Hati-hati jika Anda memiliki file json berisi secret, pastikan ditambahkan secara manual di bawah)
 
-# File log debug npm yang mungkin berisi info sensitif saat crash
+
+# File log debug npm yang 
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -57,9 +56,9 @@ $RECYCLE.BIN/
 .Trash-*
 
 # ----------------------------------------------------------------------
-# 3. IDE & EDITOR SETTINGS (PERSONAL PREFERENCE)
+# 3. IDE & EDITOR SETTINGS 
 # ----------------------------------------------------------------------
-# Jangan paksa tim lain menggunakan setting editor Anda
+
 .idea/
 .vscode/
 *.swp
@@ -71,7 +70,7 @@ $RECYCLE.BIN/
 .settings/
 
 # ----------------------------------------------------------------------
-# 4. DEPENDENCIES & BUILD OUTPUTS (HEAVY FILES)
+# 4. DEPENDENCIES & BUILD OUTPUTS 
 # ----------------------------------------------------------------------
 # Node.js
 node_modules/
@@ -97,3 +96,4 @@ pid
 *.pid
 *.seed
 *.pid.lock
+!posmant/*

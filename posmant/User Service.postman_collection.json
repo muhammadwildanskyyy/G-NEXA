@@ -1,0 +1,1426 @@
+{
+  "info": {
+    "_postman_id": "0987cdc5-0fc2-407e-bc50-45b7cc84d1df",
+    "name": "User Service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40663290",
+    "_collection_link": "https://go.postman.co/collection/40663290-0987cdc5-0fc2-407e-bc50-45b7cc84d1df?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"skyyy-buyer-1\",\n  \"email\": \"buyer_11@gmail.com\",\n  \"password\": \"Admin231\",\n  \"phone_number\": \"086687567790\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/users/auth/register",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "users",
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Create User",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"skyyy-buyer-1\",\n  \"email\": \"buyer_11@gmail.com\",\n  \"password\": \"Admin231\",\n  \"phone_number\": \"086687567790\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL_USER_SERVICE}}/v1/api/users/auth/register",
+                  "host": [
+                    "{{BASE_URL_USER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "users",
+                    "auth",
+                    "register"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "416"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:36:17 GMT"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"1a0-al1QG9ZUnfi6QBTK7Zxfit/bKzc\""
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "257"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "13"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "0dd7526d68ff2e321490f21de1f0bb0e"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"User Created\",\n        \"status\": 201\n    },\n    \"data\": {\n        \"id\": \"cdfed9bf-b74e-46e7-9263-15849d5094f4\",\n        \"full_name\": \"skyyy-buyer-1\",\n        \"email\": \"buyer_11@gmail.com\",\n        \"role\": \"BUYER\",\n        \"activation_code\": \"$2b$10$zGMNNHLMqyuDaCn0P1/Z5O6Ez7cxYZKPs5NKvzLXxXXzINshm6.K2\",\n        \"is_Active\": false,\n        \"phone_number\": \"086687567790\",\n        \"profile_picture\": null,\n        \"bio\": null,\n        \"created_at\": \"2026-03-15T14:36:17.679Z\",\n        \"updated_at\": \"2026-03-15T14:36:17.679Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\n  \"email\": \"buyer_1@gmail.com\",\n  \"password\": \"Admin231\"\n\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/users/auth/login",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "users",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Login",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n\n  \"email\": \"seller_1@gmail.com\",\n  \"password\": \"Admin231\"\n\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL_USER_SERVICE}}/v1/api/users/auth/login",
+                  "host": [
+                    "{{BASE_URL_USER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "users",
+                    "auth",
+                    "login"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "336"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:36:30 GMT"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"150-ghXTVZWfVMQX6+JVKR6KUXE0Pxo\""
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "158"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "4"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "e67f016bdae2911551a70d7bd5d2ee15"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Login Success\",\n        \"status\": 200\n    },\n    \"data\": {\n        \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZDA5MDRjM2ItYmUyZi00MjgyLWJhN2UtMTQ3MTZmOGEyMTk0IiwidXNlcl9lbWFpbCI6InNlbGxlcl8xQGdtYWlsLmNvbSIsInVzZXJfcm9sZSI6IlNFTExFUiIsImlhdCI6MTc3MzU4NTM5MCwiZXhwIjoxNzc0MTkwMTkwfQ.pJZdMGZx0QnJCvX4pEukaDrd7kL8Uh3VTVs5KVJi6p8\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "me",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_BUYER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/users/me",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "users",
+                "me"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "me",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL_USER_SERVICE}}/v1/api/users/me",
+                  "host": [
+                    "{{BASE_URL_USER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "users",
+                    "me"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "497"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:36:35 GMT"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"1f1-GT8FGBlFYgOTWyYGNPq9CE7Qj98\""
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "73"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "7"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "8ec2d27c1547130da9a7a87d4a71261b"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"success get user profile\",\n        \"status\": 200\n    },\n    \"data\": {\n        \"id\": \"eab46733-4cdb-4dba-91b7-848d0efd4e36\",\n        \"full_name\": \"ardan skyyy\",\n        \"email\": \"wildan.yulio04@gmail.com\",\n        \"role\": \"ADMIN\",\n        \"activation_code\": \"$2b$10$PSXNSOqGn/zVuCefIyphaOnARfDqQ0YvNnaWCsFBOP7VAGj2wn6em\",\n        \"is_Active\": true,\n        \"phone_number\": \"086637567990\",\n        \"profile_picture\": \"https://gemini.google.com/app/4279a1003e9acf56?hl=id\",\n        \"bio\": \"ini ts update user\",\n        \"created_at\": \"2026-03-09T01:38:32.343Z\",\n        \"updated_at\": \"2026-03-14T11:40:25.803Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\n    \"full_name\":\"ardan skyyy\",\n    \"phone_number\": \"08819893574\",\n    \"profile_picture\":\"https://gemini.google.com/app/4279a1003e9acf56?hl=id\",\n    \"bio\":\"ini ts update user\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/users/update-user",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "users",
+                "update-user"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Update User",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n\n    \"full_name\":\"ardan skyyy\",\n    \"phone_number\": \"08819893574\",\n    \"profile_picture\":\"https://gemini.google.com/app/4279a1003e9acf56?hl=id\",\n    \"bio\":\"ini ts update user\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL_USER_SERVICE}}/v1/api/users/update-user",
+                  "host": [
+                    "{{BASE_URL_USER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "users",
+                    "update-user"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "566"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:36:41 GMT"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"236-thBEPXUNCuyLMdnYoVdSIAoStqM\""
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "93"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "25"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "b831d11c5228cd376b179f292e92a259"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Success Update User\",\n        \"status\": 200\n    },\n    \"data\": {\n        \"id\": \"eab46733-4cdb-4dba-91b7-848d0efd4e36\",\n        \"full_name\": \"ardan skyyy\",\n        \"email\": \"wildan.yulio04@gmail.com\",\n        \"password\": \"$2b$10$0dJLKDtJuAhFmP1DQAULNudx5eGOnBwGbNLUrBWv3cpFpCF.n2Ct2\",\n        \"role\": \"ADMIN\",\n        \"activation_code\": \"$2b$10$PSXNSOqGn/zVuCefIyphaOnARfDqQ0YvNnaWCsFBOP7VAGj2wn6em\",\n        \"is_Active\": true,\n        \"phone_number\": \"086637567990\",\n        \"profile_picture\": \"https://gemini.google.com/app/4279a1003e9acf56?hl=id\",\n        \"bio\": \"ini ts update user\",\n        \"created_at\": \"2026-03-09T01:38:32.343Z\",\n        \"updated_at\": \"2026-03-15T14:36:41.734Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "activation",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"full_name\": \"ardan\",\n  \"email\": \"wildan.yulio04@gmail.com\",\n  \"password\": \"Admin231\",\n  \"phone_number\": \"086637567990\"\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/users/activation/?code=$2b$10$M30jPILgUSVSshqz5yFddOIQBmsu5bD49HT6iFCK1NA/2D4OIfMbC",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "users",
+                "activation",
+                ""
+              ],
+              "query": [
+                {
+                  "key": "code",
+                  "value": "$2b$10$M30jPILgUSVSshqz5yFddOIQBmsu5bD49HT6iFCK1NA/2D4OIfMbC"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "activation",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"ardan\",\n  \"email\": \"wildan.yulio04@gmail.com\",\n  \"password\": \"Admin231\",\n  \"phone_number\": \"086637567990\"\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL_USER_SERVICE}}/v1/api/users/activation/?code=$2b$10$M30jPILgUSVSshqz5yFddOIQBmsu5bD49HT6iFCK1NA/2D4OIfMbC",
+                  "host": [
+                    "{{BASE_URL_USER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "users",
+                    "activation",
+                    ""
+                  ],
+                  "query": [
+                    {
+                      "key": "code",
+                      "value": "$2b$10$M30jPILgUSVSshqz5yFddOIQBmsu5bD49HT6iFCK1NA/2D4OIfMbC"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "502"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:36:48 GMT"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"1f6-RBxTfScXfXtWVYmgP/Txyx0y7kQ\""
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "48"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "26"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "edd50b4d9a4db71eefa6503b7117dc3e"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Success Activation User\",\n        \"status\": 200\n    },\n    \"data\": {\n        \"id\": \"d0904c3b-be2f-4282-ba7e-14716f8a2194\",\n        \"full_name\": \"skyyy-seller-1\",\n        \"email\": \"seller_1@gmail.com\",\n        \"password\": \"$2b$10$/Bo55k1OSYsYqQmMHy3F3eXaq1sugn2IxHOXkkrgSLr.QKDyQqfZS\",\n        \"role\": \"SELLER\",\n        \"activation_code\": \"$2b$10$M30jPILgUSVSshqz5yFddOIQBmsu5bD49HT6iFCK1NA/2D4OIfMbC\",\n        \"is_Active\": true,\n        \"phone_number\": \"086637567680\",\n        \"profile_picture\": null,\n        \"bio\": null,\n        \"created_at\": \"2026-03-13T01:13:50.548Z\",\n        \"updated_at\": \"2026-03-13T01:19:33.088Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send activation email",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\":\"buyer_11@gmail.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/users/auth/send-activation",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "users",
+                "auth",
+                "send-activation"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Send activation email",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"email\":\"buyer_11@gmail.com\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL_USER_SERVICE}}/v1/api/users/auth/send-activation",
+                  "host": [
+                    "{{BASE_URL_USER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "users",
+                    "auth",
+                    "send-activation"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "506"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:37:18 GMT"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"1fa-sw5+gVA6r5t2F3yfjUlVWmaqqyo\""
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "3631"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "6"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "59139a5bb7542e3eb9ed33708a75a91f"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"success send activation code\",\n        \"status\": 200\n    },\n    \"data\": {\n        \"id\": \"cdfed9bf-b74e-46e7-9263-15849d5094f4\",\n        \"full_name\": \"skyyy-buyer-1\",\n        \"email\": \"buyer_11@gmail.com\",\n        \"password\": \"$2b$10$9VMgpOlcSF/uI.KMM0lUhOcC2fkPjFTSyH4Pfght3dIZjEoQwWYw2\",\n        \"role\": \"BUYER\",\n        \"activation_code\": \"$2b$10$zGMNNHLMqyuDaCn0P1/Z5O6Ez7cxYZKPs5NKvzLXxXXzINshm6.K2\",\n        \"is_Active\": false,\n        \"phone_number\": \"086687567790\",\n        \"profile_picture\": null,\n        \"bio\": null,\n        \"created_at\": \"2026-03-15T14:36:17.679Z\",\n        \"updated_at\": \"2026-03-15T14:36:17.679Z\"\n    }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Store",
+      "item": [
+        {
+          "name": "Create Store",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_BUYER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"SKYYY Store 22\",\n  \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n  \"logo_url\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n  \"cover_url\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n  \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n  \"city\": \"Surabaya\",\n  \"province\": \"Jawa Timur\",\n  \"postal_code\": \"60243\",\n  \"latitude\": -7.3092,\n  \"longitude\": 112.7344\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/users/store/register",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "users",
+                "store",
+                "register"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Create Store",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"SKYYY Store 22\",\n  \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n  \"logo_url\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n  \"cover_url\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n  \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n  \"city\": \"Surabaya\",\n  \"province\": \"Jawa Timur\",\n  \"postal_code\": \"60243\",\n  \"latitude\": -7.3092,\n  \"longitude\": 112.7344\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL_USER_SERVICE}}/v1/api/users/store/register",
+                  "host": [
+                    "{{BASE_URL_USER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "users",
+                    "store",
+                    "register"
+                  ]
+                }
+              },
+              "status": "Created",
+              "code": 201,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "647"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:37:53 GMT"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"287-VxgCkF36NDulBpMQZm5TvC2U74w\""
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "70"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "3"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "d4b031559306fc1afb8ed95eba303340"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Store Created\",\n        \"status\": 201\n    },\n    \"data\": {\n        \"id\": \"dc8be727-c7d4-4cbf-9ba8-b0d3b4c1950a\",\n        \"name\": \"SKYYY Store 22\",\n        \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n        \"status\": \"ACTIVE\",\n        \"is_verified\": false,\n        \"logo_url\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n        \"cover_url\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n        \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n        \"city\": \"Surabaya\",\n        \"province\": \"Jawa Timur\",\n        \"postal_code\": \"60243\",\n        \"latitude\": -7.3092,\n        \"longitude\": 112.7344,\n        \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n        \"created_at\": \"2026-03-15T14:37:53.739Z\",\n        \"updated_at\": \"2026-03-15T14:37:53.739Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Store",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_BUYER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n\n  \"name\": \"G-NEXA Official Store Update \",\n  \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n  \"logo_url\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n  \"cover_url\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n  \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n  \"city\": \"Surabaya\",\n  \"province\": \"Jawa Timur\",\n  \"postal_code\": \"60243\",\n  \"latitude\": -7.3092,\n  \"longitude\": 112.7344\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/users/store/dc8be727-c7d4-4cbf-9ba8-b0d3b4c1950a",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "users",
+                "store",
+                "dc8be727-c7d4-4cbf-9ba8-b0d3b4c1950a"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Update Store",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n\n  \"name\": \"G-NEXA Official Store Update \",\n  \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n  \"logo_url\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n  \"cover_url\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n  \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n  \"city\": \"Surabaya\",\n  \"province\": \"Jawa Timur\",\n  \"postal_code\": \"60243\",\n  \"latitude\": -7.3092,\n  \"longitude\": 112.7344\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{BASE_URL_USER_SERVICE}}/v1/api/users/store/dc8be727-c7d4-4cbf-9ba8-b0d3b4c1950a",
+                  "host": [
+                    "{{BASE_URL_USER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "users",
+                    "store",
+                    "dc8be727-c7d4-4cbf-9ba8-b0d3b4c1950a"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "669"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:38:49 GMT"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"29d-R1EXnK/1e+jldYwqcV1GCWXjiW0\""
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "90"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "12"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "4b82dd1038e8be18eac07f17b65e814c"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Success Update Store\",\n        \"status\": 200\n    },\n    \"data\": {\n        \"id\": \"dc8be727-c7d4-4cbf-9ba8-b0d3b4c1950a\",\n        \"name\": \"G-NEXA Official Store Update \",\n        \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n        \"status\": \"ACTIVE\",\n        \"is_verified\": false,\n        \"logo_url\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n        \"cover_url\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n        \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n        \"city\": \"Surabaya\",\n        \"province\": \"Jawa Timur\",\n        \"postal_code\": \"60243\",\n        \"latitude\": -7.3092,\n        \"longitude\": 112.7344,\n        \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n        \"created_at\": \"2026-03-15T14:37:53.739Z\",\n        \"updated_at\": \"2026-03-15T14:38:49.764Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Stores",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN_SELLER_1}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"G-NEXA Official Store \",\n  \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n  \"logoUrl\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n  \"coverUrl\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n  \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n  \"city\": \"Surabaya\",\n  \"province\": \"Jawa Timur\",\n  \"postalCode\": \"60243\",\n  \"latitude\": -7.3092,\n  \"longitude\": 112.7344\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/users/store",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "users",
+                "store"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Stores",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"G-NEXA Official Store \",\n  \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n  \"logoUrl\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n  \"coverUrl\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n  \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n  \"city\": \"Surabaya\",\n  \"province\": \"Jawa Timur\",\n  \"postalCode\": \"60243\",\n  \"latitude\": -7.3092,\n  \"longitude\": 112.7344\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL_USER_SERVICE}}/v1/api/users/store",
+                  "host": [
+                    "{{BASE_URL_USER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "users",
+                    "store"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "2452"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:38:59 GMT"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"994-JD8TqkZmEHt/f8qEUeQ4nXRFX8E\""
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "57"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "10"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "ac23464345e2a406758cb7590537e01e"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Success Get All Stores\",\n        \"status\": 200\n    },\n    \"data\": [\n        {\n            \"id\": \"1b09dda5-8ae9-4667-a2d5-ff1c71014af8\",\n            \"name\": \"G-NEXA Official Store \",\n            \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n            \"status\": \"ACTIVE\",\n            \"is_verified\": false,\n            \"logo_url\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n            \"cover_url\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n            \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n            \"city\": \"Surabaya\",\n            \"province\": \"Jawa Timur\",\n            \"postal_code\": \"60243\",\n            \"latitude\": -7.3092,\n            \"longitude\": 112.7344,\n            \"user_id\": \"eab46733-4cdb-4dba-91b7-848d0efd4e36\",\n            \"created_at\": \"2026-03-09T01:44:15.544Z\",\n            \"updated_at\": \"2026-03-09T01:44:15.544Z\"\n        },\n        {\n            \"id\": \"5bfa6906-f5e6-47b0-912c-17ff8ee7bfce\",\n            \"name\": \"SKYYY Store 1\",\n            \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n            \"status\": \"ACTIVE\",\n            \"is_verified\": false,\n            \"logo_url\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n            \"cover_url\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n            \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n            \"city\": \"Surabaya\",\n            \"province\": \"Jawa Timur\",\n            \"postal_code\": \"60243\",\n            \"latitude\": -7.3092,\n            \"longitude\": 112.7344,\n            \"user_id\": \"d0904c3b-be2f-4282-ba7e-14716f8a2194\",\n            \"created_at\": \"2026-03-13T01:19:33.056Z\",\n            \"updated_at\": \"2026-03-13T01:19:33.056Z\"\n        },\n        {\n            \"id\": \"5c0b0190-7541-4429-95db-7a1e49a799ed\",\n            \"name\": \"SKYYY Store 2\",\n            \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n            \"status\": \"ACTIVE\",\n            \"is_verified\": false,\n            \"logo_url\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n            \"cover_url\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n            \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n            \"city\": \"Surabaya\",\n            \"province\": \"Jawa Timur\",\n            \"postal_code\": \"60243\",\n            \"latitude\": -7.3092,\n            \"longitude\": 112.7344,\n            \"user_id\": \"991f6b34-99c0-4940-a057-8e344244e656\",\n            \"created_at\": \"2026-03-13T01:19:50.362Z\",\n            \"updated_at\": \"2026-03-13T01:19:50.362Z\"\n        },\n        {\n            \"id\": \"dc8be727-c7d4-4cbf-9ba8-b0d3b4c1950a\",\n            \"name\": \"G-NEXA Official Store Update \",\n            \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n            \"status\": \"ACTIVE\",\n            \"is_verified\": false,\n            \"logo_url\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n            \"cover_url\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n            \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n            \"city\": \"Surabaya\",\n            \"province\": \"Jawa Timur\",\n            \"postal_code\": \"60243\",\n            \"latitude\": -7.3092,\n            \"longitude\": 112.7344,\n            \"user_id\": \"748b43f2-e74c-4439-bc2b-781fb3f0d845\",\n            \"created_at\": \"2026-03-15T14:37:53.739Z\",\n            \"updated_at\": \"2026-03-15T14:38:49.764Z\"\n        }\n    ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Stores By Owner Id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"G-NEXA Official Store \",\n  \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n  \"logoUrl\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n  \"coverUrl\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n  \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n  \"city\": \"Surabaya\",\n  \"province\": \"Jawa Timur\",\n  \"postalCode\": \"60243\",\n  \"latitude\": -7.3092,\n  \"longitude\": 112.7344\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/users/store/owner",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "users",
+                "store",
+                "owner"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Stores By Owner Id",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"G-NEXA Official Store \",\n  \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n  \"logoUrl\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n  \"coverUrl\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n  \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n  \"city\": \"Surabaya\",\n  \"province\": \"Jawa Timur\",\n  \"postalCode\": \"60243\",\n  \"latitude\": -7.3092,\n  \"longitude\": 112.7344\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL_USER_SERVICE}}/v1/api/users/store/owner",
+                  "host": [
+                    "{{BASE_URL_USER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "users",
+                    "store",
+                    "owner"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "660"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:39:08 GMT"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"294-AF05OVOEp+NtkTwvKfdH1Qs5iOo\""
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "61"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "4"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "fc36d3442f7aeb4990ac893e09fe9d27"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Success Find Store\",\n        \"status\": 200\n    },\n    \"data\": {\n        \"id\": \"1b09dda5-8ae9-4667-a2d5-ff1c71014af8\",\n        \"name\": \"G-NEXA Official Store \",\n        \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n        \"status\": \"ACTIVE\",\n        \"is_verified\": false,\n        \"logo_url\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n        \"cover_url\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n        \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n        \"city\": \"Surabaya\",\n        \"province\": \"Jawa Timur\",\n        \"postal_code\": \"60243\",\n        \"latitude\": -7.3092,\n        \"longitude\": 112.7344,\n        \"user_id\": \"eab46733-4cdb-4dba-91b7-848d0efd4e36\",\n        \"created_at\": \"2026-03-09T01:44:15.544Z\",\n        \"updated_at\": \"2026-03-09T01:44:15.544Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Store By Id",
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"G-NEXA Official Store \",\n  \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n  \"logoUrl\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n  \"coverUrl\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n  \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n  \"city\": \"Surabaya\",\n  \"province\": \"Jawa Timur\",\n  \"postalCode\": \"60243\",\n  \"latitude\": -7.3092,\n  \"longitude\": 112.7344\n}"
+            },
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/users/store/1b09dda5-8ae9-4667-a2d5-ff1c71014af8",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "users",
+                "store",
+                "1b09dda5-8ae9-4667-a2d5-ff1c71014af8"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Get Store By Id",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"G-NEXA Official Store \",\n  \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n  \"logoUrl\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n  \"coverUrl\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n  \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n  \"city\": \"Surabaya\",\n  \"province\": \"Jawa Timur\",\n  \"postalCode\": \"60243\",\n  \"latitude\": -7.3092,\n  \"longitude\": 112.7344\n}"
+                },
+                "url": {
+                  "raw": "{{BASE_URL_USER_SERVICE}}/v1/api/users/store/1b09dda5-8ae9-4667-a2d5-ff1c71014af8",
+                  "host": [
+                    "{{BASE_URL_USER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "users",
+                    "store",
+                    "1b09dda5-8ae9-4667-a2d5-ff1c71014af8"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "660"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:39:34 GMT"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"294-AF05OVOEp+NtkTwvKfdH1Qs5iOo\""
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "48"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "4"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "a3298f561d2b9556280d530210131d07"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Success Find Store\",\n        \"status\": 200\n    },\n    \"data\": {\n        \"id\": \"1b09dda5-8ae9-4667-a2d5-ff1c71014af8\",\n        \"name\": \"G-NEXA Official Store \",\n        \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n        \"status\": \"ACTIVE\",\n        \"is_verified\": false,\n        \"logo_url\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n        \"cover_url\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n        \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n        \"city\": \"Surabaya\",\n        \"province\": \"Jawa Timur\",\n        \"postal_code\": \"60243\",\n        \"latitude\": -7.3092,\n        \"longitude\": 112.7344,\n        \"user_id\": \"eab46733-4cdb-4dba-91b7-848d0efd4e36\",\n        \"created_at\": \"2026-03-09T01:44:15.544Z\",\n        \"updated_at\": \"2026-03-09T01:44:15.544Z\"\n    }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Store",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{AUTHORIZATION_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{BASE_URL}}/v1/api/users/store/1b09dda5-8ae9-4667-a2d5-ff1c71014af8",
+              "host": [
+                "{{BASE_URL}}"
+              ],
+              "path": [
+                "v1",
+                "api",
+                "users",
+                "store",
+                "1b09dda5-8ae9-4667-a2d5-ff1c71014af8"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Delete Store",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{BASE_URL_USER_SERVICE}}/v1/api/users/store/1b09dda5-8ae9-4667-a2d5-ff1c71014af8",
+                  "host": [
+                    "{{BASE_URL_USER_SERVICE}}"
+                  ],
+                  "path": [
+                    "v1",
+                    "api",
+                    "users",
+                    "store",
+                    "1b09dda5-8ae9-4667-a2d5-ff1c71014af8"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Content-Length",
+                  "value": "662"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Access-Control-Allow-Origin",
+                  "value": "*"
+                },
+                {
+                  "key": "Date",
+                  "value": "Sun, 15 Mar 2026 14:39:48 GMT"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"296-ofHgQ9Mle7Lwbi3rK6Jq8AiYkjY\""
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Server",
+                  "value": "kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Upstream-Latency",
+                  "value": "93"
+                },
+                {
+                  "key": "X-Kong-Proxy-Latency",
+                  "value": "4"
+                },
+                {
+                  "key": "Via",
+                  "value": "1.1 kong/3.9.1"
+                },
+                {
+                  "key": "X-Kong-Request-Id",
+                  "value": "6a617c30b81075580cbf7d34ccde7617"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"meta\": {\n        \"message\": \"Success Delete Store\",\n        \"status\": 200\n    },\n    \"data\": {\n        \"id\": \"1b09dda5-8ae9-4667-a2d5-ff1c71014af8\",\n        \"name\": \"G-NEXA Official Store \",\n        \"description\": \"Toko resmi gadget dan aksesoris teknologi terbaik di Surabaya.\",\n        \"status\": \"ACTIVE\",\n        \"is_verified\": false,\n        \"logo_url\": \"https://cdn.gnexa.id/assets/logos/my-store.png\",\n        \"cover_url\": \"https://cdn.gnexa.id/assets/covers/banner-promo.jpg\",\n        \"address\": \"Jl. Ahmad Yani No. 88, Wonokromo\",\n        \"city\": \"Surabaya\",\n        \"province\": \"Jawa Timur\",\n        \"postal_code\": \"60243\",\n        \"latitude\": -7.3092,\n        \"longitude\": 112.7344,\n        \"user_id\": \"eab46733-4cdb-4dba-91b7-848d0efd4e36\",\n        \"created_at\": \"2026-03-09T01:44:15.544Z\",\n        \"updated_at\": \"2026-03-09T01:44:15.544Z\"\n    }\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
