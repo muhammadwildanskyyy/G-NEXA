@@ -67,5 +67,5 @@ Proses asinkronus ini menjamin bahwa respons API untuk "Verifikasi Sukses" bisa 
 :::info Tahap Selanjutnya: Orkestrasi Katalog & Transaksi
 Sekarang kita telah memahami bagaimana pengguna dan entitas toko dikelola di pintu depan. Mari kita bergerak lebih dalam untuk melihat bagaimana barang-barang dari berbagai toko tersebut dikelola dan dibeli.
 
-Lanjutkan ke **[Product Service (Node.js & MongoDB)](/docs/components/product-service)**.
+Lanjutkan ke **[Product Service (Golang & MongoDB)](/docs/components/product-service)**.
 :::

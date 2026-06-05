@@ -24,7 +24,7 @@ Order Service memiliki yurisdiksi penuh atas seluruh siklus hidup pesanan, mulai
 
 ## 2. Pergeseran Paradigma: Mengapa NestJS?
 
-Sementara User dan Product Service menggunakan Express.js yang *un-opinionated* dan bebas, Order Service membutuhkan struktur yang sangat kaku. NestJS menawarkan arsitektur tingkat *enterprise* yang terinspirasi dari Angular:
+Sementara User Service menggunakan Express.js yang *un-opinionated* dan bebas, serta Product Service menggunakan Golang (Gin Gonic) yang didesain untuk kecepatan maksimum, Order Service membutuhkan struktur yang sangat kaku. NestJS menawarkan arsitektur tingkat *enterprise* yang terinspirasi dari Angular:
 
 * **Opinionated Structure:** NestJS memaksa *engineer* untuk memisahkan *Controllers*, *Services*, dan *Modules*. Ini mencegah terjadinya *spaghetti code* saat logika bisnis transaksi semakin membengkak.
 * **Dependency Injection (DI):** Ekosistem DI bawaan NestJS membuat pengujian otomatis (*Unit Testing*) menjadi sangat mudah. Memastikan kalkulasi harga, diskon, dan ongkos kirim berjalan 100% akurat adalah harga mati sebelum kode didorong ke tahap produksi.

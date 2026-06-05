@@ -49,11 +49,11 @@ flowchart TD
     
     subgraph D2 ["Product Domain"]
         direction TB
-        PS[Product Service<br/>Node.js]:::service
+        PS[Product Service<br/>Golang]:::service
         DB_PS[(Mongo & Redis<br/>Product)]:::db
         PS --- DB_PS
     end
-
+    
     subgraph D3 ["Order Domain"]
         direction TB
         OS[Order Service<br/>NestJS]:::service
@@ -70,7 +70,7 @@ flowchart TD
     
     subgraph D5 ["Media Domain"]
         direction TB
-        MS[Media Service<br/>Node.js]:::service
+        MS[Media Service<br/>Golang]:::service
         DB_MS[(PostgreSQL<br/>Media)]:::db
         MS --- DB_MS
     end
